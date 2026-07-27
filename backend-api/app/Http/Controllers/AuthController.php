@@ -66,15 +66,16 @@ class AuthController extends Controller
         return Socialite::driver('google')->stateless()->redirect();
     }
 
-    public function handleGoogleCallback(): JsonResponse
+    public function handleGoogleCallback(): RedirectResponse
     {
+        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:5173'), '/');
         $googleUser = Socialite::driver('google')->stateless()->user();
         $email = strtolower((string) $googleUser->getEmail());
         $isVerified = (bool) ($googleUser->user['email_verified'] ?? false);
         $isAmikomEmail = str_ends_with($email, '@amikom.ac.id') || str_ends_with($email, '@students.amikom.ac.id');
 
         if (! $isVerified || ! $isAmikomEmail) {
-            return response()->json(['message' => 'Hanya akun Google @amikom.ac.id yang dapat login.'], 403);
+            return redirect()->to($frontendUrl.'/auth/callback?error='.rawurlencode('Hanya akun Google @amikom.ac.id yang dapat login.'));
         }
 
         $user = User::where('google_id', $googleUser->getId())
@@ -101,7 +102,9 @@ class AuthController extends Controller
             ]);
         }
 
-        return $this->tokenResponse($user);
+        $token = $user->createToken('google-oauth')->plainTextToken;
+
+        return redirect()->to($frontendUrl.'/auth/callback#token='.rawurlencode($token));
     }
 
     public function me(Request $request): JsonResponse

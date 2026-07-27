@@ -17,6 +17,12 @@ class DatabaseSeeder extends Seeder
 
         $accounts = [
             [
+                'name' => 'Mahasiswa',
+                'nim_nip' => '24.11.6372',
+                'email' => 'mahasiswa@students.amikom.ac.id',
+                'role' => 'mahasiswa',
+            ],
+            [
                 'name' => 'Dosen Pembimbing Lapangan',
                 'nim_nip' => 'DPL001',
                 'email' => 'dpl@amikom.ac.id',

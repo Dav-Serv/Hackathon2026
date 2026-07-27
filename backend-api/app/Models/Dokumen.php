@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Dokumen extends Model
 {
@@ -11,5 +12,10 @@ class Dokumen extends Model
     protected function casts(): array
     {
         return ['referensi_id' => 'integer'];
+    }
+
+    public function klaimKonversi(): BelongsTo
+    {
+        return $this->belongsTo(KlaimKonversi::class, 'referensi_id');
     }
 }
