@@ -99,19 +99,6 @@ function StudentDashboard({ user, onLogout }) {
     showToast('Pendaftaran magang berhasil dikirim untuk verifikasi prodi!')
   }
 
-  // Demo helper to simulate prodi approval
-  const demoApproveMagang = (approve = true) => {
-    setDb(prev => ({
-      ...prev,
-      magang: {
-        ...prev.magang,
-        status: approve ? 'disetujui' : 'ditolak',
-        catatanAdmin: approve ? '' : 'File bukti penerimaan magang kurang jelas.'
-      }
-    }))
-    showToast(approve ? 'Magang DISETUJUI oleh Admin Prodi (Simulasi)' : 'Magang DITOLAK oleh Admin Prodi (Simulasi)', approve ? 'success' : 'error')
-  }
-
   // --- 2. Aksi Usulan Konversi ---
   const [selectedMkId, setSelectedMkId] = useState('')
   const [tempSelectedCpmk, setTempSelectedCpmk] = useState([]) // array of cpmkId
@@ -188,6 +175,7 @@ function StudentDashboard({ user, onLogout }) {
     showToast(approve ? 'Usulan disetujui oleh DPL! (Simulasi)' : 'Usulan dikembalikan untuk revisi oleh DPL (Simulasi)', approve ? 'success' : 'error')
   }
 
+
   // --- 3. Aksi Klaim Konversi ---
   const [klaimGeneral, setKlaimGeneral] = useState({
     logbookFile: 'logbook_magang_final.pdf',
@@ -227,6 +215,7 @@ function StudentDashboard({ user, onLogout }) {
     }))
     showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
   }
+
 
   const demoMitraEvaluation = (score = 90) => {
     setDb(prev => ({
@@ -288,6 +277,7 @@ function StudentDashboard({ user, onLogout }) {
     setDraftUsulanDetails([])
     showToast('Database Demo direset ke kondisi awal!', 'info')
   }
+
 
   // Utility to map score to letter grade
   const getLetterGrade = (score) => {
@@ -377,6 +367,7 @@ function StudentDashboard({ user, onLogout }) {
             <span className="tracking-tight uppercase">GradeSync</span>
             <button className="text-white hover:opacity-80" onClick={() => setIsSidebarOpen(false)}>
               <Icon>close</Icon>
+
             </button>
           </div>
 
@@ -412,34 +403,15 @@ function StudentDashboard({ user, onLogout }) {
           </nav>
         </div>
 
-        {/* Simulasi Workflow panel at the bottom of the sidebar */}
+        {/* Logout Button (Moved to bottom of sidebar) */}
         <div className="p-4 border-t-3 border-[#191b23] bg-purple-50/50">
-          <div className="mb-2 flex items-center gap-2 font-black text-[10px] uppercase tracking-wider text-[#9f149f]">
-            <Icon className="text-base">construction</Icon>
-            Simulasi Workflow
-          </div>
-          <div className="flex flex-col gap-2">
-            {db.magang.status === 'menunggu_verifikasi' && (
-              <div className="flex gap-1.5">
-                <button onClick={() => demoApproveMagang(true)} className="flex-1 rounded border-2 border-[#191b23] bg-green-200 py-1 text-[10px] font-bold shadow-[1px_1px_0_#191b23] hover:translate-y-0.5">Approve</button>
-                <button onClick={() => demoApproveMagang(false)} className="flex-1 rounded border-2 border-[#191b23] bg-red-200 py-1 text-[10px] font-bold shadow-[1px_1px_0_#191b23] hover:translate-y-0.5">Tolak</button>
-              </div>
-            )}
-            {db.usulan.status === 'menunggu_persetujuan_dpl' && (
-              <div className="flex gap-1.5">
-                <button onClick={() => demoApproveUsulan(true)} className="flex-1 rounded border-2 border-[#191b23] bg-green-200 py-1 text-[10px] font-bold shadow-[1px_1px_0_#191b23] hover:translate-y-0.5">Approve</button>
-                <button onClick={() => demoApproveUsulan(false)} className="flex-1 rounded border-2 border-[#191b23] bg-amber-200 py-1 text-[10px] font-bold shadow-[1px_191b23_0_#191b23] hover:translate-y-0.5">Revisi</button>
-              </div>
-            )}
-            {db.klaim.status === 'menunggu_penilaian_mitra' && (
-              <button onClick={() => demoMitraEvaluation(92)} className="w-full rounded border-2 border-[#191b23] bg-purple-200 py-1.5 text-[10px] font-bold shadow-[1.5px_1.5px_0_#191b23] hover:translate-y-0.5">Kirim Nilai Mitra: 92</button>
-            )}
-            {db.klaim.status === 'menunggu_review_dpl' && (
-              <button onClick={() => demoDplEvaluation(88)} className="w-full rounded border-2 border-[#191b23] bg-green-200 py-1.5 text-[10px] font-bold shadow-[1.5px_1.5px_0_#191b23] hover:translate-y-0.5">Kirim Nilai DPL: 88</button>
-            )}
-            {db.magang.status === 'draft' && <span className="text-[10px] italic text-[#9f149f]/75">Submit magang dahulu.</span>}
-            {db.klaim.status === 'disetujui' && <span className="text-[10px] text-green-700 font-bold flex items-center gap-1"><Icon className="text-sm">done_all</Icon> Simulasi Selesai</span>}
-          </div>
+          <button
+            onClick={onLogout}
+            className="flex items-center justify-center gap-2 w-full rounded-xl border-2 border-[#191b23] bg-[#191b23] py-2.5 text-xs font-bold text-white shadow-[3px_3px_0_#9f149f] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all duration-150"
+          >
+            <Icon className="text-base text-white">logout</Icon>
+            <span>Keluar</span>
+          </button>
         </div>
       </aside>
 
@@ -466,29 +438,11 @@ function StudentDashboard({ user, onLogout }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <button 
-              onClick={resetAllDemo}
-              className="flex items-center gap-1.5 rounded-xl border-2 border-[#191b23] bg-yellow-200 px-4 py-1.5 text-xs font-bold shadow-[2.5px_2.5px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
-            >
-              <Icon className="text-base">restart_alt</Icon>
-              Reset Demo
-            </button>
-            
-            <button 
-              onClick={onLogout}
-              className="flex items-center gap-1.5 rounded-xl border-2 border-[#191b23] bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white shadow-[2.5px_2.5px_0_#9f149f] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
-            >
-              <Icon className="text-base">logout</Icon>
-              Keluar
-            </button>
-
-            <div className="h-7 w-px bg-slate-200 mx-1 hidden sm:block" />
-
             <div 
               onClick={() => setActiveTab('profile')}
               className="flex items-center gap-2 cursor-pointer hover:opacity-85"
             >
-              <img className="h-7 w-7 rounded-full border border-[#191b23] object-cover" src={profileForm.avatar} alt="Student avatar" />
+              <Icon className="text-2xl text-[#9f149f]">account_circle</Icon>
               <span className="text-xs font-black hidden sm:inline">{profileForm.nama.split(' ')[0]}</span>
             </div>
           </div>
@@ -541,6 +495,7 @@ function StudentDashboard({ user, onLogout }) {
                 ))}
               </div>
             </div>
+
           )}
 
           {/* ============================================================== */}
@@ -596,12 +551,14 @@ function StudentDashboard({ user, onLogout }) {
                         <label className="text-[10px] font-black uppercase text-gray-400">Bidang Usaha & Alamat</label>
                         <p className="font-semibold">{db.magang.mitraBidang}</p>
                         <p className="text-[11px] text-gray-500">{db.magang.mitraAlamat}</p>
+
                       </div>
                       <div>
                         <label className="text-[10px] font-black uppercase text-gray-400">Posisi Magang</label>
                         <p className="font-bold text-[#9f149f]">{db.magang.posisi}</p>
                       </div>
                       <div>
+
                         <label className="text-[10px] font-black uppercase text-gray-400">Periode Magang</label>
                         <p className="font-bold flex items-center gap-1 mt-0.5">
                           <Icon className="text-sm text-[#9f149f]">calendar_month</Icon>
@@ -1064,6 +1021,7 @@ function StudentDashboard({ user, onLogout }) {
                         <Icon className="text-3xl text-red-500 mb-1">picture_as_pdf</Icon>
                         <div className="text-[10px]">Logbook Magang (PDF)</div>
                         <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.logbookFile}</div>
+
                       </div>
                       <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
                         <Icon className="text-3xl text-blue-500 mb-1">picture_as_pdf</Icon>
@@ -1071,6 +1029,7 @@ function StudentDashboard({ user, onLogout }) {
                         <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.laporanFile}</div>
                       </div>
                       <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
+
                         <Icon className="text-3xl text-green-600 mb-1">workspace_premium</Icon>
                         <div className="text-[10px]">Sertifikat Magang (PDF)</div>
                         <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.sertifikatFile}</div>
@@ -1277,11 +1236,10 @@ function StudentDashboard({ user, onLogout }) {
                 {/* Profile Avatar Card */}
                 <div className="w-full md:w-72 shrink-0 space-y-6">
                   <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23] text-center space-y-4">
-                    <div className="relative mx-auto w-28 h-28 rounded-full border-2 border-[#191b23] overflow-hidden group shadow-[3px_3px_0_#191b23]">
-                      <img className="w-full h-full object-cover" src={profileForm.avatar} alt="Profile photo" />
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white">
-                        <Icon>photo_camera</Icon>
-                      </div>
+
+                    <div className="relative mx-auto w-28 h-28 rounded-full border-2 border-[#191b23] bg-purple-100 flex items-center justify-center shadow-[3px_3px_0_#191b23]">
+                      <Icon className="text-5xl text-[#9f149f]">account_circle</Icon>
+
                     </div>
                     <div>
                       <h2 className="text-base font-bold">{profileForm.nama}</h2>
