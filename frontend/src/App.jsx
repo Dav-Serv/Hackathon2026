@@ -63,6 +63,23 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
 
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
+      <div className="pointer-events-auto absolute inset-0 z-0 opacity-70" aria-hidden="true">
+        <CursorGrid
+          cellSize={70}
+          color="#a862a8"
+          radius={140}
+          falloff="smooth"
+          holdTime={400}
+          fadeDuration={800}
+          lineWidth={1.2}
+          maxOpacity={1}
+          fillOpacity={0}
+          gridOpacity={0.08}
+          cellRadius={0}
+          clickPulse
+          pulseSpeed={600}
+        />
+      </div>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
         <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>

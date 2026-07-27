@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import api, { getApiError } from './lib/api'
+import CursorGrid from './components/CursorGrid'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
@@ -56,8 +57,25 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#faf8ff] p-4 font-['Space_Grotesk',sans-serif] text-[#191b23] md:p-8">
-      <div className="w-full max-w-lg">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#faf8ff] p-4 font-['Space_Grotesk',sans-serif] text-[#191b23] md:p-8">
+      <div className="pointer-events-auto absolute inset-0 z-0 opacity-70" aria-hidden="true">
+        <CursorGrid
+          cellSize={70}
+          color="#a862a8"
+          radius={140}
+          falloff="smooth"
+          holdTime={400}
+          fadeDuration={800}
+          lineWidth={1.2}
+          maxOpacity={1}
+          fillOpacity={0}
+          gridOpacity={0.08}
+          cellRadius={0}
+          clickPulse
+          pulseSpeed={600}
+        />
+      </div>
+      <div className="relative z-10 w-full max-w-lg">
         <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] shadow-[8px_8px_0_#191b23]">
           <div className="flex flex-col gap-6 p-8 pb-0">
             <div>
