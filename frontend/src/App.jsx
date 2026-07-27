@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RegisterMahasiswa from './RegisterPage.jsx/RegisterMahasiswa.jsx'
 
 const icons = {
   logo: 'grading',
@@ -32,7 +33,7 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
-function LoginPage({ onBack }) {
+function LoginPage({ onBack, onRegister }) {
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -78,7 +79,7 @@ function LoginPage({ onBack }) {
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#004ac6] hover:underline">Lupa?</button></div>
             <button disabled={isLoading} className="group flex items-center justify-center gap-2 border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[8px_8px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
           </form>
-          <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onBack} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button><button type="button" aria-label="Hub" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><Icon className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-base text-white">hub</Icon></button></div></div>
+          <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button><button type="button" aria-label="Hub" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><Icon className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-base text-white">hub</Icon></button></div></div>
         </div>
         <div className="mt-4 flex justify-between px-4 text-[10px] font-bold uppercase tracking-widest text-[#737686]"><span>[ Status Sistem: Optimal ]</span><span>v2.4.0_stable</span></div>
       </div>
@@ -90,7 +91,8 @@ function App() {
   const [selectedStage, setSelectedStage] = useState(null)
   const [page, setPage] = useState('landing')
 
-  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} />
+  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} />
+  if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} />
 
   const stageClass = (stage) => `absolute z-20 cursor-pointer opacity-60 transition duration-300 hover:z-50 hover:scale-110 hover:opacity-100 ${selectedStage === stage ? 'z-50 !opacity-100 !border-[#004ac6] shadow-[0_0_20px_rgba(0,74,198,.4),12px_12px_0_#191b23]' : ''}`
 
