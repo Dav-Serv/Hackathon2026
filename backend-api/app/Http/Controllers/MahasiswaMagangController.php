@@ -33,8 +33,8 @@ class MahasiswaMagangController extends Controller
             'posisi' => ['required', 'string', 'max:255'],
             'periode_mulai' => ['required', 'date'],
             'periode_selesai' => ['required', 'date', 'after_or_equal:periode_mulai'],
-            'proposal_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
-            'bukti_diterima_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'proposal_file' => ['required', 'file', 'mimes:pdf,docx', 'max:10240','mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+            'bukti_diterima_file' => ['required', 'file', 'mimes:pdf,docx', 'max:10240','mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
         ]);
         $magang = DB::transaction(function () use ($request, $data) {
             $mitraId = $data['mitra_industri_id'] ?? null;
