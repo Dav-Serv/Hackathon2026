@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Magang;
+use App\Models\MitraIndustri;
 use App\Models\SupervisorMitra;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class MahasiswaMagangController extends Controller
@@ -18,9 +20,15 @@ class MahasiswaMagangController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'mitra_industri_id' => ['required', 'exists:mitra_industris,id'],
-            'supervisor_mitra_id' => ['required', 'exists:supervisor_mitras,id'],
-            'dpl_id' => ['required', 'exists:users,id', Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'dpl')->where('is_active', true))],
+            'mitra_industri_id' => ['nullable', 'exists:mitra_industris,id'],
+            'mitra_nama' => ['required_without:mitra_industri_id', 'string', 'max:255'],
+            'mitra_bidang' => ['nullable', 'string', 'max:255'],
+            'mitra_alamat' => ['nullable', 'string'],
+            'supervisor_mitra_id' => ['nullable', 'exists:supervisor_mitras,id'],
+            'supervisor_nama' => ['required_without:supervisor_mitra_id', 'string', 'max:255'],
+            'supervisor_email' => ['required_without:supervisor_mitra_id', 'email', 'max:255'],
+            'supervisor_hp' => ['nullable', 'string', 'max:50'],
+            'dpl_id' => ['required', 'exists:users,id', Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'dpl')->whereRaw('is_active IS TRUE'))],
             'jenis_program' => ['required', Rule::in(['magang', 'studi_independen'])],
             'posisi' => ['required', 'string', 'max:255'],
             'periode_mulai' => ['required', 'date'],
@@ -28,14 +36,48 @@ class MahasiswaMagangController extends Controller
             'proposal_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
             'bukti_diterima_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
-        abort_unless(SupervisorMitra::whereKey($data['supervisor_mitra_id'])->where('mitra_industri_id', $data['mitra_industri_id'])->exists(), 422, 'Supervisor bukan bagian dari mitra.');
-        $data['mahasiswa_id'] = $request->user()->id;
-        $data['nomor_magang'] = 'MAG-'.strtoupper(substr($data['jenis_program'], 0, 3)).'-'.now()->year.'-'.str_pad((string) (Magang::max('id') + 1), 4, '0', STR_PAD_LEFT);
-        $data['proposal_file'] = $request->file('proposal_file')->store('magang/'.$request->user()->id, 'supabase');
-        $data['bukti_diterima_file'] = $request->file('bukti_diterima_file')->store('magang/'.$request->user()->id, 'supabase');
-        $data['status'] = 'menunggu_verifikasi';
+        $magang = DB::transaction(function () use ($request, $data) {
+            $mitraId = $data['mitra_industri_id'] ?? null;
+            $supervisorId = $data['supervisor_mitra_id'] ?? null;
 
-        return response()->json(Magang::create($data), 201);
+            $mitra = $mitraId
+                ? MitraIndustri::findOrFail($mitraId)
+                : MitraIndustri::firstOrCreate(
+                    ['nama_perusahaan' => $data['mitra_nama']],
+                    [
+                        'bidang' => $data['mitra_bidang'] ?? null,
+                        'alamat' => $data['mitra_alamat'] ?? null,
+                    ],
+                );
+
+            if ($supervisorId) {
+                $supervisor = SupervisorMitra::whereKey($supervisorId)
+                    ->where('mitra_industri_id', $mitra->id)
+                    ->firstOrFail();
+            } else {
+                $supervisor = SupervisorMitra::firstOrCreate(
+                    ['mitra_industri_id' => $mitra->id, 'email' => $data['supervisor_email']],
+                    ['nama' => $data['supervisor_nama'], 'no_hp' => $data['supervisor_hp'] ?? null],
+                );
+            }
+
+            return Magang::create([
+                'mahasiswa_id' => $request->user()->id,
+                'mitra_industri_id' => $mitra->id,
+                'supervisor_mitra_id' => $supervisor->id,
+                'dpl_id' => $data['dpl_id'],
+                'jenis_program' => $data['jenis_program'],
+                'posisi' => $data['posisi'],
+                'periode_mulai' => $data['periode_mulai'],
+                'periode_selesai' => $data['periode_selesai'],
+                'nomor_magang' => 'MAG-'.strtoupper(substr($data['jenis_program'], 0, 3)).'-'.now()->year.'-'.str_pad((string) (Magang::max('id') + 1), 4, '0', STR_PAD_LEFT),
+                'proposal_file' => $request->file('proposal_file')->store('magang/'.$request->user()->id, 'supabase'),
+                'bukti_diterima_file' => $request->file('bukti_diterima_file')->store('magang/'.$request->user()->id, 'supabase'),
+                'status' => 'menunggu_verifikasi',
+            ]);
+        });
+
+        return response()->json($magang->load(['mitraIndustri', 'supervisorMitra', 'dpl']), 201);
     }
 
     public function update(Request $request, Magang $magang): JsonResponse
