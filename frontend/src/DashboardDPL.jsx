@@ -626,6 +626,45 @@ export default function DashboardDosen({ user, onLogout }) {
                       </table>
                     </div>
                   </div>
+
+                  {/* Recent Activity Timeline */}
+                  <section className="bg-white border-[3px] border-[#191b23] p-6 shadow-[6px_6px_0_#191b23] rounded-2xl">
+                    <h3 className="font-black text-sm uppercase mb-6 flex justify-between items-center">
+                      <span>Aktivitas Terbaru</span>
+                    </h3>
+                    <div className="relative space-y-6">
+                      {/* Timeline Vertical Line */}
+                      <div className="absolute left-6 top-2 bottom-2 w-1 bg-[#191b23]" />
+                      
+                      {/* Activity 1 */}
+                      <div className="relative flex gap-4 pl-12 items-start">
+                        <div className="absolute left-3 w-7 h-7 rounded-full border-2 border-[#191b23] bg-[#22C55E] flex items-center justify-center text-white z-10">
+                          <Icon className="text-sm font-bold">check_circle</Icon>
+                        </div>
+                        <div className="flex-1 p-4 border-2 border-[#191b23] bg-slate-50 rounded-xl">
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="text-xs font-black uppercase text-[#191b23]">Proposal Disetujui: Budi Santoso</h4>
+                            <span className="text-[10px] font-bold text-gray-500">10:45 AM</span>
+                          </div>
+                          <p className="text-xs text-[#434655]">Telah memverifikasi proposal dan dokumen konversi di Bank Central Asia.</p>
+                        </div>
+                      </div>
+                      
+                      {/* Activity 2 */}
+                      <div className="relative flex gap-4 pl-12 items-start">
+                        <div className="absolute left-3 w-7 h-7 rounded-full border-2 border-[#191b23] bg-[#ba1a1a] flex items-center justify-center text-white z-10">
+                          <Icon className="text-sm font-bold">error</Icon>
+                        </div>
+                        <div className="flex-1 p-4 border-2 border-[#191b23] bg-slate-50 rounded-xl">
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="text-xs font-black uppercase text-[#ba1a1a]">Permintaan Revisi: Siti Aminah</h4>
+                            <span className="text-[10px] font-bold text-gray-500">Kemarin, 16:20</span>
+                          </div>
+                          <p className="text-xs text-[#434655]">Mengirimkan revisi usulan konversi mata kuliah pilihan ke mahasiswa.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
                 </section>
 
                 {/* Right Column: Tasks & Charts */}
@@ -701,45 +740,6 @@ export default function DashboardDosen({ user, onLogout }) {
                   </section>
                 </aside>
               </div>
-
-              {/* Recent Activity Timeline */}
-              <section className="bg-white border-[3px] border-[#191b23] p-6 shadow-[6px_6px_0_#191b23] rounded-2xl mb-8">
-                <h3 className="font-black text-sm uppercase mb-6 flex justify-between items-center">
-                  <span>Aktivitas Terbaru</span>
-                </h3>
-                <div className="relative space-y-6">
-                  {/* Timeline Vertical Line */}
-                  <div className="absolute left-6 top-2 bottom-2 w-1 bg-[#191b23]" />
-                  
-                  {/* Activity 1 */}
-                  <div className="relative flex gap-4 pl-12 items-start">
-                    <div className="absolute left-3 w-7 h-7 rounded-full border-2 border-[#191b23] bg-[#22C55E] flex items-center justify-center text-white z-10">
-                      <Icon className="text-sm font-bold">check_circle</Icon>
-                    </div>
-                    <div className="flex-1 p-4 border-2 border-[#191b23] bg-slate-50 rounded-xl">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="text-xs font-black uppercase text-[#191b23]">Proposal Disetujui: Budi Santoso</h4>
-                        <span className="text-[10px] font-bold text-gray-500">10:45 AM</span>
-                      </div>
-                      <p className="text-xs text-[#434655]">Telah memverifikasi proposal dan dokumen konversi di Bank Central Asia.</p>
-                    </div>
-                  </div>
-                  
-                  {/* Activity 2 */}
-                  <div className="relative flex gap-4 pl-12 items-start">
-                    <div className="absolute left-3 w-7 h-7 rounded-full border-2 border-[#191b23] bg-[#ba1a1a] flex items-center justify-center text-white z-10">
-                      <Icon className="text-sm font-bold">error</Icon>
-                    </div>
-                    <div className="flex-1 p-4 border-2 border-[#191b23] bg-slate-50 rounded-xl">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="text-xs font-black uppercase text-[#ba1a1a]">Permintaan Revisi: Siti Aminah</h4>
-                        <span className="text-[10px] font-bold text-gray-500">Kemarin, 16:20</span>
-                      </div>
-                      <p className="text-xs text-[#434655]">Mengirimkan revisi usulan konversi mata kuliah pilihan ke mahasiswa.</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
             </div>
           )}
 
