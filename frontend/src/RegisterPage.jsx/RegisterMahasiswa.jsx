@@ -1,10 +1,39 @@
+import { useState } from 'react'
+import api, { getApiError } from '../lib/api'
+
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
 function RegisterMahasiswa({ onBack, onLogin }) {
+  const [form, setForm] = useState({
+    name: '',
+    nim_nip: '',
+    no_hp: '',
+    email: '',
+    alamat: '',
+    password: '',
+    password_confirmation: '',
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const updateField = (event) => {
+    const { name, value } = event.target
+    setForm((current) => ({ ...current, [name]: value }))
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
+    setErrorMessage('')
+    setIsLoading(true)
+    api.post('/register', form)
+      .then(({ data }) => {
+        localStorage.setItem('auth_token', data.access_token)
+        onLogin()
+      })
+      .catch((error) => setErrorMessage(getApiError(error)))
+      .finally(() => setIsLoading(false))
   }
 
   return (
@@ -43,7 +72,9 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   required
                   className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                   id="nama-lengkap"
-                  name="namaLengkap"
+                   name="name"
+                   onChange={updateField}
+                   value={form.name}
                   placeholder="Masukkan nama lengkap Anda"
                   type="text"
                 />
@@ -58,7 +89,9 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                     required
                     className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                     id="nim-nip"
-                    name="nimNip"
+                     name="nim_nip"
+                     onChange={updateField}
+                     value={form.nim_nip}
                     placeholder="Nomor Induk"
                     type="text"
                   />
@@ -71,7 +104,9 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                     required
                     className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                     id="nomor-hp"
-                    name="nomorHp"
+                     name="no_hp"
+                     onChange={updateField}
+                     value={form.no_hp}
                     placeholder="0812xxxx"
                     type="tel"
                   />
@@ -86,7 +121,9 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   required
                   className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                   id="email"
-                  name="email"
+                   name="email"
+                   onChange={updateField}
+                   value={form.email}
                   placeholder="nama@email.com"
                   type="email"
                 />
@@ -100,7 +137,9 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   required
                   className="w-full resize-none rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                   id="alamat"
-                  name="alamat"
+                   name="alamat"
+                   onChange={updateField}
+                   value={form.alamat}
                   placeholder="Masukkan alamat lengkap"
                   rows="3"
                 />
@@ -116,7 +155,9 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                     minLength={6}
                     className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                     id="password"
-                    name="password"
+                     name="password"
+                     onChange={updateField}
+                     value={form.password}
                     placeholder="••••••••"
                     type="password"
                   />
@@ -130,18 +171,22 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                     minLength={6}
                     className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
                     id="konfirmasi-password"
-                    name="konfirmasiPassword"
+                     name="password_confirmation"
+                     onChange={updateField}
+                     value={form.password_confirmation}
                     placeholder="••••••••"
                     type="password"
                   />
                 </div>
               </div>
 
+              {errorMessage && <p role="alert" className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">{errorMessage}</p>}
               <button
-                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                disabled={isLoading}
+                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-80"
                 type="submit"
               >
-                Daftar Sekarang
+                {isLoading ? 'MEMPROSES...' : 'Daftar Sekarang'}
               </button>
             </form>
 
