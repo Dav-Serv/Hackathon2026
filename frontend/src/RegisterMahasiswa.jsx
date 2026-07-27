@@ -1,16 +1,58 @@
 import { useState } from 'react'
+import api, { getApiError } from './lib/api'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
 
-function RegisterMahasiswa({ onBack, onLogin }) {
+function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    setErrorMessage('')
+    setIsLoading(true)
+
+    const formData = new FormData(event.currentTarget)
+    const name = formData.get('namaLengkap')
+    const nim_nip = formData.get('nimNip')
+    const no_hp = formData.get('nomorHp')
+    const email = formData.get('email')
+    const alamat = formData.get('alamat')
+    const password = formData.get('password')
+    const password_confirmation = formData.get('konfirmasiPassword')
+
+    if (password !== password_confirmation) {
+      setErrorMessage('Konfirmasi kata sandi tidak cocok.')
+      setIsLoading(false)
+      return
+    }
+
+    api.post('/register', {
+      name,
+      nim_nip,
+      no_hp,
+      alamat,
+      email,
+      password,
+      password_confirmation
+    })
+      .then(({ data }) => {
+        localStorage.setItem('auth_token', data.access_token)
+        if (onRegisterSuccess) {
+          onRegisterSuccess(data.user)
+        }
+      })
+      .catch((error) => {
+        setErrorMessage(getApiError(error))
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   return (
@@ -161,11 +203,18 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                 </div>
               </div>
 
+              {errorMessage && (
+                <p role="alert" className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">
+                  {errorMessage}
+                </p>
+              )}
+
               <button
-                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#861086] hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                disabled={isLoading}
+                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#861086] hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-85"
                 type="submit"
               >
-                Daftar Sekarang
+                {isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}
               </button>
             </form>
 

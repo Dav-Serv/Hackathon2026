@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from '../src/services/mockData'
+import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from './services/mockData'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>

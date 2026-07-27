@@ -3,7 +3,7 @@ import api, { getApiError } from './lib/api'
 import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
-import DashboardDosen from '../DashboardDosen/dashboard.jsx'
+import DashboardDosen from './DashboardDPL.jsx'
 
 const icons = {
   logo: 'grading',
