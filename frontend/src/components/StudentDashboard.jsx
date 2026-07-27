@@ -94,8 +94,40 @@ function StudentDashboard({ user, onLogout }) {
     if (!isLoading) localStorage.setItem('gradeSync_db', JSON.stringify(db))
   }, [db, isLoading])
 
-  // Active sub-tab inside student dashboard: status | usulan | klaim | hasil | profile
+  // Active sub-tab inside student dashboard.
   const [activeTab, setActiveTab] = useState('status')
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState({})
+
+  const notifications = [
+    { id: 1, title: 'Status dashboard diperbarui', text: 'Periksa kembali tahapan proses konversi Anda.', time: 'Baru', unread: true },
+    { id: 2, title: 'Dokumen harus lengkap', text: 'Pastikan proposal dan bukti diterima tersedia sebelum mengajukan.', time: 'Hari ini', unread: false },
+    { id: 3, title: 'Panduan proses tersedia', text: 'Gunakan menu Usulan dan Klaim secara berurutan.', time: 'Kemarin', unread: false },
+  ]
+
+  const statusLabels = {
+    draft: 'Draft',
+    belum_diajukan: 'Belum diajukan',
+    menunggu_verifikasi: 'Menunggu verifikasi',
+    menunggu_persetujuan_dpl: 'Menunggu persetujuan DPL',
+    menunggu_penilaian_mitra: 'Menunggu penilaian mitra',
+    menunggu_review_dpl: 'Menunggu review DPL',
+    disetujui: 'Disetujui',
+    berjalan: 'Sedang berjalan',
+    selesai: 'Selesai',
+    revisi: 'Perlu revisi',
+    ditolak: 'Ditolak',
+    dibatalkan: 'Dibatalkan',
+  }
+
+  const getStatusLabel = (status) => statusLabels[status] || status || 'Belum tersedia'
+
+  const handleFileSelect = (event, field) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setSelectedFiles(prev => ({ ...prev, [field]: file }))
+    showToast(`${file.name} siap diunggah.`)
+  }
 
   // Notification helper
   const [toast, setToast] = useState(null)
@@ -142,6 +174,7 @@ function StudentDashboard({ user, onLogout }) {
 
   // --- 1. Aksi Magang ---
   const [magangForm, setMagangForm] = useState({
+    jenisProgram: db.magang.jenisProgram || 'magang',
     mitraNama: db.magang.mitraNama || 'PT Solusi Teknologi Nusantara',
     mitraAlamat: db.magang.mitraAlamat || 'Gedung Digital Creative, Jakarta',
     mitraBidang: db.magang.mitraBidang || 'Software Development',
@@ -155,6 +188,13 @@ function StudentDashboard({ user, onLogout }) {
     proposalFile: db.magang.proposalFile || 'proposal_magang_12345.pdf',
     buktiDiterimaFile: db.magang.buktiDiterimaFile || 'bukti_penerimaan_12345.pdf'
   })
+
+  const processHistory = [
+    { date: db.magang.updated_at || db.magang.created_at, title: 'Pengajuan magang', status: getStatusLabel(db.magang.status), note: db.magang.catatanAdmin || 'Data pengajuan tersimpan di dashboard.' },
+    { date: db.usulan.updated_at || db.usulan.created_at, title: 'Usulan konversi', status: getStatusLabel(db.usulan.status), note: db.usulan.catatanDpl || 'Pemetaan mata kuliah dan CPMK.' },
+    { date: db.klaim.updated_at || db.klaim.created_at, title: 'Klaim konversi', status: getStatusLabel(db.klaim.status), note: 'Bukti kegiatan dan dokumen akhir.' },
+    { date: db.penilaian.dpl.submittedAt, title: 'Penilaian akhir', status: db.klaim.status === 'disetujui' ? 'Selesai' : 'Menunggu', note: db.penilaian.dpl.komentar || 'Menunggu seluruh pihak menyelesaikan penilaian.' },
+  ].filter(item => item.date || item.title === 'Pengajuan magang')
 
   const handleMagangSubmit = (e) => {
     e.preventDefault()
@@ -373,6 +413,8 @@ function StudentDashboard({ user, onLogout }) {
           <nav className="mt-8 flex flex-col gap-2 px-3">
             {[
               { id: 'status', label: 'Data & Status Magang', icon: 'business_center', disabled: false },
+              { id: 'history', label: 'Histori Proses', icon: 'history', disabled: false },
+              { id: 'surat', label: 'Surat Pengantar', icon: 'mail', disabled: false },
               { id: 'usulan', label: 'Usulan Konversi', icon: 'history_edu', disabled: db.magang.status !== 'disetujui' },
               { id: 'klaim', label: 'Klaim Konversi', icon: 'fact_check', disabled: db.usulan.status !== 'disetujui' },
               { id: 'hasil', label: 'Hasil Konversi (KHS)', icon: 'workspace_premium', disabled: db.klaim.status !== 'disetujui' },
@@ -435,7 +477,35 @@ function StudentDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="relative flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Notifikasi"
+              onClick={() => setShowNotifications(prev => !prev)}
+              className="relative rounded-xl border-2 border-[#191b23] bg-white p-2 shadow-[2px_2px_0_#9f149f] hover:bg-purple-50"
+            >
+              <Icon className="text-xl text-[#9f149f]">notifications</Icon>
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-[#191b23] bg-red-500 px-1 text-[9px] font-black text-white">1</span>
+            </button>
+            {showNotifications && (
+              <div className="absolute right-14 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border-2 border-[#191b23] bg-white p-3 shadow-[5px_5px_0_#191b23]">
+                <div className="mb-2 flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="text-xs font-black uppercase">Notifikasi</span>
+                  <span className="text-[10px] font-bold text-[#9f149f]">1 belum dibaca</span>
+                </div>
+                <div className="space-y-2">
+                  {notifications.map(notification => (
+                    <div key={notification.id} className={`rounded-lg border p-2 ${notification.unread ? 'border-purple-200 bg-purple-50' : 'border-slate-200 bg-slate-50'}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-[11px] font-black">{notification.title}</p>
+                        <span className="shrink-0 text-[9px] font-bold text-slate-400">{notification.time}</span>
+                      </div>
+                      <p className="mt-1 text-[10px] font-semibold text-slate-600">{notification.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div 
               onClick={() => setActiveTab('profile')}
               className="flex items-center gap-2 cursor-pointer hover:opacity-85"
@@ -532,7 +602,7 @@ function StudentDashboard({ user, onLogout }) {
                       <h3 className="text-sm font-black uppercase tracking-tight">Status Pendaftaran Magang</h3>
                       <span className={`inline-block border border-[#191b23] px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded ${
                         db.magang.status === 'disetujui' ? 'bg-green-200' : db.magang.status === 'menunggu_verifikasi' ? 'bg-purple-200' : db.magang.status === 'ditolak' ? 'bg-red-200' : 'bg-amber-200'
-                      }`}>{db.magang.status}</span>
+                       }`}>{getStatusLabel(db.magang.status)}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-600 font-semibold leading-relaxed">
                       {db.magang.status === 'draft' && 'Lengkapi form pendaftaran di bawah dan klik "Ajukan Pendaftaran Magang" untuk diverifikasi oleh prodi.'}
@@ -611,6 +681,27 @@ function StudentDashboard({ user, onLogout }) {
 
                   <div className="border-t-2 border-slate-100 pt-4 space-y-4 text-xs font-bold">
                     <h3 className="font-black text-xs uppercase text-[#9f149f]">A. Rincian Tempat Magang</h3>
+
+                    <div className="space-y-1.5">
+                      <label>Jenis Program</label>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {[
+                          ['magang', 'Magang'],
+                          ['studi_independen', 'Studi Independen'],
+                        ].map(([value, label]) => (
+                          <label key={value} className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-2 ${magangForm.jenisProgram === value ? 'border-[#9f149f] bg-purple-50 text-[#9f149f]' : 'border-[#191b23] bg-white'}`}>
+                            <input
+                              type="radio"
+                              name="jenisProgram"
+                              value={value}
+                              checked={magangForm.jenisProgram === value}
+                              onChange={(e) => setMagangForm({ ...magangForm, jenisProgram: e.target.value })}
+                            />
+                            {label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                     
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
@@ -741,16 +832,18 @@ function StudentDashboard({ user, onLogout }) {
                   <div className="border-t-2 border-slate-100 pt-4 space-y-4 text-xs font-bold">
                     <h3 className="font-black text-xs uppercase text-[#9f149f]">C. Dokumen Lampiran (Format PDF)</h3>
                     <div className="grid gap-4 md:grid-cols-2">
-                      <div className="rounded-xl border-2 border-dashed border-[#191b23] p-3 text-center bg-slate-50">
+                      <label className="cursor-pointer rounded-xl border-2 border-dashed border-[#191b23] p-3 text-center bg-slate-50 hover:bg-purple-50">
                         <Icon className="text-2xl text-[#9f149f] mb-1">upload_file</Icon>
                         <div className="text-xs">Proposal Magang</div>
-                        <div className="text-[9px] text-gray-400 mt-0.5 truncate">{magangForm.proposalFile}</div>
-                      </div>
-                      <div className="rounded-xl border-2 border-dashed border-[#191b23] p-3 text-center bg-slate-50">
+                        <div className="text-[9px] text-gray-400 mt-0.5 truncate">{selectedFiles.proposal?.name || magangForm.proposalFile || 'Pilih file PDF'}</div>
+                        <input className="sr-only" type="file" accept="application/pdf,.pdf" onChange={(e) => handleFileSelect(e, 'proposal')} />
+                      </label>
+                      <label className="cursor-pointer rounded-xl border-2 border-dashed border-[#191b23] p-3 text-center bg-slate-50 hover:bg-purple-50">
                         <Icon className="text-2xl text-green-600 mb-1">task_alt</Icon>
                         <div className="text-xs">Bukti Diterima Magang</div>
-                        <div className="text-[9px] text-gray-400 mt-0.5 truncate">{magangForm.buktiDiterimaFile}</div>
-                      </div>
+                        <div className="text-[9px] text-gray-400 mt-0.5 truncate">{selectedFiles.buktiDiterima?.name || magangForm.buktiDiterimaFile || 'Pilih file PDF'}</div>
+                        <input className="sr-only" type="file" accept="application/pdf,.pdf" onChange={(e) => handleFileSelect(e, 'buktiDiterima')} />
+                      </label>
                     </div>
                   </div>
 
@@ -762,6 +855,68 @@ function StudentDashboard({ user, onLogout }) {
                   </button>
                 </form>
               )}
+            </div>
+          )}
+
+          {activeTab === 'history' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23]">
+                <div className="mb-5 flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-md font-black uppercase">Histori Proses</h2>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">Pantau perubahan status dan catatan pada setiap tahap pengajuan.</p>
+                  </div>
+                  <Icon className="text-2xl text-[#9f149f]">history</Icon>
+                </div>
+                <div className="space-y-4">
+                  {processHistory.map((item, index) => (
+                    <div key={`${item.title}-${index}`} className="relative flex gap-3">
+                      {index < processHistory.length - 1 && <span className="absolute left-[9px] top-6 h-full w-px bg-purple-200" />}
+                      <span className="relative z-10 mt-1 h-5 w-5 shrink-0 rounded-full border-2 border-[#191b23] bg-[#f3dff3]" />
+                      <div className="min-w-0 flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h3 className="text-xs font-black">{item.title}</h3>
+                          <span className="rounded border border-[#191b23] bg-white px-2 py-0.5 text-[9px] font-black uppercase text-[#9f149f]">{item.status}</span>
+                        </div>
+                        <p className="mt-1 text-[10px] font-semibold text-slate-600">{item.note}</p>
+                        {item.date && <p className="mt-2 text-[9px] font-bold text-slate-400">{item.date}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'surat' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23]">
+                <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-slate-100 pb-4">
+                  <div>
+                    <h2 className="text-md font-black uppercase">Surat Pengantar</h2>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">Kelola dan pantau penerbitan surat pengantar magang Anda.</p>
+                  </div>
+                  <span className="rounded-full border-2 border-[#191b23] bg-amber-100 px-3 py-1 text-[10px] font-black uppercase">Menunggu penerbitan</span>
+                </div>
+                <div className="mt-5 grid gap-4 md:grid-cols-3">
+                  {[
+                    ['description', 'Proposal tervalidasi', db.magang.status === 'disetujui'],
+                    ['edit_document', 'Surat sedang diproses', db.magang.status === 'disetujui'],
+                    ['download', 'Surat siap diunduh', false],
+                  ].map(([icon, label, done]) => (
+                    <div key={label} className={`rounded-xl border-2 p-4 ${done ? 'border-green-200 bg-green-50' : 'border-slate-200 bg-slate-50'}`}>
+                      <Icon className={`text-2xl ${done ? 'text-green-600' : 'text-slate-400'}`}>{done ? 'check_circle' : icon}</Icon>
+                      <p className="mt-2 text-xs font-black">{label}</p>
+                      <p className="mt-1 text-[10px] font-semibold text-slate-500">{done ? 'Selesai' : 'Belum tersedia'}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 p-5 text-center">
+                  <Icon className="text-4xl text-slate-300">mail_lock</Icon>
+                  <p className="mt-2 text-xs font-black">Surat pengantar belum tersedia</p>
+                  <p className="mt-1 text-[10px] font-semibold text-slate-500">Tombol preview dan unduh akan tersedia setelah surat diterbitkan oleh admin.</p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -787,7 +942,7 @@ function StudentDashboard({ user, onLogout }) {
                       <h3 className="text-sm font-black uppercase tracking-tight">Status Usulan Konversi</h3>
                       <span className={`inline-block border border-[#191b23] px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded ${
                         db.usulan.status === 'disetujui' ? 'bg-green-200' : db.usulan.status === 'menunggu_persetujuan_dpl' ? 'bg-purple-200' : db.usulan.status === 'revisi' ? 'bg-amber-200' : 'bg-gray-200'
-                      }`}>{db.usulan.status === 'belum_diajukan' ? 'Draft' : db.usulan.status}</span>
+                       }`}>{getStatusLabel(db.usulan.status)}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-600 font-semibold leading-relaxed">
                       {db.usulan.status === 'belum_diajukan' && 'Ajukan usulan pemetaan Mata Kuliah pilihan dengan Capaian Pembelajaran (CPMK) yang relevan dengan tugas magang Anda.'}
@@ -1010,7 +1165,7 @@ function StudentDashboard({ user, onLogout }) {
                       <h3 className="text-sm font-black uppercase tracking-tight">Status Klaim Konversi</h3>
                       <span className={`inline-block border border-[#191b23] px-1.5 py-0.5 text-[9px] font-extrabold uppercase rounded ${
                         db.klaim.status === 'disetujui' ? 'bg-green-200' : db.klaim.status === 'menunggu_penilaian_mitra' || db.klaim.status === 'menunggu_review_dpl' ? 'bg-purple-200' : db.klaim.status === 'revisi' ? 'bg-amber-200' : 'bg-gray-200'
-                      }`}>{db.klaim.status === 'belum_diajukan' ? 'Draft' : db.klaim.status}</span>
+                       }`}>{getStatusLabel(db.klaim.status)}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-600 font-semibold leading-relaxed">
                       {db.klaim.status === 'belum_diajukan' && 'Unggah laporan akhir magang, logbook, dan sertifikat, serta cantumkan bukti pencapaian tugas untuk masing-masing CPMK yang diusulkan.'}
@@ -1028,23 +1183,26 @@ function StudentDashboard({ user, onLogout }) {
                   <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23] space-y-4">
                     <h2 className="text-md font-bold uppercase tracking-tight">Dokumen Laporan Akhir</h2>
                     <div className="grid gap-4 md:grid-cols-3 text-xs font-bold">
-                      <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
+                      <label className="cursor-pointer rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50 hover:bg-purple-50">
                         <Icon className="text-3xl text-red-500 mb-1">picture_as_pdf</Icon>
                         <div className="text-[10px]">Logbook Magang (PDF)</div>
-                        <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.logbookFile}</div>
+                        <div className="text-[9px] text-gray-400 mt-1 truncate">{selectedFiles.logbook?.name || klaimGeneral.logbookFile || 'Pilih file PDF'}</div>
+                        <input className="sr-only" type="file" accept="application/pdf,.pdf" onChange={(e) => handleFileSelect(e, 'logbook')} />
 
-                      </div>
-                      <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
+                      </label>
+                      <label className="cursor-pointer rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50 hover:bg-purple-50">
                         <Icon className="text-3xl text-blue-500 mb-1">picture_as_pdf</Icon>
                         <div className="text-[10px]">Laporan Akhir (PDF)</div>
-                        <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.laporanFile}</div>
-                      </div>
-                      <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
+                        <div className="text-[9px] text-gray-400 mt-1 truncate">{selectedFiles.laporan?.name || klaimGeneral.laporanFile || 'Pilih file PDF'}</div>
+                        <input className="sr-only" type="file" accept="application/pdf,.pdf" onChange={(e) => handleFileSelect(e, 'laporan')} />
+                      </label>
+                      <label className="cursor-pointer rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50 hover:bg-purple-50">
 
                         <Icon className="text-3xl text-green-600 mb-1">workspace_premium</Icon>
                         <div className="text-[10px]">Sertifikat Magang (PDF)</div>
-                        <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.sertifikatFile}</div>
-                      </div>
+                        <div className="text-[9px] text-gray-400 mt-1 truncate">{selectedFiles.sertifikat?.name || klaimGeneral.sertifikatFile || 'Pilih file PDF'}</div>
+                        <input className="sr-only" type="file" accept="application/pdf,.pdf" onChange={(e) => handleFileSelect(e, 'sertifikat')} />
+                      </label>
                     </div>
                   </div>
 
@@ -1082,6 +1240,11 @@ function StudentDashboard({ user, onLogout }) {
                                 })}
                                 className="w-full resize-none rounded-xl border-2 border-[#191b23] bg-white p-3 text-xs font-bold outline-none"
                               />
+                              <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-white px-3 py-2 text-[10px] font-black text-slate-500 hover:border-[#9f149f] hover:text-[#9f149f]">
+                                <Icon className="text-base">attach_file</Icon>
+                                {selectedFiles[`cpmk-${idx}`]?.name || 'Lampirkan bukti CPMK'}
+                                <input className="sr-only" type="file" accept=".pdf,.zip,.rar,image/*" onChange={(e) => handleFileSelect(e, `cpmk-${idx}`)} />
+                              </label>
                             </div>
                           </div>
                         )
