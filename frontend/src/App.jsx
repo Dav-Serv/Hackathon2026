@@ -32,8 +32,65 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
+function LoginPage({ onBack }) {
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    setIsLoading(true)
+    window.setTimeout(() => setIsLoading(false), 2000)
+  }
+
+  const handleMouseMove = (event) => {
+    if (window.innerWidth < 768) return
+    setTilt({
+      x: (window.innerWidth / 2 - event.clientX) / 80,
+      y: (window.innerHeight / 2 - event.clientY) / 80,
+    })
+  }
+
+  return (
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]" onMouseMove={handleMouseMove}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <svg className="absolute left-10 top-10 h-32 w-32 text-[#004ac6] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
+        <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#0060ac] opacity-20" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
+        <Icon className="absolute right-[10%] top-[15%] rotate-12 text-8xl opacity-20">school</Icon>
+        <Icon className="absolute bottom-[20%] left-[5%] -rotate-12 text-7xl opacity-20">auto_stories</Icon>
+        <div className="absolute left-12 top-1/4 flex h-24 w-24 rotate-[-5deg] items-center justify-center border-2 border-[#191b23] bg-[#64a8fe] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">OBE READY?</div>
+        <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#dbe1ff] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md" style={{ perspective: '1000px' }}>
+        <div className="rounded-xl border-4 border-[#191b23] bg-white p-8 shadow-[12px_12px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
+          <button type="button" onClick={onBack} className="mb-6 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#004ac6] hover:underline"><Icon className="text-base">arrow_back</Icon> Kembali</button>
+          <div className="mb-8"><h1 className="mb-2 text-4xl font-bold">OBE GradeSync</h1><p className="leading-relaxed text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
+          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+            <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Email atau NIM
+              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full border-[3px] border-[#191b23] bg-white p-4 pr-12 outline-none transition focus:border-[#004ac6] focus:shadow-[4px_4px_0_#2563eb]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Kata Sandi
+              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full border-[3px] border-[#191b23] bg-white p-4 pr-24 outline-none transition focus:border-[#004ac6] focus:shadow-[4px_4px_0_#2563eb]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#004ac6]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
+            </label>
+            <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#004ac6] hover:underline">Lupa?</button></div>
+            <button disabled={isLoading} className="group flex items-center justify-center gap-2 border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[8px_8px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
+          </form>
+          <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onBack} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button><button type="button" aria-label="Hub" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><Icon className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-base text-white">hub</Icon></button></div></div>
+        </div>
+        <div className="mt-4 flex justify-between px-4 text-[10px] font-bold uppercase tracking-widest text-[#737686]"><span>[ Status Sistem: Optimal ]</span><span>v2.4.0_stable</span></div>
+      </div>
+    </main>
+  )
+}
+
 function App() {
   const [selectedStage, setSelectedStage] = useState(null)
+  const [page, setPage] = useState('landing')
+
+  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} />
 
   const stageClass = (stage) => `absolute z-20 cursor-pointer opacity-60 transition duration-300 hover:z-50 hover:scale-110 hover:opacity-100 ${selectedStage === stage ? 'z-50 !opacity-100 !border-[#004ac6] shadow-[0_0_20px_rgba(0,74,198,.4),12px_12px_0_#191b23]' : ''}`
 
@@ -50,7 +107,7 @@ function App() {
             <a href="#fitur" className="rounded-full px-4 py-1.5 text-xs font-bold hover:bg-[#e7e7f3]">Fitur</a>
             <a href="#alur" className="rounded-full px-4 py-1.5 text-xs font-bold hover:bg-[#e7e7f3]">Alur</a>
           </div>
-          <a href="#daftar" className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#004ac6] sm:px-5">Login</a>
+          <button type="button" onClick={() => setPage('login')} className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#004ac6] sm:px-5">Login</button>
         </nav>
       </header>
 
@@ -72,7 +129,7 @@ function App() {
 
         <section id="alur" className="bg-[#e1e2ed] px-5 py-20 md:px-16"><div className="mx-auto max-w-7xl"><h2 className="mb-14 text-center text-3xl font-bold uppercase italic md:text-5xl">Alur Sistem Konversi</h2><div className="relative flex flex-col items-center justify-between gap-8 md:flex-row"><div className="absolute left-0 top-10 hidden w-full border-t-4 border-dashed border-[#191b23] md:block" />{steps.map(([title, text, icon], index) => <div key={title} className="relative z-10 flex w-full flex-col items-center text-center md:w-1/5"><div className={`mb-5 flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#191b23] shadow-[4px_4px_0_#191b23] ${index === 4 ? 'bg-[#2563eb] text-white' : 'bg-white'} transition hover:bg-[#004ac6] hover:text-white`}><Icon className="text-3xl">{icon}</Icon></div><div className={`rounded-lg border-[3px] border-[#191b23] p-4 shadow-[4px_4px_0_#191b23] ${index === 4 ? 'bg-[#004ac6] text-white' : 'bg-white'}`}><h4 className="text-xs font-bold tracking-wide">{title}</h4><p className="mt-2 text-xs opacity-70">{text}</p></div></div>)}</div></div></section>
 
-        <section id="daftar" className="flex items-center justify-center bg-[#004ac6] px-5 py-24 md:px-16"><div className="relative w-full max-w-4xl overflow-hidden rounded-[36px] border-[6px] border-[#191b23] bg-white p-10 text-center shadow-[16px_16px_0_#191b23] md:p-20"><div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border-4 border-[#191b23] bg-[#64a8fe] opacity-50" /><div className="relative z-10"><h2 className="text-4xl font-bold md:text-6xl">Siap Mengelola Konversi Nilai Secara Digital?</h2><p className="mx-auto mb-10 mt-6 max-w-2xl text-lg leading-relaxed text-[#434655]">Bergabunglah dengan ratusan mahasiswa AMIKOM lainnya yang telah merasakan kemudahan konversi nilai berbasis OBE.</p><div className="flex flex-col justify-center gap-5 sm:flex-row"><button className="rounded-full border-4 border-[#191b23] bg-[#004ac6] px-10 py-4 text-lg font-bold text-white shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">DAFTAR SEKARANG</button><button className="rounded-full border-4 border-[#191b23] bg-[#faf8ff] px-10 py-4 text-lg font-bold shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">HUBUNGI KAMI</button></div></div></div></section>
+        <section id="daftar" className="flex items-center justify-center bg-[#004ac6] px-5 py-24 md:px-16"><div className="relative w-full max-w-4xl overflow-hidden rounded-[36px] border-[6px] border-[#191b23] bg-white p-10 text-center shadow-[16px_16px_0_#191b23] md:p-20"><div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border-4 border-[#191b23] bg-[#64a8fe] opacity-50" /><div className="relative z-10"><h2 className="text-4xl font-bold md:text-6xl">Siap Mengelola Konversi Nilai Secara Digital?</h2><p className="mx-auto mb-10 mt-6 max-w-2xl text-lg leading-relaxed text-[#434655]">Bergabunglah dengan ratusan mahasiswa AMIKOM lainnya yang telah merasakan kemudahan konversi nilai berbasis OBE.</p><div className="flex flex-col justify-center gap-5 sm:flex-row"><button type="button" onClick={() => setPage('login')} className="rounded-full border-4 border-[#191b23] bg-[#004ac6] px-10 py-4 text-lg font-bold text-white shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">DAFTAR SEKARANG</button><button type="button" className="rounded-full border-4 border-[#191b23] bg-[#faf8ff] px-10 py-4 text-lg font-bold shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">HUBUNGI KAMI</button></div></div></div></section>
       </main>
 
       <footer className="border-t-4 border-[#191b23] bg-[#ededf9] px-5 py-16 md:px-16"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 md:flex-row"><div className="max-w-md"><div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#191b23] bg-[#004ac6] text-white"><Icon>school</Icon></span><span className="text-2xl font-semibold">GradeFlow OBE</span></div><p className="leading-relaxed text-[#434655]">Platform manajemen Outcome-Based Education terpadu untuk efisiensi penilaian akademik dan pelaporan capaian lulusan secara presisi.</p></div><div className="grid grid-cols-2 gap-10"><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Kontak</b><a className="text-[#434655] hover:text-[#004ac6]" href="mailto:info@amikom.ac.id">info@amikom.ac.id</a><a className="text-[#434655] hover:text-[#004ac6]" href="tel:+62274884201">+62 274 884201</a></div><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Alamat</b><span className="text-[#434655]">Jl. Ring Road Utara,<br />Condongcatur, Yogyakarta 55283</span></div></div></div><div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-4 border-t-2 border-[#191b23]/20 pt-5 text-sm text-[#434655] md:flex-row"><span>© 2024 Universitas AMIKOM Yogyakarta. All rights reserved.</span><div className="flex gap-5"><a href="#daftar">Privacy Policy</a><a href="#daftar">Terms of Service</a></div></div></footer>
