@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mitra_industris', function (Blueprint $table) {
+        Schema::create('dokumens', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_perusahaan');
-            $table->string('alamat');
-            $table->string('bidang');
+            $table->string('referensi_tabel');
+            $table->unsignedBigInteger('referensi_id');
+            $table->string('jenis_dokumen');
+            $table->string('path_file');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('mitra_industris');
+        Schema::dropIfExists('dokumens');
     }
 };
