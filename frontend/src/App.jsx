@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import api, { getApiError } from './lib/api'
 import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
@@ -41,14 +42,21 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [errorMessage, setErrorMessage] = useState('')
+
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    setErrorMessage('')
     setIsLoading(true)
-    window.setTimeout(() => {
-      setIsLoading(false)
-      if (onLoginSuccess) onLoginSuccess()
-    }, 1000)
+    api.post('/login', { email: identifier, password })
+      .then(({ data }) => {
+        localStorage.setItem('auth_token', data.access_token)
+        onLoginSuccess(data.user)
+      })
+      .catch((error) => setErrorMessage(getApiError(error)))
+      .finally(() => setIsLoading(false))
+
   }
 
   const handleMouseMove = (event) => {
@@ -82,7 +90,11 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
               <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#004ac6]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
             </label>
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#004ac6] hover:underline">Lupa?</button></div>
+
             <button disabled={isLoading} className="group flex items-center justify-center gap-2 rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
+            {errorMessage && <p role="alert" className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">{errorMessage}</p>}
+            <button disabled={isLoading} className="flex items-center justify-center gap-2 border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[8px_8px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? 'MEMPROSES...' : <>MASUK <Icon>arrow_forward</Icon></>}</button>
+
           </form>
           <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button></div></div>
         </div>
@@ -96,6 +108,7 @@ function App() {
   const [selectedStage, setSelectedStage] = useState(null)
   const [page, setPage] = useState('landing')
   const [activeNav, setActiveNav] = useState('beranda')
+  const [authenticatedUser, setAuthenticatedUser] = useState(null)
 
   useEffect(() => {
     if (page !== 'landing') return undefined
@@ -119,9 +132,9 @@ function App() {
     return () => observer.disconnect()
   }, [page])
 
-  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} />
-  if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} />
-  if (page === 'dashboard') return <StudentDashboard onLogout={() => setPage('landing')} />
+  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} onLoginSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
+  if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} onRegisterSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
+  if (page === 'dashboard') return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
 
   const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#004ac6] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
 
