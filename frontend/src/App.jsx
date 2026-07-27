@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterPage.jsx/RegisterMahasiswa.jsx'
+import StudentDashboard from './components/StudentDashboard.jsx'
 
 const icons = {
   logo: 'grading',
@@ -34,7 +35,7 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
-function LoginPage({ onBack, onRegister }) {
+function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -43,7 +44,10 @@ function LoginPage({ onBack, onRegister }) {
   const handleSubmit = (event) => {
     event.preventDefault()
     setIsLoading(true)
-    window.setTimeout(() => setIsLoading(false), 2000)
+    window.setTimeout(() => {
+      setIsLoading(false)
+      if (onLoginSuccess) onLoginSuccess()
+    }, 1000)
   }
 
   return (
@@ -108,6 +112,7 @@ function App() {
 
   if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} />
   if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} />
+  if (page === 'dashboard') return <StudentDashboard onLogout={() => setPage('landing')} />
 
   const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#004ac6] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
 
