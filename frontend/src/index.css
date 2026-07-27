@@ -36,3 +36,12 @@ body:has(.journey-map-bg) [class*="text-[#0060ac]"] { color: #a862a8 !important;
 body:has(.journey-map-bg) [class*="text-[#a4c9ff]"] { color: #a862a8 !important; }
 body:has(.journey-map-bg) [class*="bg-blue-600"] { background-color: #a862a8 !important; }
 body:has(.journey-map-bg) [class*="hover:bg-[#004ac6]"]:hover { background-color: #9f149f !important; }
+
+.purple-grid-bg {
+  background-color: #9f149f !important;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
+}
+
