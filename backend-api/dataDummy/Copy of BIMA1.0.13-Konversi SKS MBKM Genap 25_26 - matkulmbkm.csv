@@ -1,0 +1,120 @@
+id,cpmk,kode,matkul,semester,sks,deskripsi_cpmk,kode_cpmk,grouped
+1,CPMK04,ST013,Lingkungan Bisnis,2,2,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+2,CPMK05,ST013,Lingkungan Bisnis,2,2,Mahasiswa membangun integritas dengan cara menjalin kerja sama dalam tim untuk menyelesaikan pekerjaan;,CPMK05,
+3,CPMK06,ST013,Lingkungan Bisnis,2,2,Mahasiswa menerapkan sikap profesional memimpin dalam tim dengan penuh tanggung jawab terhadap pekerjaannya;,CPMK06,
+4,CPMK08,ST013,Lingkungan Bisnis,2,2,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,grouped
+5,CPMK06,ST014,Komunikasi Data,2,4,Mahasiswa menerapkan sikap profesional memimpin dalam tim dengan penuh tanggung jawab terhadap pekerjaannya;,CPMK06,
+6,CPMK39,ST014,Komunikasi Data,2,4,Mahasiswa menjelaskan konsep teknik akuisisi data,CPMK39,
+7,CPMK41,ST014,Komunikasi Data,2,4,Mahasiswa mampu menerapkan teknik pengolahan data untuk menyelesaikan masalah,CPMK41,
+8,CPMK42,ST014,Komunikasi Data,2,4,Mahasiswa mampu menjelaskan tentang metodologi dalam membangun jaringan komputer,CPMK42,grouped
+9,CPMK04,ST015,Struktur Data,2,4,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+10,CPMK16,ST015,Struktur Data,2,4,Mahasiswa mampu merancang perangkat lunak pada berbagai platform digital,CPMK16,
+11,CPMK17,ST015,Struktur Data,2,4,Mahasiswa mampu melakukan evaluasi perangkat lunak pada berbagai platform digital,CPMK17,
+12,CPMK38,ST015,Struktur Data,2,4,Mahasiswa mampu menganalisis platform yang sesuai untuk kebutuhan industri atau masyarakat,CPMK38,grouped
+13,CPMK04,ST016,Bahasa Inggris II,2,2,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+14,CPMK05,ST016,Bahasa Inggris II,2,2,Mahasiswa membangun integritas dengan cara menjalin kerja sama dalam tim untuk menyelesaikan pekerjaan;,CPMK05,
+15,CPMK12,ST016,Bahasa Inggris II,2,2,Mahasiswa mampu mendokumentasikan pemikiran dengan baik,CPMK12,grouped
+16,CPMK04,ST019,Sistem Operasi,2,4,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+17,CPMK39,ST019,Sistem Operasi,2,4,Mahasiswa menjelaskan konsep teknik akuisisi data,CPMK39,
+18,CPMK40,ST019,Sistem Operasi,2,4,Mahasiswa mampu menerapkan teknik analisis data,CPMK40,
+19,CPMK41,ST019,Sistem Operasi,2,4,Mahasiswa mampu menerapkan teknik pengolahan data untuk menyelesaikan masalah,CPMK41,grouped
+20,CPMK15,ST021,Pemrograman,2,2,Mahasiswa mampu menganalisis perangkat lunak pada berbagai platform digital,CPMK15,
+21,CPMK35,ST021,Pemrograman,2,2,Mahasiswa Mampu menerapkan metode analisis sistem.,CPMK35,
+22,CPMK36,ST021,Pemrograman,2,2,mahasiswa mampu menerapkan metode perancangan sistem,CPMK36,
+23,CPMK37,ST021,Pemrograman,2,2,Mahasiswa mampu menerapkan metode perancangan perangkat lunak.,CPMK37,grouped
+24,CPMK33,ST029,Komputer Grafis,2,2,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+25,CPMK45,ST029,Komputer Grafis,2,2,mahasiswa mampu menguraikan prinsip-prinsip multimedia,CPMK45,
+26,CPMK46,ST029,Komputer Grafis,2,2,Mahasiswa mampu menguraikan komponen multimedia;,CPMK46,
+27,CPMK47,ST029,Komputer Grafis,2,2,Mahasiswa mampu menjelaskan jenis-jenis produk digital,CPMK47,grouped
+28,CPMK02,ST160,Hardware/Software I,2,2,Mahasiswa memiliki sikap saling menghargai dengan menjalin kerja sama dengan individu yang memiliki latar belakang sosial dan budaya yang beragam (carring culture),CPMK02,
+29,CPMK40,ST160,Hardware/Software I,2,2,Mahasiswa mampu menerapkan teknik analisis data,CPMK40,
+30,CPMK43,ST160,Hardware/Software I,2,2,Mahasiswa mampu mengidentifikasi komponen dan perangkat yang dibutuhkan untuk membangun jaringan komputer,CPMK43,grouped
+31,CPMK27,ST037,Jaringan Komputer II,4,4,Mahasiswa mampu menganalisis fungsi dari komponen yang berkaitan dengan jaringan komputer;,CPMK27,
+32,CPMK28,ST037,Jaringan Komputer II,4,4,Mahasiswa mampu mengkonfigurasi sistem jaringan komputer sesuai kebutuhan pengguna,CPMK28,
+33,CPMK42,ST037,Jaringan Komputer II,4,4,Mahasiswa mampu menjelaskan tentang metodologi dalam membangun jaringan komputer,CPMK42,grouped
+34,CPMK03,ST045,Kecerdasan Buatan,4,2,Mahasiswa memiliki sikap tanggung jawab dengan membangun integritas profesional yang berkomitmen terhadap nilai-nilai etika;,CPMK03,
+35,CPMK21,ST045,Kecerdasan Buatan,4,2,Mahasiswa mampu menerapkan metode analisis data;,CPMK21,
+36,CPMK22,ST045,Kecerdasan Buatan,4,2,Mahasiswa mampu menerapkan metode pengolahan data;,CPMK22,
+37,CPMK35,ST045,Kecerdasan Buatan,4,2,Mahasiswa Mampu menerapkan metode analisis sistem.,CPMK35,grouped
+38,CPMK16,ST084,Pemrograman Web,4,4,Mahasiswa mampu merancang perangkat lunak pada berbagai platform digital,CPMK16,
+39,CPMK18,ST084,Pemrograman Web,4,4,Mahasisiwa mampu menganalisis kebutuhan industri atau masyakarat,CPMK18,
+40,CPMK37,ST084,Pemrograman Web,4,4,Mahasiswa mampu menerapkan metode perancangan perangkat lunak.,CPMK37,
+41,CPMK38,ST084,Pemrograman Web,4,4,Mahasiswa mampu menganalisis platform yang sesuai untuk kebutuhan industri atau masyarakat,CPMK38,grouped
+42,CPMK01,ST090,Pend. Kewarganegaraan,4,2,Mahasiswa mengamalkan ketaqwaan kepada Tuhan YME melalui sikap peduli serta mampu mengulang proses belajar seumur hidup (learning culture);,CPMK01,
+43,CPMK03,ST090,Pend. Kewarganegaraan,4,2,Mahasiswa memiliki sikap tanggung jawab dengan membangun integritas profesional yang berkomitmen terhadap nilai-nilai etika;,CPMK03,grouped
+44,CPMK11,ST091,Analisis dan Desain Sistem Informasi,4,4,Mahasiswa mampu menghasilkan produk ekonomi kreatif digital dalam bidang informatika,CPMK11,
+45,CPMK18,ST091,Analisis dan Desain Sistem Informasi,4,4,Mahasisiwa mampu menganalisis kebutuhan industri atau masyakarat,CPMK18,
+46,CPMK38,ST091,Analisis dan Desain Sistem Informasi,4,4,Mahasiswa mampu menganalisis platform yang sesuai untuk kebutuhan industri atau masyarakat,CPMK38,grouped
+47,CPMK21,ST092,Aljabar Linear dan Matriks,4,2,Mahasiswa mampu menerapkan metode analisis data;,CPMK21,
+48,CPMK22,ST092,Aljabar Linear dan Matriks,4,2,Mahasiswa mampu menerapkan metode pengolahan data;,CPMK22,grouped
+49,CPMK32,ST114,Multimedia Lanjut,4,4,mahasiswa mampu membuat produk digital.,CPMK32,
+50,CPMK33,ST114,Multimedia Lanjut,4,4,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+51,CPMK45,ST114,Multimedia Lanjut,4,4,mahasiswa mampu menguraikan prinsip-prinsip multimedia,CPMK45,grouped
+52,CPMK15,ST116,Pemrograman Basis Data,4,4,Mahasiswa mampu menganalisis perangkat lunak pada berbagai platform digital,CPMK15,
+53,CPMK16,ST116,Pemrograman Basis Data,4,4,Mahasiswa mampu merancang perangkat lunak pada berbagai platform digital,CPMK16,
+54,CPMK38,ST116,Pemrograman Basis Data,4,4,Mahasiswa mampu menganalisis platform yang sesuai untuk kebutuhan industri atau masyarakat,CPMK38,grouped
+55,CPMK04,ST129,Riset Operasi,4,2,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+56,CPMK21,ST129,Riset Operasi,4,2,Mahasiswa mampu menerapkan metode analisis data;,CPMK21,grouped
+57,CPMK21,ST152,Big Data & Predictive Analytics,4,4,Mahasiswa mampu menerapkan metode analisis data;,CPMK21,
+58,CPMK22,ST152,Big Data & Predictive Analytics,4,4,Mahasiswa mampu menerapkan metode pengolahan data;,CPMK22,grouped
+59,CPMK06,ST050,Managemen Strategik,6,2,Mahasiswa menerapkan sikap profesional memimpin dalam tim dengan penuh tanggung jawab terhadap pekerjaannya;,CPMK06,
+60,CPMK07,ST050,Managemen Strategik,6,2,Mahasiswa mengimplementasikan profesionalisme dalam menyesuaikan diri pada berbagai kegiatan secara simultan diberbagai kondisi:,CPMK07,
+61,CPMK08,ST050,Managemen Strategik,6,2,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,grouped
+62,CPMK01,ST082,Kecakapan Antar personal,6,2,Mahasiswa mengamalkan ketaqwaan kepada Tuhan YME melalui sikap peduli serta mampu mengulang proses belajar seumur hidup (learning culture);,CPMK01,
+63,CPMK02,ST082,Kecakapan Antar personal,6,2,Mahasiswa memiliki sikap saling menghargai dengan menjalin kerja sama dengan individu yang memiliki latar belakang sosial dan budaya yang beragam (carring culture),CPMK02,
+64,CPMK04,ST082,Kecakapan Antar personal,6,2,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+65,CPMK07,ST082,Kecakapan Antar personal,6,2,Mahasiswa mengimplementasikan profesionalisme dalam menyesuaikan diri pada berbagai kegiatan secara simultan diberbagai kondisi:,CPMK07,grouped
+66,CPMK08,ST087,Manajemen Sumber Daya Teknologi Informasi,6,2,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,
+67,CPMK09,ST087,Manajemen Sumber Daya Teknologi Informasi,6,2,Mahasiswa mampu menerapkan ilmu pengetahuan bidang informatika untuk menyelesaikan masalah pada industri,CPMK09,
+68,CPMK41,ST087,Manajemen Sumber Daya Teknologi Informasi,6,2,Mahasiswa mampu menerapkan teknik pengolahan data untuk menyelesaikan masalah,CPMK41,grouped
+69,CPMK04,ST096,Metodologi Penelitian,6,2,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+70,CPMK12,ST096,Metodologi Penelitian,6,2,Mahasiswa mampu mendokumentasikan pemikiran dengan baik,CPMK12,
+71,CPMK13,ST096,Metodologi Penelitian,6,2,Mahasiswa mampu mengevaluasi pemikiran dan hasil karya dengan baik,CPMK13,grouped
+72,CPMK32,ST126,Film Kartun 3D,6,4,mahasiswa mampu membuat produk digital.,CPMK32,
+73,CPMK33,ST126,Film Kartun 3D,6,4,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+74,CPMK45,ST126,Film Kartun 3D,6,4,mahasiswa mampu menguraikan prinsip-prinsip multimedia,CPMK45,grouped
+75,CPMK30,ST133,Keamanan Jaringan,6,4,Mahasiswa mampu menerapkan konsep keamanan jaringan sesuai kebutuhan pengguna,CPMK30,
+76,CPMK42,ST133,Keamanan Jaringan,6,4,Mahasiswa mampu menjelaskan tentang metodologi dalam membangun jaringan komputer,CPMK42,grouped
+77,CPMK24,ST143,Perancangan Jaringan,6,4,Mahasiswa mampu menerapkan metodologi pengembangan sistem jaringan komputer;,CPMK24,
+78,CPMK28,ST143,Perancangan Jaringan,6,4,Mahasiswa mampu mengkonfigurasi sistem jaringan komputer sesuai kebutuhan pengguna,CPMK28,
+79,CPMK42,ST143,Perancangan Jaringan,6,4,Mahasiswa mampu menjelaskan tentang metodologi dalam membangun jaringan komputer,CPMK42,
+80,CPMK44,ST143,Perancangan Jaringan,6,4,Mahasiswa mampu menguraikan konsep jaringan komputer sesuai kebutuhan pengguna,CPMK44,grouped
+81,CPMK32,ST144,Media Interaktif,6,2,mahasiswa mampu membuat produk digital.,CPMK32,
+82,CPMK33,ST144,Media Interaktif,6,2,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+83,CPMK34,ST144,Media Interaktif,6,2,mahasiswa mampu menyelesaikan masalah di masyarakat dengan produk digital,CPMK34,grouped
+84,CPMK04,ST155,Digital Business,6,2,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+85,CPMK07,ST155,Digital Business,6,2,Mahasiswa mengimplementasikan profesionalisme dalam menyesuaikan diri pada berbagai kegiatan secara simultan diberbagai kondisi:,CPMK07,
+86,CPMK09,ST155,Digital Business,6,2,Mahasiswa mampu menerapkan ilmu pengetahuan bidang informatika untuk menyelesaikan masalah pada industri,CPMK09,
+87,CPMK11,ST155,Digital Business,6,2,Mahasiswa mampu menghasilkan produk ekonomi kreatif digital dalam bidang informatika,CPMK11,grouped
+88,CPMK08,ST165,Proyek Pemrograman,6,4,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,
+89,CPMK11,ST165,Proyek Pemrograman,6,4,Mahasiswa mampu menghasilkan produk ekonomi kreatif digital dalam bidang informatika,CPMK11,
+90,CPMK16,ST165,Proyek Pemrograman,6,4,Mahasiswa mampu merancang perangkat lunak pada berbagai platform digital,CPMK16,
+91,CPMK38,ST165,Proyek Pemrograman,6,4,Mahasiswa mampu menganalisis platform yang sesuai untuk kebutuhan industri atau masyarakat,CPMK38,grouped
+92,CPMK09,ST166,Proyek Game,6,4,Mahasiswa mampu menerapkan ilmu pengetahuan bidang informatika untuk menyelesaikan masalah pada industri,CPMK09,
+93,CPMK32,ST166,Proyek Game,6,4,mahasiswa mampu membuat produk digital.,CPMK32,
+94,CPMK47,ST166,Proyek Game,6,4,Mahasiswa mampu menjelaskan jenis-jenis produk digital,CPMK47,grouped
+95,CPMK08,ST167,Proyek Data Mining,6,4,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,
+96,CPMK18,ST167,Proyek Data Mining,6,4,Mahasisiwa mampu menganalisis kebutuhan industri atau masyakarat,CPMK18,
+97,CPMK21,ST167,Proyek Data Mining,6,4,Mahasiswa mampu menerapkan metode analisis data;,CPMK21,
+98,CPMK22,ST167,Proyek Data Mining,6,4,Mahasiswa mampu menerapkan metode pengolahan data;,CPMK22,grouped
+99,CPMK32,ST171,VIDEO DAN BROADCASTING,6,4,mahasiswa mampu membuat produk digital.,CPMK32,
+100,CPMK33,ST171,VIDEO DAN BROADCASTING,6,4,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+101,CPMK45,ST171,VIDEO DAN BROADCASTING,6,4,mahasiswa mampu menguraikan prinsip-prinsip multimedia,CPMK45,grouped
+102,CPMK05,ST175,Komunikasi & Negosiasi,6,2,Mahasiswa membangun integritas dengan cara menjalin kerja sama dalam tim untuk menyelesaikan pekerjaan,CPMK05,
+103,CPMK08,ST175,Komunikasi & Negosiasi,6,2,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,grouped
+104,CPMK08,ST178,Mixed Reality,6,4,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,
+106,CPMK10,ST178,Mixed Reality,6,4,Mahasiswa mampu memecahkan masalah pada industri secara inovatif,CPMK10,
+108,CPMK22,ST178,Mixed Reality,6,4,Mahasiswa mampu menerapkan metode pengolahan data;,CPMK22,
+110,CPMK47,ST178,Mixed Reality,6,4,Mahasiswa mampu menjelaskan jenis-jenis produk digital,CPMK47,grouped
+112,CPMK08,ST176,Tugas Media Interaktif,8,4,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,
+113,CPMK11,ST176,Tugas Media Interaktif,8,4,Mahasiswa mampu menghasilkan produk ekonomi kreatif digital dalam bidang informatika,CPMK11,
+114,CPMK33,ST176,Tugas Media Interaktif,8,4,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+115,CPMK45,ST176,Tugas Media Interaktif,8,4,mahasiswa mampu menguraikan prinsip-prinsip multimedia,CPMK45,grouped
+116,CPMK33,ST177,Tugas Video & Spesial Efek,8,4,mahasiswa mampu menerapkan prinsip prinsip multimedia pada produk digital,CPMK33,
+117,CPMK47,ST177,Tugas Video & Spesial Efek,8,4,Mahasiswa mampu menjelaskan jenis-jenis produk digital,CPMK47,
+118,CPMK32,ST177,Tugas Video & Spesial Efek,8,4,mahasiswa mampu membuat produk digital.,CPMK32,grouped
+119,CPMK04,ST179,Digi Preneurship,8,4,Mahasiswa mengamalkan sikap mental positif  melalui komunikasi lisan dan tulisan yang berkaitan dengan aspek teknis maupun non-teknis;,CPMK04,
+120,CPMK35,ST179,Digi Preneurship,8,4,Mahasiswa Mampu menerapkan metode analisis sistem.,CPMK35,grouped
+121,CPMK05,ST052,Tugas Praktek,6,2,Mahasiswa mampu menjalin kerja sama dalam tim untuk menyelesaikan pekerjaan;,CPMK05,
+122,CPMK08,ST052,Tugas Praktek,6,2,Mahasiswa mampu menyampaikan pandangan atau gagasan yang kritis dan profesional dalam menyelesaikan masalah pada industri,CPMK08,
+123,CPMK12,ST052,Tugas Praktek,6,2,Mahasiswa mampu mendokumentasikan pemikiran dengan baik,CPMK12,grouped

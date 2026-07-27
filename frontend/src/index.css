@@ -19,3 +19,20 @@ body { margin: 0; overscroll-behavior: none; }
 .animate-float-reverse { animation: float 7s ease-in-out infinite reverse -1s; }
 .acc-stamp { transform: rotate(-15deg); border: 4px double #ba1a1a; color: #ba1a1a; padding: 2px 8px; font-weight: 900; font-size: 12px; text-transform: uppercase; }
 .journey-map-bg { background-image: radial-gradient(circle at 2px 2px, #c3c6d7 1px, transparent 0); background-size: 40px 40px; }
+
+/* Landing-page primary accent override. */
+body:has(.journey-map-bg) [class*="bg-[#004ac6]"] { background-color: #9f149f !important; }
+body:has(.journey-map-bg) [class*="text-[#004ac6]"] { color: #9f149f !important; }
+body:has(.journey-map-bg) [class*="border-[#004ac6]"] { border-color: #9f149f !important; }
+body:has(.journey-map-bg) [class*="shadow-[16px_16px_0_#004ac6]"] { --tw-shadow-color: #9f149f !important; }
+body:has(.journey-map-bg) [class*="hover:bg-[#004ac6]"]:hover { background-color: #9f149f !important; }
+body:has(.journey-map-bg) [class*="bg-[#2563eb]"] { background-color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="text-[#2563eb]"] { color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="border-[#2563eb]"] { border-color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="bg-[#64a8fe]"] { background-color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="text-[#64a8fe]"] { color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="bg-[#5595ff]"] { background-color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="text-[#0060ac]"] { color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="text-[#a4c9ff]"] { color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="bg-blue-600"] { background-color: #a862a8 !important; }
+body:has(.journey-map-bg) [class*="hover:bg-[#004ac6]"]:hover { background-color: #9f149f !important; }
