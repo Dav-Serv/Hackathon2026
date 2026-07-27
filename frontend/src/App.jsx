@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
+import StudentDashboard from './components/StudentDashboard.jsx'
 
 const icons = {
   logo: 'grading',
@@ -33,29 +35,23 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
-function LoginPage({ onBack, onRegister }) {
+function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
   const handleSubmit = (event) => {
     event.preventDefault()
     setIsLoading(true)
-    window.setTimeout(() => setIsLoading(false), 2000)
-  }
-
-  const handleMouseMove = (event) => {
-    if (window.innerWidth < 768) return
-    setTilt({
-      x: (window.innerWidth / 2 - event.clientX) / 80,
-      y: (window.innerHeight / 2 - event.clientY) / 80,
-    })
+    window.setTimeout(() => {
+      setIsLoading(false)
+      if (onLoginSuccess) onLoginSuccess()
+    }, 1000)
   }
 
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]" onMouseMove={handleMouseMove}>
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg className="absolute left-10 top-10 h-32 w-32 text-[#004ac6] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
         <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#0060ac] opacity-20" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
@@ -79,7 +75,7 @@ function LoginPage({ onBack, onRegister }) {
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#004ac6] hover:underline">Lupa?</button></div>
             <button disabled={isLoading} className="group flex items-center justify-center gap-2 rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
           </form>
-          <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button><button type="button" aria-label="Hub" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><Icon className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-base text-white">hub</Icon></button></div></div>
+          <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button></div></div>
         </div>
         <div className="mt-4 flex justify-between px-4 text-[10px] font-bold uppercase tracking-widest text-[#737686]"><span>[ Status Sistem: Optimal ]</span><span>v2.4.0_stable</span></div>
       </div>
@@ -92,8 +88,31 @@ function App() {
   const [page, setPage] = useState('landing')
   const [activeNav, setActiveNav] = useState('beranda')
 
+  useEffect(() => {
+    if (page !== 'landing') return undefined
+
+    const sections = ['beranda', 'fitur', 'alur']
+      .map((id) => document.getElementById(id))
+      .filter(Boolean)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleSection = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+
+        if (visibleSection) setActiveNav(visibleSection.target.id)
+      },
+      { threshold: [0.35, 0.5, 0.75], rootMargin: '-80px 0px -25% 0px' },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [page])
+
   if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} />
   if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} />
+  if (page === 'dashboard') return <StudentDashboard onLogout={() => setPage('landing')} />
 
   const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#004ac6] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
 
@@ -118,6 +137,9 @@ function App() {
 
       <main>
         <section id="beranda" className="journey-map-bg relative flex min-h-[860px] items-center justify-center overflow-hidden border-b-4 border-[#191b23] px-5 py-36 md:px-16">
+          <div className="absolute inset-0 z-0 opacity-70" aria-hidden="true">
+            <CursorGrid cellSize={70} color="#5595ff" radius={140} falloff="smooth" holdTime={400} fadeDuration={800} lineWidth={1.2} maxOpacity={1} fillOpacity={0} gridOpacity={0} cellRadius={0} clickPulse={false} pulseSpeed={600} />
+          </div>
           <div className="pointer-events-none absolute inset-0 opacity-10"><svg className="h-full w-full" viewBox="0 0 1440 900" fill="none"><path d="M250 220Q400 200 550 280M850 250Q1050 280 1150 450M1150 600Q1100 750 850 780M550 780Q350 780 250 650" stroke="#191b23" strokeDasharray="8 8" strokeWidth="3" /></svg></div>
           <div onClick={() => setSelectedStage('submit')} className={`${stageClass('submit')} animate-float left-[4%] top-[130px] rotate-[-5deg] md:left-[8%]`}><div className="w-48 border-[3px] border-[#191b23] bg-yellow-200 p-4 shadow-[6px_6px_0_#191b23]"><h4 className="text-xs font-bold uppercase">Step 01</h4><p className="mt-1 text-base font-semibold leading-tight">Pengajuan Magang</p><div className="mt-4 flex items-center gap-2 border-t-2 border-[#191b23]/20 pt-2 text-[10px] font-bold"><Icon className="text-xs text-green-600">check_circle</Icon> Uploaded</div></div></div>
           <div onClick={() => setSelectedStage('dosen')} className={`${stageClass('dosen')} animate-float-delayed right-[4%] top-[150px] rotate-[3deg] md:right-[8%]`}><div className="relative w-56 border-4 border-[#191b23] bg-white p-6 shadow-[8px_8px_0_#2563eb]"><div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border-2 border-[#191b23] bg-[#2563eb] text-white"><Icon>how_to_reg</Icon></div><p className="text-lg font-semibold leading-tight">Validasi Dosen</p><span className="acc-stamp absolute -bottom-4 -right-2">Approved</span></div></div>
