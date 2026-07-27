@@ -1,8 +1,14 @@
+import { useState } from 'react'
+
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
+
 function RegisterMahasiswa({ onBack, onLogin }) {
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   const handleSubmit = (event) => {
     event.preventDefault()
   }
@@ -111,29 +117,47 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   <label className="ml-1 block text-sm font-bold tracking-[0.05em]" htmlFor="password">
                     Password
                   </label>
-                  <input
-                    required
-                    minLength={6}
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
-                    id="password"
-                    name="password"
-                    placeholder="••••••••"
-                    type="password"
-                  />
+                  <div className="relative">
+                    <input
+                      required
+                      minLength={6}
+                      className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                      id="password"
+                      name="password"
+                      placeholder="••••••••"
+                      type={showPassword ? 'text' : 'password'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((value) => !value)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#737686] hover:text-[#9f149f] transition-colors"
+                    >
+                      <Icon className="text-xl">{showPassword ? 'visibility_off' : 'visibility'}</Icon>
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="ml-1 block text-sm font-bold tracking-[0.05em]" htmlFor="konfirmasi-password">
                     Konfirmasi Password
                   </label>
-                  <input
-                    required
-                    minLength={6}
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
-                    id="konfirmasi-password"
-                    name="konfirmasiPassword"
-                    placeholder="••••••••"
-                    type="password"
-                  />
+                  <div className="relative">
+                    <input
+                      required
+                      minLength={6}
+                      className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                      id="konfirmasi-password"
+                      name="konfirmasiPassword"
+                      placeholder="••••••••"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((value) => !value)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#737686] hover:text-[#9f149f] transition-colors"
+                    >
+                      <Icon className="text-xl">{showConfirmPassword ? 'visibility_off' : 'visibility'}</Icon>
+                    </button>
+                  </div>
                 </div>
               </div>
 

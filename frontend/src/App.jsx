@@ -41,7 +41,6 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const [errorMessage, setErrorMessage] = useState('')
 
 
@@ -59,16 +58,8 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
 
   }
 
-  const handleMouseMove = (event) => {
-    if (window.innerWidth < 768) return
-    setTilt({
-      x: (window.innerWidth / 2 - event.clientX) / 80,
-      y: (window.innerHeight / 2 - event.clientY) / 80,
-    })
-  }
-
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]" onMouseMove={handleMouseMove}>
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
         <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
@@ -78,16 +69,16 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
         <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#f3dff3] p-2 text-center text-xs font-bold opacity-50 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
       </div>
 
-      <div className="relative z-10 w-full max-w-lg" style={{ perspective: '1000px' }}>
-        <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] p-8 shadow-[8px_8px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
+      <div className="relative z-10 w-full max-w-lg">
+        <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] p-8 shadow-[8px_8px_0_#191b23]">
           <button type="button" onClick={onBack} className="mb-6 inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"><Icon className="text-base">arrow_back</Icon> Kembali ke Beranda</button>
           <div className="mb-8"><h1 className="mb-2 text-[32px] font-bold leading-tight md:text-[40px] md:leading-tight">OBE GradeSync</h1><p className="text-base leading-[1.6] text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Email atau NIM
-              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
+              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
             </label>
             <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Kata Sandi
-              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#9f149f]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
+              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#737686] hover:text-[#9f149f] transition-colors"><Icon className="text-xl">{showPassword ? 'visibility_off' : 'visibility'}</Icon></button></div>
             </label>
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#9f149f] hover:underline">Lupa?</button></div>
 
@@ -99,14 +90,15 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
             <p className="text-[#434655]">
               Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#9f149f] hover:underline">DAFTAR</button>
             </p>
-            <div className="flex gap-4">
-              <button type="button" aria-label="Google" className="flex items-center justify-center rounded-xl border-2 border-[#191b23] bg-white p-3 shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#f3dff3] hover:shadow-[4px_4px_0_#191b23] active:translate-x-0 active:translate-y-0 active:shadow-none">
+            <div className="w-full">
+              <button type="button" aria-label="Google" className="flex w-full items-center justify-center gap-3 rounded-2xl border-[3px] border-[#191b23] bg-white py-4 text-lg font-semibold shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#f3dff3] hover:shadow-[10px_10px_0_#191b23] active:translate-x-0 active:translate-y-0 active:shadow-none">
                 <svg className="h-6 w-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
                 </svg>
+                <span>Masuk dengan Google</span>
               </button>
             </div>
           </div>
@@ -191,7 +183,7 @@ function App() {
 
         <section id="alur" className="bg-[#e1e2ed] px-5 py-20 md:px-16"><div className="mx-auto max-w-7xl"><h2 className="mb-14 text-center text-3xl font-bold uppercase italic md:text-5xl">Alur Sistem Konversi</h2><div className="relative flex flex-col items-center justify-between gap-8 md:flex-row"><div className="absolute left-0 top-10 hidden w-full border-t-4 border-dashed border-[#191b23] md:block" />{steps.map(([title, text, icon], index) => <div key={title} className="relative z-10 flex w-full flex-col items-center text-center md:w-1/5"><div className={`mb-5 flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#191b23] shadow-[4px_4px_0_#191b23] ${index === 4 ? 'bg-[#2563eb] text-white' : 'bg-white'} transition hover:bg-[#004ac6] hover:text-white`}><Icon className="text-3xl">{icon}</Icon></div><div className={`rounded-lg border-[3px] border-[#191b23] p-4 shadow-[4px_4px_0_#191b23] ${index === 4 ? 'bg-[#004ac6] text-white' : 'bg-white'}`}><h4 className="text-xs font-bold tracking-wide">{title}</h4><p className="mt-2 text-xs opacity-70">{text}</p></div></div>)}</div></div></section>
 
-        <section id="daftar" className="flex items-center justify-center bg-[#004ac6] px-5 py-24 md:px-16"><div className="relative w-full max-w-4xl overflow-hidden rounded-[36px] border-[6px] border-[#191b23] bg-white p-10 text-center shadow-[16px_16px_0_#191b23] md:p-20"><div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border-4 border-[#191b23] bg-[#64a8fe] opacity-50" /><div className="relative z-10"><h2 className="text-4xl font-bold md:text-6xl">Siap Mengelola Konversi Nilai Secara Digital?</h2><p className="mx-auto mb-10 mt-6 max-w-2xl text-lg leading-relaxed text-[#434655]">Bergabunglah dengan ratusan mahasiswa AMIKOM lainnya yang telah merasakan kemudahan konversi nilai berbasis OBE.</p><div className="flex flex-col justify-center gap-5 sm:flex-row"><button type="button" onClick={() => setPage('login')} className="rounded-full border-4 border-[#191b23] bg-[#004ac6] px-10 py-4 text-lg font-bold text-white shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">DAFTAR SEKARANG</button><button type="button" className="rounded-full border-4 border-[#191b23] bg-[#faf8ff] px-10 py-4 text-lg font-bold shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">HUBUNGI KAMI</button></div></div></div></section>
+        <section id="daftar" className="purple-grid-bg flex items-center justify-center px-5 py-24 md:px-16"><div className="relative w-full max-w-4xl overflow-hidden rounded-[36px] border-[6px] border-[#191b23] bg-white p-10 text-center shadow-[16px_16px_0_#191b23] md:p-20"><div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border-4 border-[#191b23] bg-[#64a8fe] opacity-50" /><div className="relative z-10"><h2 className="text-4xl font-bold md:text-6xl">Siap Mengelola Konversi Nilai Secara Digital?</h2><p className="mx-auto mb-10 mt-6 max-w-2xl text-lg leading-relaxed text-[#434655]">Bergabunglah dengan ratusan mahasiswa AMIKOM lainnya yang telah merasakan kemudahan konversi nilai berbasis OBE.</p><div className="flex flex-col justify-center gap-5 sm:flex-row"><button type="button" onClick={() => setPage('login')} className="rounded-full border-4 border-[#191b23] bg-[#004ac6] px-10 py-4 text-lg font-bold text-white shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">DAFTAR SEKARANG</button><button type="button" className="rounded-full border-4 border-[#191b23] bg-[#faf8ff] px-10 py-4 text-lg font-bold shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">HUBUNGI KAMI</button></div></div></div></section>
       </main>
 
       <footer className="border-t-4 border-[#191b23] bg-[#ededf9] px-5 py-16 md:px-16"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 md:flex-row"><div className="max-w-md"><div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#191b23] bg-[#004ac6] text-white"><Icon>school</Icon></span><span className="text-2xl font-semibold">GradeFlow OBE</span></div><p className="leading-relaxed text-[#434655]">Platform manajemen Outcome-Based Education terpadu untuk efisiensi penilaian akademik dan pelaporan capaian lulusan secara presisi.</p></div><div className="grid grid-cols-2 gap-10"><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Kontak</b><a className="text-[#434655] hover:text-[#004ac6]" href="mailto:info@amikom.ac.id">info@amikom.ac.id</a><a className="text-[#434655] hover:text-[#004ac6]" href="tel:+62274884201">+62 274 884201</a></div><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Alamat</b><span className="text-[#434655]">Jl. Ring Road Utara,<br />Condongcatur, Yogyakarta 55283</span></div></div></div><div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-4 border-t-2 border-[#191b23]/20 pt-5 text-sm text-[#434655] md:flex-row"><span>© 2024 Universitas AMIKOM Yogyakarta. All rights reserved.</span><div className="flex gap-5"><a href="#daftar">Privacy Policy</a><a href="#daftar">Terms of Service</a></div></div></footer>
