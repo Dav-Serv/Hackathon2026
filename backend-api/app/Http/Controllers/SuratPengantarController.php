@@ -18,7 +18,7 @@ class SuratPengantarController extends Controller
     public function store(Request $request, Magang $magang): JsonResponse
     {
         abort_unless($magang->mahasiswa_id === $request->user()->id, 403);
-        $data = $request->validate(['file' => ['required', 'file', 'mimes:pdf', 'max:10240']]);
+        $data = $request->validate(['file' => ['required', 'file', 'mimes:pdf,docx', 'max:10240', 'mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document']]);
         $surat = SuratPengantar::updateOrCreate(['magang_id' => $magang->id], ['file_path' => $data['file']->store('surat-pengantar/'.$request->user()->id, 'supabase'), 'status' => 'diajukan']);
 
         return response()->json($surat, 201);
