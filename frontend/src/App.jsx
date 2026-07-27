@@ -66,8 +66,15 @@ function LoginPage({ onBack, onRegister }) {
       </div>
 
       <div className="relative z-10 w-full max-w-md" style={{ perspective: '1000px' }}>
-        <div className="rounded-xl border-4 border-[#191b23] bg-white p-8 shadow-[12px_12px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
-          <button type="button" onClick={onBack} className="mb-6 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#004ac6] hover:underline"><Icon className="text-base">arrow_back</Icon> Kembali</button>
+        <div className="min-h-[760px] rounded-xl border-4 border-[#191b23] bg-white p-8 shadow-[12px_12px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
+          <button
+            className="mb-6 inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            onClick={onBack}
+            type="button"
+          >
+            <Icon className="text-base">arrow_back</Icon>
+            <span>Kembali ke Beranda</span>
+          </button>
           <div className="mb-8"><h1 className="mb-2 text-4xl font-bold">OBE GradeSync</h1><p className="leading-relaxed text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Email atau NIM
