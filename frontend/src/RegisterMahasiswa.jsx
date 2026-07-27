@@ -24,7 +24,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
             </div>
 
             <div>
-              <h1 className="mb-2 text-[32px] font-bold leading-tight md:text-[40px] md:leading-tight">
+              <h1 className="mb-2 text-4xl font-bold leading-tight md:text-[40px] md:leading-tight">
                 Registrasi Mahasiswa
               </h1>
               <p className="text-base leading-[1.6] text-[#434655]">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import api, { getApiError } from './lib/api'
 import CursorGrid from './components/CursorGrid'
-import RegisterMahasiswa from './RegisterPage.jsx/RegisterMahasiswa.jsx'
+import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
 
 const icons = {
@@ -41,7 +41,9 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
   const [errorMessage, setErrorMessage] = useState('')
+
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -57,8 +59,16 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
 
   }
 
+  const handleMouseMove = (event) => {
+    if (window.innerWidth < 768) return
+    setTilt({
+      x: (window.innerWidth / 2 - event.clientX) / 80,
+      y: (window.innerHeight / 2 - event.clientY) / 80,
+    })
+  }
+
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]" onMouseMove={handleMouseMove}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg className="absolute left-10 top-10 h-32 w-32 text-[#004ac6] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
         <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#0060ac] opacity-20" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
@@ -68,20 +78,23 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
         <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#dbe1ff] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-xl border-4 border-[#191b23] bg-white p-8 shadow-[12px_12px_0_#191b23]">
-          <button type="button" onClick={onBack} className="mb-6 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#004ac6] hover:underline"><Icon className="text-base">arrow_back</Icon> Kembali</button>
-          <div className="mb-8"><h1 className="mb-2 text-4xl font-bold">OBE GradeSync</h1><p className="leading-relaxed text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
+      <div className="relative z-10 w-full max-w-lg" style={{ perspective: '1000px' }}>
+        <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] p-8 shadow-[8px_8px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
+          <button type="button" onClick={onBack} className="mb-6 inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"><Icon className="text-base">arrow_back</Icon> Kembali ke Beranda</button>
+          <div className="mb-8"><h1 className="mb-2 text-[32px] font-bold leading-tight md:text-[40px] md:leading-tight">OBE GradeSync</h1><p className="text-base leading-[1.6] text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Email
-              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full border-[3px] border-[#191b23] bg-white p-4 pr-12 outline-none transition focus:border-[#004ac6] focus:shadow-[4px_4px_0_#2563eb]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
+            <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Email atau NIM
+              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
             </label>
-            <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Kata Sandi
-              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full border-[3px] border-[#191b23] bg-white p-4 pr-24 outline-none transition focus:border-[#004ac6] focus:shadow-[4px_4px_0_#2563eb]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#004ac6]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
+            <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Kata Sandi
+              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#004ac6]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
             </label>
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#004ac6] hover:underline">Lupa?</button></div>
+
+            <button disabled={isLoading} className="group flex items-center justify-center gap-2 rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
             {errorMessage && <p role="alert" className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">{errorMessage}</p>}
             <button disabled={isLoading} className="flex items-center justify-center gap-2 border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[8px_8px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? 'MEMPROSES...' : <>MASUK <Icon>arrow_forward</Icon></>}</button>
+
           </form>
           <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button></div></div>
         </div>
