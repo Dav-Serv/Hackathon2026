@@ -41,7 +41,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                 </label>
                 <input
                   required
-                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                   id="nama-lengkap"
                   name="namaLengkap"
                   placeholder="Masukkan nama lengkap Anda"
@@ -56,7 +56,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   </label>
                   <input
                     required
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                     id="nim-nip"
                     name="nimNip"
                     placeholder="Nomor Induk"
@@ -69,7 +69,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   </label>
                   <input
                     required
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                     id="nomor-hp"
                     name="nomorHp"
                     placeholder="0812xxxx"
@@ -84,7 +84,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                 </label>
                 <input
                   required
-                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                   id="email"
                   name="email"
                   placeholder="nama@email.com"
@@ -98,7 +98,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                 </label>
                 <textarea
                   required
-                  className="w-full resize-none rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                  className="w-full resize-none rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                   id="alamat"
                   name="alamat"
                   placeholder="Masukkan alamat lengkap"
@@ -114,7 +114,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   <input
                     required
                     minLength={6}
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                     id="password"
                     name="password"
                     placeholder="••••••••"
@@ -128,7 +128,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
                   <input
                     required
                     minLength={6}
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]"
+                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                     id="konfirmasi-password"
                     name="konfirmasiPassword"
                     placeholder="••••••••"
@@ -138,7 +138,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
               </div>
 
               <button
-                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#861086] hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none"
                 type="submit"
               >
                 Daftar Sekarang
@@ -149,7 +149,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
               <p className="text-base leading-[1.6] text-[#434655]">
                 Sudah punya akun?{' '}
                 <button
-                  className="font-bold text-[#004ac6] underline decoration-2 underline-offset-4 transition-colors hover:text-[#191b23]"
+                  className="font-bold text-[#9f149f] underline decoration-2 underline-offset-4 transition-colors hover:text-[#191b23]"
                   onClick={onLogin}
                   type="button"
                 >

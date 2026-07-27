@@ -163,6 +163,19 @@ function StudentDashboard({ user, onLogout }) {
     showToast('Usulan konversi berhasil diajukan ke DPL!')
   }
 
+  const demoApproveUsulan = (approve = true) => {
+    setDb(prev => ({
+      ...prev,
+      usulan: {
+        ...prev.usulan,
+        status: approve ? 'disetujui' : 'revisi',
+        catatanDpl: approve ? '' : 'Deskripsi rencana aktivitas pada CPMK-1 Proyek Web kurang detail.'
+      }
+    }))
+    showToast(approve ? 'Usulan disetujui oleh DPL! (Simulasi)' : 'Usulan dikembalikan untuk revisi oleh DPL (Simulasi)', approve ? 'success' : 'error')
+  }
+
+
   // --- 3. Aksi Klaim Konversi ---
   const [klaimGeneral, setKlaimGeneral] = useState({
     logbookFile: 'logbook_magang_final.pdf',
@@ -202,6 +215,69 @@ function StudentDashboard({ user, onLogout }) {
     }))
     showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
   }
+
+
+  const demoMitraEvaluation = (score = 90) => {
+    setDb(prev => ({
+      ...prev,
+      klaim: {
+        ...prev.klaim,
+        status: 'menunggu_review_dpl'
+      },
+      penilaian: {
+        ...prev.penilaian,
+        mitra: {
+          nilai: Number(score),
+          komentar: 'Sangat disiplin, hasil kerjanya melebihi ekspektasi tim frontend.',
+          submittedAt: new Date().toLocaleString()
+        }
+      }
+    }))
+    showToast(`Penilaian supervisor mitra masuk dengan nilai ${score}! (Simulasi)`)
+  }
+
+  const demoDplEvaluation = (score = 85) => {
+    setDb(prev => ({
+      ...prev,
+      klaim: {
+        ...prev.klaim,
+        status: 'disetujui'
+      },
+      penilaian: {
+        ...prev.penilaian,
+        dpl: {
+          nilaiAkademik: Number(score),
+          keputusan: 'setuju',
+          komentar: 'Laporan tersusun rapi, keselarasan CPMK terbukti dengan baik.',
+          submittedAt: new Date().toLocaleString()
+        }
+      }
+    }))
+    showToast(`Penilaian DPL masuk dengan nilai ${score}! Konversi nilai selesai. (Simulasi)`)
+  }
+
+  const resetAllDemo = () => {
+    localStorage.removeItem('gradeSync_db')
+    setDb(INITIAL_STATE)
+    setActiveTab('status')
+    setMagangForm({
+      mitraNama: INITIAL_STATE.magang.mitraNama,
+      mitraAlamat: INITIAL_STATE.magang.mitraAlamat,
+      mitraBidang: INITIAL_STATE.magang.mitraBidang,
+      posisi: INITIAL_STATE.magang.posisi,
+      periodeMulai: INITIAL_STATE.magang.periodeMulai,
+      periodeSelesai: INITIAL_STATE.magang.periodeSelesai,
+      dplId: INITIAL_STATE.magang.dplId,
+      supervisorNama: INITIAL_STATE.magang.supervisorNama,
+      supervisorEmail: INITIAL_STATE.magang.supervisorEmail,
+      supervisorHp: INITIAL_STATE.magang.supervisorHp,
+      proposalFile: INITIAL_STATE.magang.proposalFile,
+      buktiDiterimaFile: INITIAL_STATE.magang.buktiDiterimaFile
+    })
+    setDraftUsulanDetails([])
+    showToast('Database Demo direset ke kondisi awal!', 'info')
+  }
+
 
   // Utility to map score to letter grade
   const getLetterGrade = (score) => {
@@ -291,6 +367,7 @@ function StudentDashboard({ user, onLogout }) {
             <span className="tracking-tight uppercase">GradeSync</span>
             <button className="text-white hover:opacity-80" onClick={() => setIsSidebarOpen(false)}>
               <Icon>close</Icon>
+
             </button>
           </div>
 
@@ -418,6 +495,7 @@ function StudentDashboard({ user, onLogout }) {
                 ))}
               </div>
             </div>
+
           )}
 
           {/* ============================================================== */}
@@ -473,12 +551,14 @@ function StudentDashboard({ user, onLogout }) {
                         <label className="text-[10px] font-black uppercase text-gray-400">Bidang Usaha & Alamat</label>
                         <p className="font-semibold">{db.magang.mitraBidang}</p>
                         <p className="text-[11px] text-gray-500">{db.magang.mitraAlamat}</p>
+
                       </div>
                       <div>
                         <label className="text-[10px] font-black uppercase text-gray-400">Posisi Magang</label>
                         <p className="font-bold text-[#9f149f]">{db.magang.posisi}</p>
                       </div>
                       <div>
+
                         <label className="text-[10px] font-black uppercase text-gray-400">Periode Magang</label>
                         <p className="font-bold flex items-center gap-1 mt-0.5">
                           <Icon className="text-sm text-[#9f149f]">calendar_month</Icon>
@@ -941,6 +1021,7 @@ function StudentDashboard({ user, onLogout }) {
                         <Icon className="text-3xl text-red-500 mb-1">picture_as_pdf</Icon>
                         <div className="text-[10px]">Logbook Magang (PDF)</div>
                         <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.logbookFile}</div>
+
                       </div>
                       <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
                         <Icon className="text-3xl text-blue-500 mb-1">picture_as_pdf</Icon>
@@ -948,6 +1029,7 @@ function StudentDashboard({ user, onLogout }) {
                         <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.laporanFile}</div>
                       </div>
                       <div className="rounded-xl border-2 border-dashed border-[#191b23] p-4 text-center bg-slate-50">
+
                         <Icon className="text-3xl text-green-600 mb-1">workspace_premium</Icon>
                         <div className="text-[10px]">Sertifikat Magang (PDF)</div>
                         <div className="text-[9px] text-gray-400 mt-1 truncate">{klaimGeneral.sertifikatFile}</div>
@@ -1154,8 +1236,10 @@ function StudentDashboard({ user, onLogout }) {
                 {/* Profile Avatar Card */}
                 <div className="w-full md:w-72 shrink-0 space-y-6">
                   <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23] text-center space-y-4">
+
                     <div className="relative mx-auto w-28 h-28 rounded-full border-2 border-[#191b23] bg-purple-100 flex items-center justify-center shadow-[3px_3px_0_#191b23]">
                       <Icon className="text-5xl text-[#9f149f]">account_circle</Icon>
+
                     </div>
                     <div>
                       <h2 className="text-base font-bold">{profileForm.nama}</h2>
