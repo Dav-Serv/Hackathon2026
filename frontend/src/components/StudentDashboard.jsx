@@ -405,7 +405,7 @@ function StudentDashboard({ user, onLogout }) {
 
         {/* Logout Button (Moved to bottom of sidebar) */}
         <div className="p-4 border-t-3 border-[#191b23] bg-purple-50/50">
-          <button 
+          <button
             onClick={onLogout}
             className="flex items-center justify-center gap-2 w-full rounded-xl border-2 border-[#191b23] bg-[#191b23] py-2.5 text-xs font-bold text-white shadow-[3px_3px_0_#9f149f] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all duration-150"
           >
