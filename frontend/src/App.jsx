@@ -5,6 +5,7 @@ import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
 import DashboardDosen from './DashboardDPL.jsx'
 import DashboardAdminProdi from './DashboardAdminProdi.jsx'
+import DashboardKaprodi from './DashboardKaprodi.jsx'
 
 const icons = {
   logo: 'grading',
@@ -147,6 +148,9 @@ function App() {
     }
     if (authenticatedUser?.role === 'admin_prodi' || authenticatedUser?.role === 'admin') {
       return <DashboardAdminProdi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+    }
+    if (authenticatedUser?.role === 'kaprodi') {
+      return <DashboardKaprodi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
     }
     return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
   }
