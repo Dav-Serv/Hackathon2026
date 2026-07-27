@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from '../src/services/mockData'
+import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from './services/mockData'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
@@ -353,14 +353,14 @@ export default function DashboardDosen({ user, onLogout }) {
       {/* ============================================================== */}
       {/* COLLAPSIBLE LEFT SIDEBAR */}
       {/* ============================================================== */}
-      <aside className={`w-64 shrink-0 border-r-3 border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-screen fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      <aside className={`w-64 shrink-0 border-r-3 border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-screen fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col flex-1">
           {/* Header Brand */}
           <div className="bg-[#9f149f] border-b-3 border-[#191b23] h-16 flex items-center px-6 text-white font-bold text-xl justify-between">
             <span className="tracking-tight uppercase">DPL Core</span>
-            <button className="text-white hover:opacity-80 lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+            <button className="text-white hover:opacity-80" onClick={() => setIsSidebarOpen(false)}>
               <Icon>close</Icon>
             </button>
           </div>
@@ -395,27 +395,45 @@ export default function DashboardDosen({ user, onLogout }) {
           </nav>
         </div>
 
-        {/* Footer info in sidebar */}
-        <div className="p-4 border-t-3 border-[#191b23] bg-purple-50/50">
+        {/* Footer info in sidebar with Reset and Logout buttons */}
+        <div className="p-4 border-t-3 border-[#191b23] bg-purple-50/50 space-y-3">
           <div className="flex items-center gap-2 font-black text-[10px] uppercase tracking-wider text-[#9f149f]">
             <Icon className="text-base">verified_user</Icon>
             GradeSync DPL Portal
           </div>
           <div className="text-[9px] text-gray-500 mt-1">NIDN: 0628047901</div>
+          
+          <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
+            <button 
+              onClick={resetAllDemo}
+              className="flex items-center justify-center gap-1.5 w-full rounded-xl border-2 border-[#191b23] bg-yellow-200 py-2 text-xs font-bold shadow-[2.5px_2.5px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <Icon className="text-base">restart_alt</Icon>
+              <span>Reset Demo</span>
+            </button>
+            
+            <button 
+              onClick={onLogout}
+              className="flex items-center justify-center gap-1.5 w-full rounded-xl border-2 border-[#191b23] bg-[#191b23] py-2 text-xs font-bold text-white shadow-[2.5px_2.5px_0_#9f149f] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <Icon className="text-base text-white">logout</Icon>
+              <span>Keluar</span>
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* ============================================================== */}
       {/* MAIN VIEWPORT */}
       {/* ============================================================== */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto w-full lg:pl-64">
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto w-full">
         
         {/* Top Bar Header */}
         <header className="h-16 shrink-0 border-b-3 border-[#191b23] bg-white flex items-center justify-between px-6 sticky top-0 z-20">
           <div className="flex items-center gap-3">
             {/* Toggle Menu Button */}
             <button 
-              className="p-2 border-2 border-[#191b23] rounded-xl bg-purple-50 hover:bg-purple-100 shadow-[2.5px_2.5px_0_#9f149f] transition-all flex items-center justify-center lg:hidden"
+              className="p-2 border-2 border-[#191b23] rounded-xl bg-purple-50 hover:bg-purple-100 shadow-[2.5px_2.5px_0_#9f149f] transition-all flex items-center justify-center"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
               <Icon className="text-xl font-bold text-[#9f149f]">{isSidebarOpen ? 'menu_open' : 'menu'}</Icon>
@@ -428,25 +446,10 @@ export default function DashboardDosen({ user, onLogout }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <button 
-              onClick={resetAllDemo}
-              className="flex items-center gap-1.5 rounded-xl border-2 border-[#191b23] bg-yellow-200 px-4 py-1.5 text-xs font-bold shadow-[2.5px_2.5px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            <div 
+              onClick={() => setActiveTab('profile')}
+              className="flex items-center gap-2 cursor-pointer hover:opacity-85"
             >
-              <Icon className="text-base">restart_alt</Icon>
-              Reset Demo
-            </button>
-            
-            <button 
-              onClick={onLogout}
-              className="flex items-center gap-1.5 rounded-xl border-2 border-[#191b23] bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white shadow-[2.5px_2.5px_0_#9f149f] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
-            >
-              <Icon className="text-base">logout</Icon>
-              Keluar
-            </button>
-
-            <div className="h-7 w-px bg-slate-200 mx-1 hidden sm:block" />
-
-            <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full border border-[#191b23] bg-[#9f149f] flex items-center justify-center text-white text-xs font-black">
                 DPL
               </div>
@@ -454,6 +457,7 @@ export default function DashboardDosen({ user, onLogout }) {
             </div>
           </div>
         </header>
+
 
         {/* Main Content Area */}
         <main className="p-6 md:p-8 space-y-8 flex-1 bg-[#faf8ff] [background-image:radial-gradient(#e1e2ed_1px,transparent_1px)] [background-size:24px_24px]">
