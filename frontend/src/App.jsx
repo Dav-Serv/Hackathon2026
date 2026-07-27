@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import RegisterMahasiswa from './RegisterPage.jsx/RegisterMahasiswa.jsx'
+import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 
 const icons = {
   logo: 'grading',
@@ -65,26 +65,19 @@ function LoginPage({ onBack, onRegister }) {
         <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#dbe1ff] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md" style={{ perspective: '1000px' }}>
-        <div className="min-h-[760px] rounded-xl border-4 border-[#191b23] bg-white p-8 shadow-[12px_12px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
-          <button
-            className="mb-6 inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-            onClick={onBack}
-            type="button"
-          >
-            <Icon className="text-base">arrow_back</Icon>
-            <span>Kembali ke Beranda</span>
-          </button>
-          <div className="mb-8"><h1 className="mb-2 text-4xl font-bold">OBE GradeSync</h1><p className="leading-relaxed text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
+      <div className="relative z-10 w-full max-w-lg" style={{ perspective: '1000px' }}>
+        <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] p-8 shadow-[8px_8px_0_#191b23] transition-transform duration-300" style={{ transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)` }}>
+          <button type="button" onClick={onBack} className="mb-6 inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"><Icon className="text-base">arrow_back</Icon> Kembali ke Beranda</button>
+          <div className="mb-8"><h1 className="mb-2 text-[32px] font-bold leading-tight md:text-[40px] md:leading-tight">OBE GradeSync</h1><p className="text-base leading-[1.6] text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
           <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Email atau NIM
-              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full border-[3px] border-[#191b23] bg-white p-4 pr-12 outline-none transition focus:border-[#004ac6] focus:shadow-[4px_4px_0_#2563eb]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
+            <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Email atau NIM
+              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
             </label>
-            <label className="flex flex-col gap-2 text-sm font-bold uppercase tracking-wider">Kata Sandi
-              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full border-[3px] border-[#191b23] bg-white p-4 pr-24 outline-none transition focus:border-[#004ac6] focus:shadow-[4px_4px_0_#2563eb]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#004ac6]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
+            <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Kata Sandi
+              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#004ac6]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#004ac6]">{showPassword ? 'SEMBUNYIKAN' : 'LIHAT'}</button></div>
             </label>
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#004ac6] hover:underline">Lupa?</button></div>
-            <button disabled={isLoading} className="group flex items-center justify-center gap-2 border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[8px_8px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
+            <button disabled={isLoading} className="group flex items-center justify-center gap-2 rounded-2xl border-[3px] border-[#191b23] bg-[#004ac6] px-8 py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
           </form>
           <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6"><p className="text-[#434655]">Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#004ac6] hover:underline">DAFTAR</button></p><div className="flex gap-4"><button type="button" aria-label="Google" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-xs font-bold text-white">G</span></button><button type="button" aria-label="Hub" className="border-2 border-[#191b23] p-3 hover:bg-[#e7e7f3]"><Icon className="flex h-6 w-6 items-center justify-center rounded-full bg-[#191b23] text-base text-white">hub</Icon></button></div></div>
         </div>
