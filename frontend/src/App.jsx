@@ -50,7 +50,7 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
     api.post('/login', { email: identifier, password })
       .then(({ data }) => {
         localStorage.setItem('auth_token', data.access_token)
-        onBack()
+        onLoginSuccess(data.user)
       })
       .catch((error) => setErrorMessage(getApiError(error)))
       .finally(() => setIsLoading(false))
@@ -95,6 +95,7 @@ function App() {
   const [selectedStage, setSelectedStage] = useState(null)
   const [page, setPage] = useState('landing')
   const [activeNav, setActiveNav] = useState('beranda')
+  const [authenticatedUser, setAuthenticatedUser] = useState(null)
 
   useEffect(() => {
     if (page !== 'landing') return undefined
@@ -118,9 +119,9 @@ function App() {
     return () => observer.disconnect()
   }, [page])
 
-  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} />
-  if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} />
-  if (page === 'dashboard') return <StudentDashboard onLogout={() => setPage('landing')} />
+  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} onLoginSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
+  if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} onRegisterSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
+  if (page === 'dashboard') return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
 
   const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#004ac6] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
 

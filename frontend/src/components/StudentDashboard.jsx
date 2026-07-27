@@ -5,7 +5,7 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
-function StudentDashboard({ onLogout }) {
+function StudentDashboard({ onLogout, user }) {
   // Load state from localStorage or initial state
   const [db, setDb] = useState(() => {
     const saved = localStorage.getItem('gradeSync_db')
@@ -341,7 +341,7 @@ function StudentDashboard({ onLogout }) {
               Portal Mahasiswa Aktif
             </div>
             <h1 className="text-4xl font-bold uppercase tracking-tight md:text-5xl">Dashboard Konversi</h1>
-            <p className="mt-1 text-[#434655] font-medium">Selamat datang, <b>Arnanda (NIM: 22.11.9876)</b> • Informatika</p>
+            <p className="mt-1 text-[#434655] font-medium">Selamat datang, <b>{user?.name || 'Mahasiswa'}{user?.nim_nip ? ` (NIM: ${user.nim_nip})` : ''}</b>{user?.role ? ` • ${user.role}` : ''}</p>
           </div>
           <div className="flex gap-4">
             <button 
