@@ -319,11 +319,14 @@ function StudentDashboard({ user, onLogout }) {
   const summary = getConversionSummary()
 
   // Track progress steps
+  const magangApproved = ['disetujui', 'berjalan', 'selesai'].includes(db.magang.status)
+  const usulanApproved = db.usulan.status === 'disetujui'
+  const klaimApproved = db.klaim.status === 'disetujui'
   const stepsList = [
-    { key: 'magang', title: 'Pengajuan magang', done: ['disetujui', 'berjalan', 'selesai'].includes(db.magang.status), active: ['draft', 'revisi', 'menunggu_verifikasi'].includes(db.magang.status) },
-    { key: 'usulan', title: 'Usulan konversi', done: db.usulan.status === 'disetujui', active: ['belum_diajukan', 'revisi', 'menunggu_persetujuan_dpl'].includes(db.usulan.status) },
-    { key: 'klaim', title: 'Klaim konversi', done: db.klaim.status === 'disetujui', active: ['belum_diajukan', 'revisi', 'menunggu_penilaian_mitra', 'menunggu_review_dpl'].includes(db.klaim.status) },
-    { key: 'grade', title: 'Hasil konversi', done: db.klaim.status === 'disetujui', active: db.klaim.status === 'disetujui' }
+    { key: 'magang', title: 'Pengajuan magang', unlocked: true, done: magangApproved, active: !magangApproved },
+    { key: 'usulan', title: 'Usulan konversi', unlocked: magangApproved, done: usulanApproved, active: magangApproved && !usulanApproved },
+    { key: 'klaim', title: 'Klaim konversi', unlocked: usulanApproved, done: klaimApproved, active: usulanApproved && !klaimApproved },
+    { key: 'grade', title: 'Hasil konversi', unlocked: klaimApproved, done: klaimApproved, active: klaimApproved }
   ]
 
   // Collapsible sidebar state (False = closed/hidden by default)
@@ -486,15 +489,17 @@ function StudentDashboard({ user, onLogout }) {
                   <div
                     key={step.key}
                     className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold ${
-                      step.done
+                      !step.unlocked
+                        ? 'border-slate-200 bg-slate-50 text-slate-400'
+                        : step.done
                         ? 'border-green-200 bg-green-50 text-green-800'
                         : step.active
                           ? 'border-purple-200 bg-purple-50 text-purple-900'
                           : 'border-slate-200 bg-slate-50 text-slate-400'
                     }`}
                   >
-                    <Icon className={`text-base ${step.done ? 'text-green-600' : step.active ? 'text-[#9f149f]' : 'text-slate-400'}`}>
-                      {step.done ? 'check_circle' : step.active ? 'radio_button_unchecked' : 'lock'}
+                    <Icon className={`text-base ${!step.unlocked ? 'text-slate-400' : step.done ? 'text-green-600' : 'text-[#9f149f]'}`}>
+                      {!step.unlocked ? 'lock' : step.done ? 'check_circle' : 'radio_button_unchecked'}
                     </Icon>
                     <span className="min-w-0 truncate">{idx + 1}. {step.title}</span>
                   </div>
