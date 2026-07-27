@@ -40,6 +40,7 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -50,8 +51,16 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
     }, 1000)
   }
 
+  const handleMouseMove = (event) => {
+    if (window.innerWidth < 768) return
+    setTilt({
+      x: (window.innerWidth / 2 - event.clientX) / 80,
+      y: (window.innerHeight / 2 - event.clientY) / 80,
+    })
+  }
+
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]" onMouseMove={handleMouseMove}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg className="absolute left-10 top-10 h-32 w-32 text-[#004ac6] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
         <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#0060ac] opacity-20" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
