@@ -3,6 +3,7 @@ import api, { getApiError } from './lib/api'
 import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
+import DashboardDosen from '../DashboardDosen/dashboard.jsx'
 
 const icons = {
   logo: 'grading',
@@ -139,7 +140,12 @@ function App() {
 
   if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} onLoginSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
   if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} onRegisterSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
-  if (page === 'dashboard') return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+  if (page === 'dashboard') {
+    if (authenticatedUser?.role === 'dpl' || authenticatedUser?.role === 'dosen') {
+      return <DashboardDosen user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+    }
+    return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+  }
 
   const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#9f149f] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
 
