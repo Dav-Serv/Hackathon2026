@@ -54,6 +54,16 @@ class AuthController extends Controller
     public function handleGoogleCallback(): JsonResponse
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
+        $email = strtolower((string) $googleUser->getEmail());
+
+        $isVerified = (bool) ($googleUser->user['email_verified'] ?? false);
+
+        if (! $isVerified || ! str_ends_with($email, '@amikom.ac.id')) {
+            return response()->json(['message' => 'Hanya akun Google @amikom.ac.id yang dapat login.'], 403);
+        } else if (! $isVerified || ! str_ends_with($email, '@students.amikom.ac.id')) {
+            return response()->json(['message' => 'Hanya akun Google @students.amikom.ac.id yang dapat login.'], 403);
+        }
+
         $user = User::where('google_id', $googleUser->getId())
             ->orWhere('email', $googleUser->getEmail())
             ->first();
