@@ -4,6 +4,7 @@ import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
 import DashboardDosen from './DashboardDPL.jsx'
+import DashboardAdminProdi from './DashboardAdminProdi.jsx'
 
 const icons = {
   logo: 'grading',
@@ -143,6 +144,9 @@ function App() {
   if (page === 'dashboard') {
     if (authenticatedUser?.role === 'dpl' || authenticatedUser?.role === 'dosen') {
       return <DashboardDosen user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+    }
+    if (authenticatedUser?.role === 'admin_prodi' || authenticatedUser?.role === 'admin') {
+      return <DashboardAdminProdi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
     }
     return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
   }
