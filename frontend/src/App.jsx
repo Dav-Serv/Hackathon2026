@@ -39,6 +39,17 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
+const pagePaths = {
+  landing: '/',
+  login: '/login',
+  register: '/register',
+  dashboard: '/dashboard',
+}
+
+function pageFromPathname(pathname) {
+  return Object.entries(pagePaths).find(([, path]) => path === pathname)?.[0] || 'landing'
+}
+
 function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
@@ -172,13 +183,40 @@ function GoogleCallbackPage({ onSuccess }) {
 
 function App() {
   const [selectedStage, setSelectedStage] = useState(null)
-  const [page, setPage] = useState('landing')
+  const [page, setPage] = useState(() => pageFromPathname(window.location.pathname))
   const [activeNav, setActiveNav] = useState('beranda')
   const [authenticatedUser, setAuthenticatedUser] = useState(null)
-  const handleOAuthSuccess = useCallback((user) => {
+  const navigatePage = useCallback((nextPage, replace = false) => {
+    setPage(nextPage)
+    const nextPath = pagePaths[nextPage]
+    if (!nextPath || window.location.pathname === nextPath) return
+
+    window.history[replace ? 'replaceState' : 'pushState']({}, document.title, nextPath)
+  }, [])
+
+  const handleAuthSuccess = useCallback((user) => {
     setAuthenticatedUser(user)
-    setPage('dashboard')
-    window.history.replaceState({}, document.title, '/dashboard')
+    navigatePage('dashboard', true)
+  }, [navigatePage])
+
+  useEffect(() => {
+    if (window.location.pathname !== '/dashboard' || !localStorage.getItem('auth_token')) return
+
+    api.get('/me')
+      .then(({ data }) => {
+        setAuthenticatedUser(data.user)
+        setPage('dashboard')
+      })
+      .catch(() => {
+        localStorage.removeItem('auth_token')
+        navigatePage('landing', true)
+      })
+  }, [navigatePage])
+
+  useEffect(() => {
+    const handlePopState = () => setPage(pageFromPathname(window.location.pathname))
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
   useEffect(() => {
@@ -204,22 +242,22 @@ function App() {
   }, [page])
 
   if (window.location.pathname === '/auth/callback') {
-    return <GoogleCallbackPage onSuccess={handleOAuthSuccess} />
+    return <GoogleCallbackPage onSuccess={handleAuthSuccess} />
   }
 
-  if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} onLoginSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
-  if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} onRegisterSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
+  if (page === 'login') return <LoginPage onBack={() => navigatePage('landing')} onRegister={() => navigatePage('register')} onLoginSuccess={handleAuthSuccess} />
+  if (page === 'register') return <RegisterMahasiswa onBack={() => navigatePage('landing')} onLogin={() => navigatePage('login')} onRegisterSuccess={handleAuthSuccess} />
   if (page === 'dashboard') {
     if (authenticatedUser?.role === 'dpl' || authenticatedUser?.role === 'dosen') {
-      return <DashboardDosen user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+      return <DashboardDosen user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); navigatePage('login') }} />
     }
     if (authenticatedUser?.role === 'admin_prodi' || authenticatedUser?.role === 'admin') {
-      return <DashboardAdminProdi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+      return <DashboardAdminProdi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); navigatePage('login') }} />
     }
     if (authenticatedUser?.role === 'kaprodi') {
-      return <DashboardKaprodi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+      return <DashboardKaprodi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); navigatePage('login') }} />
     }
-    return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); setPage('landing') }} />
+    return <StudentDashboard user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); navigatePage('login') }} />
   }
 
   const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#9f149f] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
@@ -239,7 +277,7 @@ function App() {
             <a href="#fitur" onClick={() => setActiveNav('fitur')} className={navLinkClass('fitur')}>Fitur</a>
             <a href="#alur" onClick={() => setActiveNav('alur')} className={navLinkClass('alur')}>Alur</a>
           </div>
-          <button type="button" onClick={() => setPage('login')} className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#9f149f] sm:px-5">Login</button>
+          <button type="button" onClick={() => navigatePage('login')} className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#9f149f] sm:px-5">Login</button>
         </nav>
       </header>
 
@@ -264,7 +302,7 @@ function App() {
 
         <section id="alur" className="bg-[#e1e2ed] px-5 py-20 md:px-16"><div className="mx-auto max-w-7xl"><h2 className="mb-14 text-center text-3xl font-bold uppercase italic md:text-5xl">Alur Sistem Konversi</h2><div className="relative flex flex-col items-center justify-between gap-8 md:flex-row"><div className="absolute left-0 top-10 hidden w-full border-t-4 border-dashed border-[#191b23] md:block" />{steps.map(([title, text, icon], index) => <div key={title} className="relative z-10 flex w-full flex-col items-center text-center md:w-1/5"><div className={`mb-5 flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#191b23] shadow-[4px_4px_0_#191b23] ${index === 4 ? 'bg-[#2563eb] text-white' : 'bg-white'} transition hover:bg-[#004ac6] hover:text-white`}><Icon className="text-3xl">{icon}</Icon></div><div className={`rounded-lg border-[3px] border-[#191b23] p-4 shadow-[4px_4px_0_#191b23] ${index === 4 ? 'bg-[#004ac6] text-white' : 'bg-white'}`}><h4 className="text-xs font-bold tracking-wide">{title}</h4><p className="mt-2 text-xs opacity-70">{text}</p></div></div>)}</div></div></section>
 
-        <section id="daftar" className="purple-grid-bg flex items-center justify-center px-5 py-24 md:px-16"><div className="relative w-full max-w-4xl overflow-hidden rounded-[36px] border-[6px] border-[#191b23] bg-white p-10 text-center shadow-[16px_16px_0_#191b23] md:p-20"><div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border-4 border-[#191b23] bg-[#64a8fe] opacity-50" /><div className="relative z-10"><h2 className="text-4xl font-bold md:text-6xl">Siap Mengelola Konversi Nilai Secara Digital?</h2><p className="mx-auto mb-10 mt-6 max-w-2xl text-lg leading-relaxed text-[#434655]">Bergabunglah dengan ratusan mahasiswa AMIKOM lainnya yang telah merasakan kemudahan konversi nilai berbasis OBE.</p><div className="flex flex-col justify-center gap-5 sm:flex-row"><button type="button" onClick={() => setPage('login')} className="rounded-full border-4 border-[#191b23] bg-[#004ac6] px-10 py-4 text-lg font-bold text-white shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">DAFTAR SEKARANG</button><button type="button" className="rounded-full border-4 border-[#191b23] bg-[#faf8ff] px-10 py-4 text-lg font-bold shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">HUBUNGI KAMI</button></div></div></div></section>
+        <section id="daftar" className="purple-grid-bg flex items-center justify-center px-5 py-24 md:px-16"><div className="relative w-full max-w-4xl overflow-hidden rounded-[36px] border-[6px] border-[#191b23] bg-white p-10 text-center shadow-[16px_16px_0_#191b23] md:p-20"><div className="absolute -right-10 -top-10 h-40 w-40 rounded-full border-4 border-[#191b23] bg-[#64a8fe] opacity-50" /><div className="relative z-10"><h2 className="text-4xl font-bold md:text-6xl">Siap Mengelola Konversi Nilai Secara Digital?</h2><p className="mx-auto mb-10 mt-6 max-w-2xl text-lg leading-relaxed text-[#434655]">Bergabunglah dengan ratusan mahasiswa AMIKOM lainnya yang telah merasakan kemudahan konversi nilai berbasis OBE.</p><div className="flex flex-col justify-center gap-5 sm:flex-row"><button type="button" onClick={() => navigatePage('login')} className="rounded-full border-4 border-[#191b23] bg-[#004ac6] px-10 py-4 text-lg font-bold text-white shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">DAFTAR SEKARANG</button><button type="button" className="rounded-full border-4 border-[#191b23] bg-[#faf8ff] px-10 py-4 text-lg font-bold shadow-[8px_8px_0_#191b23] transition hover:-translate-x-1 hover:-translate-y-1">HUBUNGI KAMI</button></div></div></div></section>
       </main>
 
       <footer className="border-t-4 border-[#191b23] bg-[#ededf9] px-5 py-16 md:px-16"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 md:flex-row"><div className="max-w-md"><div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#191b23] bg-[#004ac6] text-white"><Icon>school</Icon></span><span className="text-2xl font-semibold">GradeFlow OBE</span></div><p className="leading-relaxed text-[#434655]">Platform manajemen Outcome-Based Education terpadu untuk efisiensi penilaian akademik dan pelaporan capaian lulusan secara presisi.</p></div><div className="grid grid-cols-2 gap-10"><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Kontak</b><a className="text-[#434655] hover:text-[#004ac6]" href="mailto:info@amikom.ac.id">info@amikom.ac.id</a><a className="text-[#434655] hover:text-[#004ac6]" href="tel:+62274884201">+62 274 884201</a></div><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Alamat</b><span className="text-[#434655]">Jl. Ring Road Utara,<br />Condongcatur, Yogyakarta 55283</span></div></div></div><div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-4 border-t-2 border-[#191b23]/20 pt-5 text-sm text-[#434655] md:flex-row"><span>© 2024 Universitas AMIKOM Yogyakarta. All rights reserved.</span><div className="flex gap-5"><a href="#daftar">Privacy Policy</a><a href="#daftar">Terms of Service</a></div></div></footer>
