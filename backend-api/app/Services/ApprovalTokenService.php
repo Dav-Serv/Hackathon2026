@@ -11,6 +11,9 @@ class ApprovalTokenService
 {
     public function issue(KlaimKonversi $claim, string $role, ?string $email = null): string
     {
+        if ($role === 'mitra' && ! $email) {
+            $email = $claim->loadMissing('magang.supervisorMitra')->magang->supervisorMitra->email;
+        }
         $plain = Str::random(64);
         $approval = TokenApproval::create(['klaim_konversi_id' => $claim->id, 'role' => $role, 'target_role' => $role, 'recipient_email' => $email, 'token_hash' => hash('sha256', $plain), 'expired_at' => now()->addDays(7), 'expires_at' => now()->addDays(7)]);
         if ($email) {

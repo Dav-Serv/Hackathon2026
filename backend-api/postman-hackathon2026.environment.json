@@ -3,23 +3,10 @@
   "name": "Hackathon2026 Local",
   "values": [
     {"key":"base_url","value":"http://127.0.0.1:8000","type":"default","enabled":true},
-    {"key":"token_mahasiswa","value":"","type":"secret","enabled":true},
-    {"key":"token_dpl","value":"","type":"secret","enabled":true},
-    {"key":"token_admin","value":"","type":"secret","enabled":true},
-    {"key":"token_kaprodi","value":"","type":"secret","enabled":true},
-    {"key":"mahasiswa_email","value":"mahasiswa@students.amikom.ac.id","type":"default","enabled":true},
-    {"key":"dpl_email","value":"dpl@amikom.ac.id","type":"default","enabled":true},
-    {"key":"admin_email","value":"admin.prodi@amikom.ac.id","type":"default","enabled":true},
-    {"key":"kaprodi_email","value":"kaprodi@amikom.ac.id","type":"default","enabled":true},
-    {"key":"seed_password","value":"Password123!","type":"secret","enabled":true},
-    {"key":"approval_token","value":"","type":"secret","enabled":true},
-    {"key":"dokumen_id","value":"","type":"default","enabled":true},
-    {"key":"magang_id","value":"","type":"default","enabled":true},
-    {"key":"surat_pengantar_id","value":"","type":"default","enabled":true},
-    {"key":"usulan_id","value":"","type":"default","enabled":true},
-    {"key":"klaim_id","value":"","type":"default","enabled":true},
-    {"key":"mata_kuliah_id","value":"","type":"default","enabled":true},
-    {"key":"cpmk_id","value":"","type":"default","enabled":true}
+    {"key":"token_mahasiswa","value":"","type":"secret","enabled":true},{"key":"token_dpl","value":"","type":"secret","enabled":true},{"key":"token_admin","value":"","type":"secret","enabled":true},{"key":"token_kaprodi","value":"","type":"secret","enabled":true},
+    {"key":"mahasiswa_email","value":"mahasiswa@students.amikom.ac.id","type":"default","enabled":true},{"key":"dpl_email","value":"dpl@amikom.ac.id","type":"default","enabled":true},{"key":"admin_email","value":"admin.prodi@amikom.ac.id","type":"default","enabled":true},{"key":"kaprodi_email","value":"kaprodi@amikom.ac.id","type":"default","enabled":true},{"key":"seed_password","value":"Password123!","type":"secret","enabled":true},
+    {"key":"approval_token","value":"","type":"secret","enabled":true},{"key":"magang_status","value":"","type":"default","enabled":true},{"key":"usulan_status","value":"","type":"default","enabled":true},{"key":"usulan_detail_id","value":"","type":"default","enabled":true},{"key":"surat_pengantar_file","value":"/home/davserv/Hackathon2026/backend-api/tests/Fixtures/surat.pdf","type":"default","enabled":true},{"key":"logbook_file","value":"/home/davserv/Hackathon2026/backend-api/tests/Fixtures/logbook.pdf","type":"default","enabled":true},{"key":"laporan_file","value":"/home/davserv/Hackathon2026/backend-api/tests/Fixtures/laporan.pdf","type":"default","enabled":true},{"key":"sertifikat_file","value":"/home/davserv/Hackathon2026/backend-api/tests/Fixtures/sertifikat.pdf","type":"default","enabled":true},{"key":"klaim_detail_file","value":"/home/davserv/Hackathon2026/backend-api/tests/Fixtures/activiteit.pdf","type":"default","enabled":true},{"key":"dokumen_id","value":"","type":"default","enabled":true},{"key":"magang_id","value":"","type":"default","enabled":true},{"key":"surat_pengantar_id","value":"","type":"default","enabled":true},{"key":"usulan_id","value":"","type":"default","enabled":true},{"key":"klaim_id","value":"","type":"default","enabled":true},{"key":"mata_kuliah_id","value":"","type":"default","enabled":true},{"key":"cpmk_id","value":"","type":"default","enabled":true}
   ],
-  "_postman_variable_scope": "environment"
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "opencode"
 }
