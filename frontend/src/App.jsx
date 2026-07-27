@@ -90,9 +90,12 @@ function LoginPage({ onBack, onRegister }) {
 function App() {
   const [selectedStage, setSelectedStage] = useState(null)
   const [page, setPage] = useState('landing')
+  const [activeNav, setActiveNav] = useState('beranda')
 
   if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} />
   if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} />
+
+  const navLinkClass = (name) => `rounded-full px-4 py-1.5 text-xs font-bold transition-all ${activeNav === name ? 'border-2 border-[#191b23] bg-[#004ac6] text-white shadow-[3px_3px_0_#191b23]' : 'hover:bg-[#e7e7f3]'}`
 
   const stageClass = (stage) => `absolute z-20 cursor-pointer opacity-60 transition duration-300 hover:z-50 hover:scale-110 hover:opacity-100 ${selectedStage === stage ? 'z-50 !opacity-100 !border-[#004ac6] shadow-[0_0_20px_rgba(0,74,198,.4),12px_12px_0_#191b23]' : ''}`
 
@@ -100,14 +103,14 @@ function App() {
     <div className="min-h-screen overflow-x-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23] [background-image:radial-gradient(#e1e2ed_1px,transparent_1px)] [background-size:24px_24px]">
       <header className="fixed left-0 top-8 z-50 flex w-full justify-center px-4">
         <nav className="flex h-14 items-center gap-5 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
-          <a href="#beranda" className="group flex items-center gap-2">
+          <a href="#beranda" onClick={() => setActiveNav('beranda')} className="group flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#191b23] bg-[#004ac6] text-white transition group-hover:scale-110"><Icon className="text-[14px]">{icons.logo}</Icon></span>
             <span className="text-[11px] font-bold uppercase tracking-[.18em]">GradeFlow</span>
           </a>
           <div className="hidden items-center gap-1 md:flex">
-            <a href="#beranda" className="rounded-full border-2 border-[#191b23] bg-[#004ac6] px-4 py-1.5 text-xs font-bold text-white shadow-[3px_3px_0_#191b23]">Beranda</a>
-            <a href="#fitur" className="rounded-full px-4 py-1.5 text-xs font-bold hover:bg-[#e7e7f3]">Fitur</a>
-            <a href="#alur" className="rounded-full px-4 py-1.5 text-xs font-bold hover:bg-[#e7e7f3]">Alur</a>
+            <a href="#beranda" onClick={() => setActiveNav('beranda')} className={navLinkClass('beranda')}>Beranda</a>
+            <a href="#fitur" onClick={() => setActiveNav('fitur')} className={navLinkClass('fitur')}>Fitur</a>
+            <a href="#alur" onClick={() => setActiveNav('alur')} className={navLinkClass('alur')}>Alur</a>
           </div>
           <button type="button" onClick={() => setPage('login')} className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#004ac6] sm:px-5">Login</button>
         </nav>
