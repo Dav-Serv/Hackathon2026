@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from '../services/mockData'
+import api, { getApiError } from '../lib/api'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
 function StudentDashboard({ user, onLogout }) {
-  // Load state from localStorage or initial state
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+
+  // Keep the local state shape while the API response is normalized into it.
   const [db, setDb] = useState(() => {
     const saved = localStorage.getItem('gradeSync_db')
     if (saved) {
@@ -19,10 +23,76 @@ function StudentDashboard({ user, onLogout }) {
     return INITIAL_STATE
   })
 
-  // Sync db to localStorage
+  const normalizeDashboard = (data) => {
+    const magang = data.magangs?.[0]
+    const usulan = data.usulan_konversis?.[0]
+    const klaim = data.klaim_konversis?.[0]
+    const mitra = klaim?.penilaian_mitra || klaim?.penilaianMitra
+    const dpl = klaim?.penilaian_dpl || klaim?.penilaianDpl
+
+    return {
+      magang: {
+        ...INITIAL_STATE.magang,
+        ...magang,
+        mitraNama: magang?.mitra_industri?.nama || magang?.mitraIndustri?.nama || INITIAL_STATE.magang.mitraNama,
+        supervisorNama: magang?.supervisor_mitra?.nama || magang?.supervisorMitra?.nama || INITIAL_STATE.magang.supervisorNama,
+        supervisorEmail: magang?.supervisor_mitra?.email || magang?.supervisorMitra?.email || INITIAL_STATE.magang.supervisorEmail,
+        dplId: magang?.dpl_id || magang?.dplId || INITIAL_STATE.magang.dplId,
+        periodeMulai: magang?.periode_mulai || magang?.periodeMulai || INITIAL_STATE.magang.periodeMulai,
+        periodeSelesai: magang?.periode_selesai || magang?.periodeSelesai || INITIAL_STATE.magang.periodeSelesai,
+        status: magang?.status || INITIAL_STATE.magang.status,
+      },
+      usulan: {
+        ...INITIAL_STATE.usulan,
+        ...usulan,
+        details: usulan?.details || [],
+        status: usulan?.status || INITIAL_STATE.usulan.status,
+        catatanDpl: usulan?.catatan_dpl || usulan?.catatanDpl || '',
+      },
+      klaim: {
+        ...INITIAL_STATE.klaim,
+        ...klaim,
+        details: klaim?.details || [],
+        status: klaim?.status || INITIAL_STATE.klaim.status,
+      },
+      penilaian: {
+        mitra: {
+          ...INITIAL_STATE.penilaian.mitra,
+          ...mitra,
+          nilai: mitra?.nilai ?? null,
+        },
+        dpl: {
+          ...INITIAL_STATE.penilaian.dpl,
+          ...dpl,
+          nilaiAkademik: dpl?.nilai_akademik ?? dpl?.nilaiAkademik ?? null,
+        },
+      },
+    }
+  }
+
+  const loadDashboard = async () => {
+    setIsLoading(true)
+    setLoadError('')
+
+    try {
+      const { data } = await api.get('/mahasiswa/dashboard')
+      setDb(normalizeDashboard(data))
+      localStorage.setItem('gradeSync_db', JSON.stringify(normalizeDashboard(data)))
+    } catch (error) {
+      setLoadError(getApiError(error))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    localStorage.setItem('gradeSync_db', JSON.stringify(db))
-  }, [db])
+    loadDashboard()
+  }, [])
+
+  // Local persistence is only a temporary draft cache; server data remains authoritative.
+  useEffect(() => {
+    if (!isLoading) localStorage.setItem('gradeSync_db', JSON.stringify(db))
+  }, [db, isLoading])
 
   // Active sub-tab inside student dashboard: status | usulan | klaim | hasil | profile
   const [activeTab, setActiveTab] = useState('status')
@@ -163,19 +233,6 @@ function StudentDashboard({ user, onLogout }) {
     showToast('Usulan konversi berhasil diajukan ke DPL!')
   }
 
-  const demoApproveUsulan = (approve = true) => {
-    setDb(prev => ({
-      ...prev,
-      usulan: {
-        ...prev.usulan,
-        status: approve ? 'disetujui' : 'revisi',
-        catatanDpl: approve ? '' : 'Deskripsi rencana aktivitas pada CPMK-1 Proyek Web kurang detail.'
-      }
-    }))
-    showToast(approve ? 'Usulan disetujui oleh DPL! (Simulasi)' : 'Usulan dikembalikan untuk revisi oleh DPL (Simulasi)', approve ? 'success' : 'error')
-  }
-
-
   // --- 3. Aksi Klaim Konversi ---
   const [klaimGeneral, setKlaimGeneral] = useState({
     logbookFile: 'logbook_magang_final.pdf',
@@ -214,68 +271,6 @@ function StudentDashboard({ user, onLogout }) {
       }
     }))
     showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
-  }
-
-
-  const demoMitraEvaluation = (score = 90) => {
-    setDb(prev => ({
-      ...prev,
-      klaim: {
-        ...prev.klaim,
-        status: 'menunggu_review_dpl'
-      },
-      penilaian: {
-        ...prev.penilaian,
-        mitra: {
-          nilai: Number(score),
-          komentar: 'Sangat disiplin, hasil kerjanya melebihi ekspektasi tim frontend.',
-          submittedAt: new Date().toLocaleString()
-        }
-      }
-    }))
-    showToast(`Penilaian supervisor mitra masuk dengan nilai ${score}! (Simulasi)`)
-  }
-
-  const demoDplEvaluation = (score = 85) => {
-    setDb(prev => ({
-      ...prev,
-      klaim: {
-        ...prev.klaim,
-        status: 'disetujui'
-      },
-      penilaian: {
-        ...prev.penilaian,
-        dpl: {
-          nilaiAkademik: Number(score),
-          keputusan: 'setuju',
-          komentar: 'Laporan tersusun rapi, keselarasan CPMK terbukti dengan baik.',
-          submittedAt: new Date().toLocaleString()
-        }
-      }
-    }))
-    showToast(`Penilaian DPL masuk dengan nilai ${score}! Konversi nilai selesai. (Simulasi)`)
-  }
-
-  const resetAllDemo = () => {
-    localStorage.removeItem('gradeSync_db')
-    setDb(INITIAL_STATE)
-    setActiveTab('status')
-    setMagangForm({
-      mitraNama: INITIAL_STATE.magang.mitraNama,
-      mitraAlamat: INITIAL_STATE.magang.mitraAlamat,
-      mitraBidang: INITIAL_STATE.magang.mitraBidang,
-      posisi: INITIAL_STATE.magang.posisi,
-      periodeMulai: INITIAL_STATE.magang.periodeMulai,
-      periodeSelesai: INITIAL_STATE.magang.periodeSelesai,
-      dplId: INITIAL_STATE.magang.dplId,
-      supervisorNama: INITIAL_STATE.magang.supervisorNama,
-      supervisorEmail: INITIAL_STATE.magang.supervisorEmail,
-      supervisorHp: INITIAL_STATE.magang.supervisorHp,
-      proposalFile: INITIAL_STATE.magang.proposalFile,
-      buktiDiterimaFile: INITIAL_STATE.magang.buktiDiterimaFile
-    })
-    setDraftUsulanDetails([])
-    showToast('Database Demo direset ke kondisi awal!', 'info')
   }
 
 
@@ -324,11 +319,14 @@ function StudentDashboard({ user, onLogout }) {
   const summary = getConversionSummary()
 
   // Track progress steps
+  const magangApproved = ['disetujui', 'berjalan', 'selesai'].includes(db.magang.status)
+  const usulanApproved = db.usulan.status === 'disetujui'
+  const klaimApproved = db.klaim.status === 'disetujui'
   const stepsList = [
-    { key: 'magang', title: 'Pendaftaran Magang', active: true, done: ['disetujui'].includes(db.magang.status) },
-    { key: 'usulan', title: 'Usulan Konversi', active: ['disetujui'].includes(db.magang.status), done: ['disetujui'].includes(db.usulan.status) },
-    { key: 'klaim', title: 'Klaim Konversi', active: ['disetujui'].includes(db.usulan.status), done: ['disetujui'].includes(db.klaim.status) && db.penilaian.mitra.nilai !== null && db.penilaian.dpl.nilaiAkademik !== null },
-    { key: 'grade', title: 'Hasil Konversi', active: db.klaim.status === 'disetujui', done: db.klaim.status === 'disetujui' }
+    { key: 'magang', title: 'Pengajuan magang', unlocked: true, done: magangApproved, active: !magangApproved },
+    { key: 'usulan', title: 'Usulan konversi', unlocked: magangApproved, done: usulanApproved, active: magangApproved && !usulanApproved },
+    { key: 'klaim', title: 'Klaim konversi', unlocked: usulanApproved, done: klaimApproved, active: usulanApproved && !klaimApproved },
+    { key: 'grade', title: 'Hasil konversi', unlocked: klaimApproved, done: klaimApproved, active: klaimApproved }
   ]
 
   // Collapsible sidebar state (False = closed/hidden by default)
@@ -458,39 +456,52 @@ function StudentDashboard({ user, onLogout }) {
             </p>
           </div>
 
-          {/* Tahapan Proses Konversi Anda (Simplified into 2 blocks down/stacked grid format) */}
+          {isLoading && (
+            <div className="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-500">
+              Memuat data dashboard terbaru...
+            </div>
+          )}
+
+          {loadError && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 text-xs font-bold text-red-700">
+              <span>{loadError}</span>
+              <button
+                type="button"
+                onClick={loadDashboard}
+                className="rounded-lg border-2 border-red-700 bg-white px-3 py-1.5 font-black hover:bg-red-100"
+              >
+                Coba lagi
+              </button>
+            </div>
+          )}
+
+          {/* Ringkasan tahap dibuat ringkas agar tidak mengganggu pekerjaan utama mahasiswa. */}
           {activeTab !== 'profile' && (
-            <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-5 shadow-[6px_6px_0_#191b23]">
-              <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#9f149f]">Tahapan Proses Konversi Anda</h2>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div className="rounded-xl border-2 border-slate-200 bg-white px-4 py-3">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h2 className="text-[11px] font-black uppercase tracking-wide text-slate-600">Tahapan proses</h2>
+                <button type="button" onClick={loadDashboard} className="text-[10px] font-bold text-[#9f149f] hover:underline">
+                  Perbarui status
+                </button>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {stepsList.map((step, idx) => (
-                  <div 
-                    key={step.key} 
-                    className={`relative flex flex-col rounded-xl border-2 border-[#191b23] p-4 shadow-[3.5px_3.5px_0_#191b23] transition-all ${
-                      step.done 
-                        ? 'bg-green-50 text-green-800' 
-                        : step.active 
-                          ? 'bg-purple-50 text-purple-900 border-[#9f149f] shadow-[3.5px_3.5px_0_#9f149f]' 
-                          : 'bg-gray-100 text-gray-400 opacity-65'
+                  <div
+                    key={step.key}
+                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold ${
+                      !step.unlocked
+                        ? 'border-slate-200 bg-slate-50 text-slate-400'
+                        : step.done
+                        ? 'border-green-200 bg-green-50 text-green-800'
+                        : step.active
+                          ? 'border-purple-200 bg-purple-50 text-purple-900'
+                          : 'border-slate-200 bg-slate-50 text-slate-400'
                     }`}
                   >
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-widest bg-slate-200/50 px-2 py-0.5 rounded text-slate-700">Tahap 0{idx + 1}</span>
-                      {step.done ? (
-                        <Icon className="text-green-600 font-bold text-lg">check_circle</Icon>
-                      ) : step.active ? (
-                        <span className="h-2 w-2 rounded-full bg-[#9f149f] animate-ping"></span>
-                      ) : (
-                        <Icon className="text-gray-400 text-base">lock</Icon>
-                      )}
-                    </div>
-                    <h3 className="font-extrabold text-sm leading-tight mb-1">{step.title}</h3>
-                    <span className="text-[10px] font-bold uppercase opacity-85">
-                      {step.key === 'magang' && `Status: ${db.magang.status}`}
-                      {step.key === 'usulan' && `Status: ${db.usulan.status}`}
-                      {step.key === 'klaim' && `Status: ${db.klaim.status}`}
-                      {step.key === 'grade' && `Status: ${db.klaim.status === 'disetujui' ? 'Selesai' : 'Belum Mulai'}`}
-                    </span>
+                    <Icon className={`text-base ${!step.unlocked ? 'text-slate-400' : step.done ? 'text-green-600' : 'text-[#9f149f]'}`}>
+                      {!step.unlocked ? 'lock' : step.done ? 'check_circle' : 'radio_button_unchecked'}
+                    </Icon>
+                    <span className="min-w-0 truncate">{idx + 1}. {step.title}</span>
                   </div>
                 ))}
               </div>
