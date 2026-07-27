@@ -44,3 +44,12 @@ body:has(.journey-map-bg) [class*="hover:bg-[#004ac6]"]:hover { background-color
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
   background-size: 32px 32px;
 }
+
+@theme {
+  --font-sans: 'Space Grotesk', sans-serif;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+}
+

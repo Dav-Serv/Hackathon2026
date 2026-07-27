@@ -190,10 +190,10 @@ export default function DashboardKaprodi({ user, onLogout }) {
         </div>
       )}
 
-      {/* Backdrop overlay for mobile sidebar */}
+      {/* Backdrop overlay for sidebar */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-[#191b23]/30 z-30 transition-opacity lg:hidden"
+          className="fixed inset-0 bg-[#191b23]/30 z-30 transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -201,8 +201,8 @@ export default function DashboardKaprodi({ user, onLogout }) {
       {/* ============================================================== */}
       {/* COLLAPSIBLE / RESPONSIVE SIDEBAR */}
       {/* ============================================================== */}
-      <aside className={`w-64 shrink-0 border-r-[3px] border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-screen fixed lg:static inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      <aside className={`w-64 shrink-0 border-r-[3px] border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-screen fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col flex-1">
           {/* Header Brand */}
@@ -211,7 +211,7 @@ export default function DashboardKaprodi({ user, onLogout }) {
               <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white text-[#9f149f]"><Icon className="text-[18px]">school</Icon></span>
               <span className="tracking-tight uppercase">Kaprodi Portal</span>
             </div>
-            <button className="text-white hover:opacity-80 lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+            <button className="text-white hover:opacity-80" onClick={() => setIsSidebarOpen(false)}>
               <Icon>close</Icon>
             </button>
           </div>
@@ -271,9 +271,9 @@ export default function DashboardKaprodi({ user, onLogout }) {
         {/* Top Bar Header */}
         <header className="h-16 shrink-0 border-b-[3px] border-[#191b23] bg-white flex items-center justify-between px-6 md:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-3">
-            {/* Toggle Menu Button for mobile */}
+            {/* Toggle Menu Button */}
             <button 
-              className="p-2 border-2 border-[#191b23] rounded-xl bg-purple-50 hover:bg-purple-100 shadow-[2.5px_2.5px_0_#9f149f] transition-all flex items-center justify-center lg:hidden"
+              className="p-2 border-2 border-[#191b23] rounded-xl bg-purple-50 hover:bg-purple-100 shadow-[2.5px_2.5px_0_#9f149f] transition-all flex items-center justify-center"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
               <Icon className="text-xl font-bold text-[#9f149f]">{isSidebarOpen ? 'menu_open' : 'menu'}</Icon>
@@ -372,7 +372,7 @@ export default function DashboardKaprodi({ user, onLogout }) {
                     <div className="inline-block bg-[#f1d7f1] text-[#9f149f] px-4 py-1.5 border-[3px] border-[#191b23] font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0_#191b23] rounded-xl">
                       Executive Overview
                     </div>
-                    <h1 className="font-bold text-4xl md:text-5xl text-on-surface leading-none uppercase italic tracking-tight">
+                    <h1 className="font-bold text-4xl md:text-5xl text-on-surface leading-none uppercase tracking-tight">
                       Selamat Datang,<br/>Kaprodi
                     </h1>
                     <p className="text-sm font-bold text-gray-500 max-w-xl">
@@ -656,7 +656,7 @@ export default function DashboardKaprodi({ user, onLogout }) {
               {/* Bottom Section: Academic Insights */}
               <section className="mt-8 space-y-6">
                 <div className="flex items-center gap-4">
-                  <h2 className="font-bold text-2xl uppercase italic tracking-tight text-slate-800">Academic Insights</h2>
+                  <h2 className="font-bold text-2xl uppercase tracking-tight text-slate-800">Academic Insights</h2>
                   <div className="flex-1 h-[3px] bg-[#191b23]" />
                 </div>
                 
