@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import api, { getApiError } from './lib/api'
 import CursorGrid from './components/CursorGrid'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
@@ -110,11 +110,74 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   )
 }
 
+function GoogleCallbackPage({ onSuccess }) {
+  const [errorMessage, setErrorMessage] = useState('')
+  const hasStartedRef = useRef(false)
+
+  useEffect(() => {
+    if (hasStartedRef.current) return
+    hasStartedRef.current = true
+
+    const query = new URLSearchParams(window.location.search)
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const callbackError = query.get('error')
+    const token = hash.get('token') || hash.get('access_token') || query.get('token') || query.get('access_token')
+
+    if (callbackError) {
+      setErrorMessage(callbackError)
+      return
+    }
+
+    if (!token) {
+      setErrorMessage('Token login Google tidak ditemukan. Silakan ulangi login.')
+      return
+    }
+
+    localStorage.setItem('auth_token', token)
+    window.history.replaceState({}, document.title, '/auth/callback')
+
+    api.get('/me')
+      .then(({ data }) => {
+        onSuccess(data.user)
+      })
+      .catch((error) => {
+        localStorage.removeItem('auth_token')
+        setErrorMessage(getApiError(error))
+      })
+  }, [onSuccess])
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#faf8ff] px-5 font-['Space_Grotesk',sans-serif] text-[#191b23]">
+      <div className="w-full max-w-md rounded-[28px] border-[4px] border-[#191b23] bg-white p-8 text-center shadow-[8px_8px_0_#191b23]">
+        {errorMessage ? (
+          <>
+            <Icon className="mb-4 text-5xl text-[#ba1a1a]">error</Icon>
+            <h1 className="text-2xl font-bold">Login Google gagal</h1>
+            <p className="mt-3 text-sm text-[#434655]">{errorMessage}</p>
+            <button type="button" onClick={() => { window.location.href = '/' }} className="mt-6 rounded-xl border-[3px] border-[#191b23] bg-[#9f149f] px-5 py-3 font-bold text-white shadow-[4px_4px_0_#191b23]">Kembali ke login</button>
+          </>
+        ) : (
+          <>
+            <span className="mx-auto mb-5 block h-10 w-10 animate-spin rounded-full border-4 border-[#e1e2ed] border-t-[#9f149f]" />
+            <h1 className="text-2xl font-bold">Menyiapkan dashboard...</h1>
+            <p className="mt-2 text-sm text-[#434655]">Login Google berhasil. Mengambil data akun.</p>
+          </>
+        )}
+      </div>
+    </main>
+  )
+}
+
 function App() {
   const [selectedStage, setSelectedStage] = useState(null)
   const [page, setPage] = useState('landing')
   const [activeNav, setActiveNav] = useState('beranda')
   const [authenticatedUser, setAuthenticatedUser] = useState(null)
+  const handleOAuthSuccess = useCallback((user) => {
+    setAuthenticatedUser(user)
+    setPage('dashboard')
+    window.history.replaceState({}, document.title, '/dashboard')
+  }, [])
 
   useEffect(() => {
     if (page !== 'landing') return undefined
@@ -137,6 +200,10 @@ function App() {
     sections.forEach((section) => observer.observe(section))
     return () => observer.disconnect()
   }, [page])
+
+  if (window.location.pathname === '/auth/callback') {
+    return <GoogleCallbackPage onSuccess={handleOAuthSuccess} />
+  }
 
   if (page === 'login') return <LoginPage onBack={() => setPage('landing')} onRegister={() => setPage('register')} onLoginSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
   if (page === 'register') return <RegisterMahasiswa onBack={() => setPage('landing')} onLogin={() => setPage('login')} onRegisterSuccess={(user) => { setAuthenticatedUser(user); setPage('dashboard') }} />
