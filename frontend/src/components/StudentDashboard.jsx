@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from '../services/mockData'
+import { MASTER_MATA_KULIAH, INITIAL_STATE } from '../services/mockData'
 import api, { getApiError } from '../lib/api'
 
 function Icon({ children, className = '' }) {
@@ -20,7 +20,7 @@ function StudentDashboard({ user, onLogout }) {
         console.error('Failed to parse localStorage data, using initial state', e)
       }
     }
-    return INITIAL_STATE
+    return { ...INITIAL_STATE, dpls: [] }
   })
 
   const normalizeDashboard = (data) => {
@@ -31,16 +31,20 @@ function StudentDashboard({ user, onLogout }) {
     const dpl = klaim?.penilaian_dpl || klaim?.penilaianDpl
 
     return {
+      dpls: data.dpls || [],
       magang: {
-        ...INITIAL_STATE.magang,
         ...magang,
-        mitraNama: magang?.mitra_industri?.nama || magang?.mitraIndustri?.nama || INITIAL_STATE.magang.mitraNama,
-        supervisorNama: magang?.supervisor_mitra?.nama || magang?.supervisorMitra?.nama || INITIAL_STATE.magang.supervisorNama,
-        supervisorEmail: magang?.supervisor_mitra?.email || magang?.supervisorMitra?.email || INITIAL_STATE.magang.supervisorEmail,
-        dplId: magang?.dpl_id || magang?.dplId || INITIAL_STATE.magang.dplId,
-        periodeMulai: magang?.periode_mulai || magang?.periodeMulai || INITIAL_STATE.magang.periodeMulai,
-        periodeSelesai: magang?.periode_selesai || magang?.periodeSelesai || INITIAL_STATE.magang.periodeSelesai,
-        status: magang?.status || INITIAL_STATE.magang.status,
+        mitraNama: magang?.mitra_industri?.nama || magang?.mitraIndustri?.nama || '',
+        mitraBidang: magang?.mitra_industri?.bidang || magang?.mitraIndustri?.bidang || '',
+        mitraAlamat: magang?.mitra_industri?.alamat || magang?.mitraIndustri?.alamat || '',
+        supervisorNama: magang?.supervisor_mitra?.nama || magang?.supervisorMitra?.nama || '',
+        supervisorEmail: magang?.supervisor_mitra?.email || magang?.supervisorMitra?.email || '',
+        supervisorHp: magang?.supervisor_mitra?.no_hp || magang?.supervisorMitra?.no_hp || '',
+        dplNama: magang?.dpl?.name || '',
+        dplId: magang?.dpl_id || magang?.dplId || '',
+        periodeMulai: magang?.periode_mulai || magang?.periodeMulai || '',
+        periodeSelesai: magang?.periode_selesai || magang?.periodeSelesai || '',
+        status: magang?.status || 'draft',
       },
       usulan: {
         ...INITIAL_STATE.usulan,
@@ -175,19 +179,46 @@ function StudentDashboard({ user, onLogout }) {
   // --- 1. Aksi Magang ---
   const [magangForm, setMagangForm] = useState({
     jenisProgram: db.magang.jenisProgram || 'magang',
-    mitraNama: db.magang.mitraNama || 'PT Solusi Teknologi Nusantara',
-    mitraAlamat: db.magang.mitraAlamat || 'Gedung Digital Creative, Jakarta',
-    mitraBidang: db.magang.mitraBidang || 'Software Development',
-    posisi: db.magang.posisi || 'Fullstack Web Developer',
-    periodeMulai: db.magang.periodeMulai || '2026-02-01',
-    periodeSelesai: db.magang.periodeSelesai || '2026-07-31',
-    dplId: db.magang.dplId || MOCK_DPL_LIST[0].id,
-    supervisorNama: db.magang.supervisorNama || 'Budi Raharjo, S.T.',
-    supervisorEmail: db.magang.supervisorEmail || 'budi.raharjo@solusitech.co.id',
-    supervisorHp: db.magang.supervisorHp || '081234567890',
-    proposalFile: db.magang.proposalFile || 'proposal_magang_12345.pdf',
-    buktiDiterimaFile: db.magang.buktiDiterimaFile || 'bukti_penerimaan_12345.pdf'
+    mitraIndustriId: db.magang.mitra_industri_id || '',
+    mitraNama: db.magang.mitraNama || '',
+    mitraAlamat: db.magang.mitraAlamat || '',
+    mitraBidang: db.magang.mitraBidang || '',
+    posisi: db.magang.posisi || '',
+    periodeMulai: db.magang.periodeMulai || '',
+    periodeSelesai: db.magang.periodeSelesai || '',
+    dplId: db.magang.dplId || '',
+    dplNama: db.magang.dplNama || '',
+    supervisorMitraId: db.magang.supervisor_mitra_id || '',
+    supervisorNama: db.magang.supervisorNama || '',
+    supervisorEmail: db.magang.supervisorEmail || '',
+    supervisorHp: db.magang.supervisorHp || '',
+    proposalFile: db.magang.proposal_file || '',
+    buktiDiterimaFile: db.magang.bukti_diterima_file || ''
   })
+
+  useEffect(() => {
+    const magang = db.magang
+    const hasMagang = Boolean(magang.id)
+    setMagangForm((current) => ({
+      ...current,
+      jenisProgram: hasMagang ? (magang.jenis_program || magang.jenisProgram || 'magang') : 'magang',
+      mitraIndustriId: hasMagang ? magang.mitra_industri_id || '' : '',
+      mitraNama: hasMagang ? magang.mitraNama || '' : '',
+      mitraAlamat: hasMagang ? magang.mitraAlamat || '' : '',
+      mitraBidang: hasMagang ? magang.mitraBidang || '' : '',
+      posisi: hasMagang ? magang.posisi || '' : '',
+      periodeMulai: hasMagang ? magang.periode_mulai || magang.periodeMulai || '' : '',
+      periodeSelesai: hasMagang ? magang.periode_selesai || magang.periodeSelesai || '' : '',
+      dplId: hasMagang ? magang.dpl_id || magang.dplId || '' : '',
+      dplNama: hasMagang ? magang.dpl?.name || magang.dplNama || '' : '',
+      supervisorMitraId: hasMagang ? magang.supervisor_mitra_id || '' : '',
+      supervisorNama: hasMagang ? magang.supervisorNama || '' : '',
+      supervisorEmail: hasMagang ? magang.supervisorEmail || '' : '',
+      supervisorHp: hasMagang ? magang.supervisorHp || '' : '',
+      proposalFile: hasMagang ? magang.proposal_file || '' : '',
+      buktiDiterimaFile: hasMagang ? magang.bukti_diterima_file || '' : '',
+    }))
+  }, [db.magang])
 
   const processHistory = [
     { date: db.magang.updated_at || db.magang.created_at, title: 'Pengajuan magang', status: getStatusLabel(db.magang.status), note: db.magang.catatanAdmin || 'Data pengajuan tersimpan di dashboard.' },
@@ -196,17 +227,44 @@ function StudentDashboard({ user, onLogout }) {
     { date: db.penilaian.dpl.submittedAt, title: 'Penilaian akhir', status: db.klaim.status === 'disetujui' ? 'Selesai' : 'Menunggu', note: db.penilaian.dpl.komentar || 'Menunggu seluruh pihak menyelesaikan penilaian.' },
   ].filter(item => item.date || item.title === 'Pengajuan magang')
 
-  const handleMagangSubmit = (e) => {
+  const handleMagangSubmit = async (e) => {
     e.preventDefault()
-    setDb(prev => ({
-      ...prev,
-      magang: {
-        ...prev.magang,
-        ...magangForm,
-        status: 'menunggu_verifikasi'
-      }
-    }))
-    showToast('Pendaftaran magang berhasil dikirim untuk verifikasi prodi!')
+    const proposal = selectedFiles.proposal
+    const buktiDiterima = selectedFiles.buktiDiterima
+
+    if (!magangForm.dplId) {
+      showToast('Pilih DPL dari data backend.', 'error')
+      return
+    }
+    if (!proposal || !buktiDiterima) {
+      showToast('Proposal dan bukti diterima wajib dipilih.', 'error')
+      return
+    }
+
+    const payload = new FormData()
+    if (magangForm.mitraIndustriId) payload.append('mitra_industri_id', magangForm.mitraIndustriId)
+    payload.append('mitra_nama', magangForm.mitraNama)
+    payload.append('mitra_bidang', magangForm.mitraBidang)
+    payload.append('mitra_alamat', magangForm.mitraAlamat)
+    if (magangForm.supervisorMitraId) payload.append('supervisor_mitra_id', magangForm.supervisorMitraId)
+    payload.append('supervisor_nama', magangForm.supervisorNama)
+    payload.append('supervisor_email', magangForm.supervisorEmail)
+    payload.append('supervisor_hp', magangForm.supervisorHp)
+    payload.append('dpl_id', magangForm.dplId)
+    payload.append('jenis_program', magangForm.jenisProgram)
+    payload.append('posisi', magangForm.posisi)
+    payload.append('periode_mulai', magangForm.periodeMulai)
+    payload.append('periode_selesai', magangForm.periodeSelesai)
+    payload.append('proposal_file', proposal)
+    payload.append('bukti_diterima_file', buktiDiterima)
+
+    try {
+      await api.post('/magang', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
+      await loadDashboard()
+      showToast('Pendaftaran magang berhasil dikirim untuk verifikasi prodi!')
+    } catch (error) {
+      showToast(getApiError(error), 'error')
+    }
   }
 
   // --- 2. Aksi Usulan Konversi ---
@@ -651,7 +709,7 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="space-y-3 border-t-2 border-slate-100 pt-3 md:border-t-0 md:border-l-2 md:pl-6 md:pt-0">
                       <div>
                         <label className="text-[10px] font-black uppercase text-gray-400">Dosen Pembimbing Lapangan (DPL)</label>
-                        <p className="font-bold">{MOCK_DPL_LIST.find(d => d.id === db.magang.dplId)?.nama || 'Belum Ditugaskan'}</p>
+                        <p className="font-bold">{db.magang.dpl?.name || db.magang.dplNama || 'Belum Ditugaskan'}</p>
                       </div>
                       <div>
                         <label className="text-[10px] font-black uppercase text-gray-400">Supervisor Lapangan (Mitra)</label>
@@ -709,6 +767,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="text" 
                           required
+                          readOnly={Boolean(magangForm.mitraIndustriId)}
                           placeholder="Contoh: PT Solusi Teknologi Nusantara"
                           value={magangForm.mitraNama}
                           onChange={(e) => setMagangForm({...magangForm, mitraNama: e.target.value})}
@@ -720,6 +779,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="text" 
                           required
+                          readOnly={Boolean(magangForm.mitraIndustriId)}
                           placeholder="Contoh: Software House"
                           value={magangForm.mitraBidang}
                           onChange={(e) => setMagangForm({...magangForm, mitraBidang: e.target.value})}
@@ -733,6 +793,7 @@ function StudentDashboard({ user, onLogout }) {
                       <textarea 
                         rows="2" 
                         required
+                        readOnly={Boolean(magangForm.mitraIndustriId)}
                         placeholder="Masukkan alamat lengkap kantor mitra"
                         value={magangForm.mitraAlamat}
                         onChange={(e) => setMagangForm({...magangForm, mitraAlamat: e.target.value})}
@@ -780,21 +841,27 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
                         <label>Dosen Pembimbing (DPL)</label>
-                        <select 
-                          value={magangForm.dplId}
-                          onChange={(e) => setMagangForm({...magangForm, dplId: e.target.value})}
-                          className="w-full rounded-xl border-2 border-[#191b23] bg-white px-3 py-2 outline-none focus:shadow-[2px_2px_0_#9f149f]"
-                        >
-                          {MOCK_DPL_LIST.map(dpl => (
-                            <option key={dpl.id} value={dpl.id}>{dpl.nama}</option>
-                          ))}
-                        </select>
+                         <select
+                           required
+                           value={magangForm.dplId}
+                           onChange={(e) => {
+                             const dpl = db.dpls?.find((item) => String(item.id) === e.target.value)
+                             setMagangForm({ ...magangForm, dplId: e.target.value, dplNama: dpl?.name || '' })
+                           }}
+                           className="w-full rounded-xl border-2 border-[#191b23] bg-white px-3 py-2 outline-none focus:shadow-[2px_2px_0_#9f149f]"
+                         >
+                           <option value="">Pilih DPL</option>
+                           {(db.dpls || []).map((dpl) => (
+                             <option key={dpl.id} value={dpl.id}>{dpl.name} ({dpl.email})</option>
+                           ))}
+                         </select>
                       </div>
                       <div className="space-y-1.5">
                         <label>Nama Supervisor Mitra</label>
                         <input 
                           type="text" 
                           required
+                          readOnly={Boolean(magangForm.supervisorMitraId)}
                           placeholder="Contoh: Budi Santoso"
                           value={magangForm.supervisorNama}
                           onChange={(e) => setMagangForm({...magangForm, supervisorNama: e.target.value})}
@@ -809,6 +876,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="email" 
                           required
+                          readOnly={Boolean(magangForm.supervisorMitraId)}
                           placeholder="Contoh: supervisor@mitra.com"
                           value={magangForm.supervisorEmail}
                           onChange={(e) => setMagangForm({...magangForm, supervisorEmail: e.target.value})}
@@ -820,6 +888,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="tel" 
                           required
+                          readOnly={Boolean(magangForm.supervisorMitraId)}
                           placeholder="Contoh: 0812xxxxxxxx"
                           value={magangForm.supervisorHp}
                           onChange={(e) => setMagangForm({...magangForm, supervisorHp: e.target.value})}
@@ -1346,7 +1415,7 @@ function StudentDashboard({ user, onLogout }) {
                   <div className="space-y-1"><span className="text-gray-400">NAMA:</span> {profileForm.nama}</div>
                   <div className="space-y-1"><span className="text-gray-400">NIM:</span> {profileForm.nim}</div>
                   <div className="space-y-1"><span className="text-gray-400">MITRA:</span> {db.magang.mitraNama}</div>
-                  <div className="space-y-1"><span className="text-gray-400">DPL:</span> {MOCK_DPL_LIST.find(d => d.id === db.magang.dplId)?.nama}</div>
+                  <div className="space-y-1"><span className="text-gray-400">DPL:</span> {db.magang.dpl?.name || db.magang.dplNama || 'Belum ditugaskan'}</div>
                   <div className="space-y-1"><span className="text-gray-400">PERIODE:</span> {db.magang.periodeMulai} s.d {db.magang.periodeSelesai}</div>
                 </div>
 
