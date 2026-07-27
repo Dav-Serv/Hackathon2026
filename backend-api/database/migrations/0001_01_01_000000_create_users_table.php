@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('nim_nip')->unique();
-            $table->string('no_hp');
-            $table->text('alamat');
+            $table->string('nim_nip')->unique()->nullable();
+            $table->string('no_hp')->nullable();
+            $table->text('alamat')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('role', ['admin_prodi', 'kaprodi', 'dpl', 'mahasiswa'])->default('mahasiswa');
