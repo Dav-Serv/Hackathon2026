@@ -5,7 +5,7 @@ function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
-function RegisterMahasiswa({ onBack, onLogin }) {
+function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
   const [form, setForm] = useState({
     name: '',
     nim_nip: '',
@@ -30,7 +30,7 @@ function RegisterMahasiswa({ onBack, onLogin }) {
     api.post('/register', form)
       .then(({ data }) => {
         localStorage.setItem('auth_token', data.access_token)
-        onLogin()
+        onRegisterSuccess(data.user)
       })
       .catch((error) => setErrorMessage(getApiError(error)))
       .finally(() => setIsLoading(false))
