@@ -65,10 +65,17 @@ export default function DashboardAdminProdi({ user, onLogout }) {
     }
   }
 
-  const issueLetter = async (letter) => {
+  const issueLetter = async (letter, file) => {
+    if (!file) {
+      showToast('Pilih file surat pengantar PDF terlebih dahulu.', 'error')
+      return
+    }
     try {
-      await api.post(`/admin/surat-pengantar/${letter.id}/terbitkan`, { status: 'disetujui' })
-      setTabData(prev => ({ ...prev, letters: prev.letters.map(item => item.id === letter.id ? { ...item, status: 'disetujui' } : item) }))
+      const payload = new FormData()
+      payload.append('status', 'disetujui')
+      payload.append('file', file)
+      const { data } = await api.post(`/admin/surat-pengantar/${letter.id}/terbitkan`, payload, { headers: { 'Content-Type': 'multipart/form-data' } })
+      setTabData(prev => ({ ...prev, letters: prev.letters.map(item => item.id === letter.id ? data : item) }))
       showToast('Surat pengantar berhasil diterbitkan.')
     } catch (error) {
       showToast(getApiError(error), 'error')
@@ -591,7 +598,7 @@ export default function DashboardAdminProdi({ user, onLogout }) {
               {tabLoading && <p className="text-xs font-bold text-gray-500">Memuat data...</p>}
               {tabError && <p className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-xs font-bold text-[#93000a]">{tabError}</p>}
               {activeTab === 'data-master' && !tabLoading && <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-3">Kode</th><th className="p-3">Mata Kuliah</th><th className="p-3">SKS</th><th className="p-3">Sumber</th></tr></thead><tbody className="divide-y">{tabData.courses.map(course => <tr key={course.id}><td className="p-3 font-mono">{course.kode_mk}</td><td className="p-3">{course.nama_mk}</td><td className="p-3">{course.sks}</td><td className="p-3">{course.sumber || '-'}</td></tr>)}</tbody></table></div>}
-              {activeTab === 'surat' && !tabLoading && <div className="space-y-3">{tabData.letters.map(letter => <div key={letter.id} className="flex flex-wrap items-center justify-between gap-3 border-2 border-[#191b23] p-4 text-xs font-bold"><span>{letter.magang?.mahasiswa?.name || letter.magang?.mahasiswa?.nama || `Surat #${letter.id}`}</span><span className="uppercase">{letter.status}</span>{letter.status !== 'disetujui' && <button onClick={() => issueLetter(letter)} className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Terbitkan</button>}</div>)}</div>}
+              {activeTab === 'surat' && !tabLoading && <div className="space-y-3">{tabData.letters.map(letter => <div key={letter.id} className="flex flex-wrap items-center justify-between gap-3 border-2 border-[#191b23] p-4 text-xs font-bold"><span>{letter.magang?.mahasiswa?.name || letter.magang?.mahasiswa?.nama || `Surat #${letter.id}`}</span><span className="uppercase">{letter.status}</span>{letter.status !== 'disetujui' && <label className="flex items-center gap-2"><input type="file" accept="application/pdf,.pdf" onChange={event => { const file = event.target.files?.[0]; if (file) issueLetter(letter, file) }} className="max-w-[180px] text-[10px]" /><span className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Pilih PDF & Terbitkan</span></label>}</div>)}</div>}
               {activeTab === 'laporan' && !tabLoading && <div className="grid gap-4 sm:grid-cols-3">{Object.entries(tabData.dashboard || {}).slice(0, 6).map(([key, value]) => <div key={key} className="border-2 border-[#191b23] p-4"><p className="text-[10px] font-black uppercase">{key.replaceAll('_', ' ')}</p><strong className="text-2xl">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</strong></div>)}</div>}
               {activeTab === 'konversi-mk' && <p className="text-sm font-bold">Gunakan ekspor hasil konversi untuk melihat pemetaan nilai terbaru.</p>}
               {activeTab === 'pengaturan' && <div className="grid gap-3 sm:grid-cols-2 text-sm font-bold">{[['Nama', user?.name || user?.nama], ['Email', user?.email], ['NIM/NIP', user?.nim_nip || user?.nim], ['Peran', user?.role]].map(([label, value]) => <div key={label} className="border-2 border-[#191b23] p-4"><span className="block text-[10px] uppercase text-gray-500">{label}</span>{value || '-'}</div>)}</div>}
