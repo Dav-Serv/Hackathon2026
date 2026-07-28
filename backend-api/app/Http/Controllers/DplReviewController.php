@@ -54,7 +54,7 @@ class DplReviewController extends Controller
     {
         $klaims = KlaimKonversi::query()
             ->with(['magang.mahasiswa', 'magang.mitraIndustri', 'magang.supervisorMitra', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl'])
-            ->where('status', 'menunggu_review_dpl')
+            ->whereIn('status', ['menunggu_review_dpl', 'disetujui'])
             ->whereHas('magang', fn ($query) => $query->where('dpl_id', $request->user()->id))
             ->latest()
             ->paginate($request->integer('per_page', 15));
