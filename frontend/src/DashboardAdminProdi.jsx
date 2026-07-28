@@ -157,7 +157,7 @@ export default function DashboardAdminProdi({ user, onLogout }) {
           <div className="bg-[#9f149f] border-b-3 border-[#191b23] h-16 flex items-center px-6 text-white font-bold text-xl justify-between">
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white text-[#9f149f]"><Icon className="text-[18px]">sync_alt</Icon></span>
-              <span className="tracking-tight uppercase">GradeSync</span>
+              <span className="tracking-tight uppercase">Informatics</span>
             </div>
             <button className="text-white hover:opacity-80" onClick={() => setIsSidebarOpen(false)}>
               <Icon>close</Icon>
@@ -198,7 +198,7 @@ export default function DashboardAdminProdi({ user, onLogout }) {
         <div className="p-4 border-t-3 border-[#191b23] bg-purple-50/50 space-y-3">
           <div className="flex items-center gap-2 font-black text-[10px] uppercase tracking-wider text-[#9f149f]">
             <Icon className="text-base">verified_user</Icon>
-            GradeSync Admin Portal
+            Informatics Admin Portal
           </div>
           
           <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
