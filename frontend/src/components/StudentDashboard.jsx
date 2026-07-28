@@ -414,12 +414,10 @@ function StudentDashboard({ user, onLogout }) {
       payload.append('logbook_file', files.logbook)
       payload.append('laporan_file', files.laporan)
       payload.append('sertifikat_file', files.sertifikat)
-      db.usulan.details.forEach((detail, idx) => {
-        payload.append(`details[${idx}][usulan_konversi_detail_id]`, detail.id)
-        payload.append(`details[${idx}][bukti_aktivitas_text]`, klaimDetailsInput[idx] || '')
-        const evidence = files[`cpmk-${idx}`]
-        if (evidence) payload.append(`details[${idx}][bukti_file]`, evidence)
-      })
+       db.usulan.details.forEach((detail, idx) => {
+         payload.append(`details[${idx}][usulan_konversi_detail_id]`, detail.id)
+         payload.append(`details[${idx}][bukti_aktivitas_text]`, klaimDetailsInput[idx] || '')
+       })
       await api.post('/klaim-konversi', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
       await loadDashboard()
       showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
@@ -1259,7 +1257,7 @@ function StudentDashboard({ user, onLogout }) {
                        }`}>{getStatusLabel(db.klaim.status)}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-600 font-semibold leading-relaxed">
-                      {db.klaim.status === 'belum_diajukan' && 'Unggah laporan akhir magang, logbook, dan sertifikat, serta cantumkan bukti pencapaian tugas untuk masing-masing CPMK yang diusulkan.'}
+                       {db.klaim.status === 'belum_diajukan' && 'Unggah laporan akhir magang, logbook, dan sertifikat, lalu uraikan pencapaian tugas untuk masing-masing CPMK yang diusulkan.'}
                       {db.klaim.status === 'menunggu_penilaian_mitra' && 'Sistem telah mengirimkan token penilaian otomatis ke email supervisor industri. Harap menunggu penilaian masuk.'}
                       {db.klaim.status === 'menunggu_review_dpl' && 'Supervisor mitra telah memasukkan penilaian. Sekarang menunggu DPL memberikan penilaian akademis akhir.'}
                       {db.klaim.status === 'disetujui' && 'Selamat! Seluruh penilaian selesai dimasukkan. Silakan ke tab "Hasil Konversi" untuk mengunduh transkrip nilai Anda.'}
@@ -1331,11 +1329,7 @@ function StudentDashboard({ user, onLogout }) {
                                 })}
                                 className="w-full resize-none rounded-xl border-2 border-[#191b23] bg-white p-3 text-xs font-bold outline-none"
                               />
-                              <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-white px-3 py-2 text-[10px] font-black text-slate-500 hover:border-[#9f149f] hover:text-[#9f149f]">
-                                <Icon className="text-base">attach_file</Icon>
-                                {selectedFiles[`cpmk-${idx}`]?.name || 'Lampirkan bukti CPMK'}
-                                <input className="sr-only" type="file" accept=".pdf,.zip,.rar,image/*" onChange={(e) => handleFileSelect(e, `cpmk-${idx}`)} />
-                              </label>
+
                             </div>
                           </div>
                         )
