@@ -75,9 +75,11 @@ function StudentDashboard({ user, onLogout }) {
 
   const [masterMataKuliah, setMasterMataKuliah] = useState([])
   const [suratPengantar, setSuratPengantar] = useState(null)
+  const [suratLoading, setSuratLoading] = useState(true)
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true)
+    setSuratLoading(true)
     setLoadError('')
 
     try {
@@ -104,6 +106,7 @@ function StudentDashboard({ user, onLogout }) {
     } catch (error) {
       setLoadError(getApiError(error))
     } finally {
+      setSuratLoading(false)
       setIsLoading(false)
     }
   }, [normalizeDashboard])
@@ -490,8 +493,8 @@ function StudentDashboard({ user, onLogout }) {
         }`}>
           <Icon>{toast.type === 'error' ? 'error' : toast.type === 'info' ? 'info' : 'check_circle'}</Icon>
           <span>{toast.message}</span>
-        </div>
-      )}
+               </div>
+            )}
 
       {/* Backdrop overlay when sidebar is open */}
       {isSidebarOpen && (
@@ -595,25 +598,25 @@ function StudentDashboard({ user, onLogout }) {
               <Icon className="text-xl text-[#9f149f]">notifications</Icon>
               {notifications.length > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-[#191b23] bg-red-500 px-1 text-[9px] font-black text-white">{notifications.length}</span>}
             </button>
-            {showNotifications && (
-              <div className="absolute right-14 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border-2 border-[#191b23] bg-white p-3 shadow-[5px_5px_0_#191b23]">
-                <div className="mb-2 flex items-center justify-between border-b border-slate-200 pb-2">
-                  <span className="text-xs font-black uppercase">Notifikasi</span>
-                  <span className="text-[10px] font-bold text-[#9f149f]">1 belum dibaca</span>
+             {showNotifications && (
+               <div className="absolute right-14 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border-2 border-[#191b23] bg-white p-3 shadow-[5px_5px_0_#191b23]">
+                 <div className="mb-2 flex items-center justify-between border-b border-slate-200 pb-2">
+                   <span className="text-xs font-black uppercase">Notifikasi</span>
+                   <span className="text-[10px] font-bold text-[#9f149f]">1 belum dibaca</span>
+                 </div>
+                 <div className="space-y-2">
+                   {notifications.map(notification => (
+                     <div key={notification.id} className={`rounded-lg border p-2 ${notification.unread ? 'border-purple-200 bg-purple-50' : 'border-slate-200 bg-slate-50'}`}>
+                       <div className="flex items-start justify-between gap-2">
+                         <p className="text-[11px] font-black">{notification.title}</p>
+                         <span className="shrink-0 text-[9px] font-bold text-slate-400">{notification.time}</span>
+                       </div>
+                       <p className="mt-1 text-[10px] font-semibold text-slate-600">{notification.text}</p>
+                     </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {notifications.map(notification => (
-                    <div key={notification.id} className={`rounded-lg border p-2 ${notification.unread ? 'border-purple-200 bg-purple-50' : 'border-slate-200 bg-slate-50'}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[11px] font-black">{notification.title}</p>
-                        <span className="shrink-0 text-[9px] font-bold text-slate-400">{notification.time}</span>
-                      </div>
-                      <p className="mt-1 text-[10px] font-semibold text-slate-600">{notification.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
             <div 
               onClick={() => changeTab('profile')}
               className="flex items-center gap-2 cursor-pointer hover:opacity-85"
@@ -988,6 +991,15 @@ function StudentDashboard({ user, onLogout }) {
 
           {activeTab === 'surat' && (
             <div className="space-y-6 animate-fadeIn">
+              {suratLoading ? (
+                <div className="flex min-h-64 items-center justify-center rounded-2xl border-[3px] border-[#191b23] bg-white p-8 shadow-[6px_6px_0_#191b23]">
+                  <div className="text-center">
+                    <span className="mx-auto block h-12 w-12 animate-spin rounded-full border-4 border-[#e1e2ed] border-t-[#9f149f]" />
+                    <p className="mt-4 text-sm font-bold text-slate-600">Memuat surat pengantar...</p>
+                    <p className="mt-1 text-xs text-slate-400">Mengambil status penerbitan terbaru.</p>
+                  </div>
+                </div>
+              ) : (
               <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23]">
                 <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-slate-100 pb-4">
                   <div>
@@ -1011,10 +1023,11 @@ function StudentDashboard({ user, onLogout }) {
                 </div>
 <div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 p-5 text-center">
                    {suratPengantar?.status === 'disetujui' ? <button type="button" onClick={async () => { try { const { data } = await api.get(`/surat-pengantar/${suratPengantar.id}/download`); window.open(data.url, '_blank') } catch (error) { showToast(getApiError(error), 'error') } }} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-5 py-2 text-xs font-bold text-white">Preview / Unduh Surat</button> : <><Icon className="text-4xl text-slate-300">mail_lock</Icon><p className="mt-2 text-xs font-black">Surat pengantar belum diterbitkan</p><p className="mt-1 text-[10px] font-semibold text-slate-500">Admin akan menerbitkan surat setelah pengajuan disetujui.</p></>}
-                 </div>
+                </div>
+               </div>
+                )}
               </div>
-            </div>
-          )}
+           )}
 
           {/* ============================================================== */}
           {/* TAB 2: USULAN FORM */}
