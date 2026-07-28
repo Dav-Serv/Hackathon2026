@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { Fragment, useState, useEffect, useCallback } from 'react'
 import api, { getApiError } from '../lib/api'
 
 function Icon({ children, className = '' }) {
@@ -321,6 +321,8 @@ function StudentDashboard({ user, onLogout }) {
 
   // --- 2. Aksi Usulan Konversi ---
   const [selectedMkId, setSelectedMkId] = useState('')
+  const [isMkDropdownOpen, setIsMkDropdownOpen] = useState(false)
+  const [expandedDraftMks, setExpandedDraftMks] = useState({})
   const [tempSelectedCpmk, setTempSelectedCpmk] = useState([]) // array of cpmkId
   const [tempRencanaAktivitas, setTempRencanaAktivitas] = useState({}) // cpmkId -> text
   const [draftUsulanDetails, setDraftUsulanDetails] = useState(db.usulan.details || [])
@@ -412,12 +414,10 @@ function StudentDashboard({ user, onLogout }) {
       payload.append('logbook_file', files.logbook)
       payload.append('laporan_file', files.laporan)
       payload.append('sertifikat_file', files.sertifikat)
-      db.usulan.details.forEach((detail, idx) => {
-        payload.append(`details[${idx}][usulan_konversi_detail_id]`, detail.id)
-        payload.append(`details[${idx}][bukti_aktivitas_text]`, klaimDetailsInput[idx] || '')
-        const evidence = files[`cpmk-${idx}`]
-        if (evidence) payload.append(`details[${idx}][bukti_file]`, evidence)
-      })
+       db.usulan.details.forEach((detail, idx) => {
+         payload.append(`details[${idx}][usulan_konversi_detail_id]`, detail.id)
+         payload.append(`details[${idx}][bukti_aktivitas_text]`, klaimDetailsInput[idx] || '')
+       })
       await api.post('/klaim-konversi', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
       await loadDashboard()
       showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
@@ -1074,20 +1074,16 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="space-y-4 text-xs font-bold">
                       <div className="space-y-1.5">
                         <label className="text-gray-500">Pilih Mata Kuliah Pilihan</label>
-                        <select 
-                          value={selectedMkId}
-                          onChange={(e) => {
-                            setSelectedMkId(e.target.value)
-                            setTempSelectedCpmk([])
-                            setTempRencanaAktivitas({})
-                          }}
-                          className="w-full rounded-xl border-2 border-[#191b23] bg-white px-3 py-2.5 outline-none"
-                        >
-                          <option value="">-- Pilih Mata Kuliah --</option>
-                          {masterMataKuliah.map(mk => (
-                            <option key={mk.id} value={mk.id}>{mk.kode} - {mk.nama} ({mk.sks} SKS)</option>
-                          ))}
-                        </select>
+                        <div className="relative">
+                          <button type="button" onClick={() => setIsMkDropdownOpen(prev => !prev)} className="flex w-full items-center justify-between rounded-xl border-2 border-[#191b23] bg-white px-3 py-2.5 text-left outline-none" aria-expanded={isMkDropdownOpen}>
+                            <span>{masterMataKuliah.find(m => m.id === String(selectedMkId)) ? `${masterMataKuliah.find(m => m.id === String(selectedMkId)).kode} - ${masterMataKuliah.find(m => m.id === String(selectedMkId)).nama} (${masterMataKuliah.find(m => m.id === String(selectedMkId)).sks} SKS)` : '-- Pilih Mata Kuliah --'}</span>
+                            <Icon className="text-base">{isMkDropdownOpen ? 'expand_less' : 'expand_more'}</Icon>
+                          </button>
+                          {isMkDropdownOpen && <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border-2 border-[#191b23] bg-white shadow-[4px_4px_0_#191b23]">
+                            <button type="button" onClick={() => { setSelectedMkId(''); setTempSelectedCpmk([]); setTempRencanaAktivitas({}); setIsMkDropdownOpen(false) }} className="block w-full px-3 py-2 text-left text-xs font-bold hover:bg-purple-50">-- Pilih Mata Kuliah --</button>
+                            {masterMataKuliah.map(mk => <button type="button" key={mk.id} onClick={() => { setSelectedMkId(mk.id); setTempSelectedCpmk([]); setTempRencanaAktivitas({}); setIsMkDropdownOpen(false) }} className="block w-full px-3 py-2 text-left text-xs font-bold hover:bg-purple-50">{mk.kode} - {mk.nama} ({mk.sks} SKS)</button>)}
+                          </div>}
+                        </div>
                       </div>
 
                       {selectedMkId && (
@@ -1171,31 +1167,19 @@ function StudentDashboard({ user, onLogout }) {
                               </tr>
                             </thead>
                             <tbody>
-                              {draftUsulanDetails.map((detail, idx) => {
-                                const mk = masterMataKuliah.find(m => m.id === detail.mkId)
-                                const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
-                                return (
-                                  <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 text-xs font-bold">
-                                    <td className="p-3">
-                                     <div className="text-[#9f149f]">{mk?.kode || mk?.kode_mk || 'MK'}</div>
-                                       <div>{mk?.nama || mk?.nama_mk || 'Mata kuliah belum tersedia'}</div>
-                                      <span className="inline-block bg-slate-200 text-slate-700 font-extrabold px-1 rounded mt-0.5">{mk?.sks} SKS</span>
-                                    </td>
-                                    <td className="p-3">
-                                      <span className="font-extrabold bg-purple-100 text-[#9f149f] px-1.5 py-0.5 rounded">{cpmk?.kode}</span>
-                                    </td>
-                                    <td className="p-3 font-mono text-gray-500 max-w-xs whitespace-pre-wrap">{detail.deskripsiRencana}</td>
-                                    <td className="p-3 text-center">
-                                      <button 
-                                        type="button"
-                                        onClick={() => handleRemoveUsulanDetail(idx)}
-                                        className="rounded-lg border-2 border-[#191b23] bg-red-100 p-1.5 text-red-600 shadow-[1.5px_1.5px_0_#191b23] hover:translate-y-0.5 active:shadow-none"
-                                      >
-                                        <Icon className="text-sm font-bold">delete</Icon>
-                                      </button>
-                                    </td>
+                              {[...new Map(draftUsulanDetails.map(detail => [String(detail.mkId), draftUsulanDetails.filter(item => String(item.mkId) === String(detail.mkId))])).entries()].map(([mkId, details]) => {
+                                const mk = masterMataKuliah.find(m => String(m.id) === mkId)
+                                return <Fragment key={mkId}>
+                                  <tr className="cursor-pointer border-b border-slate-100 bg-slate-50 text-xs font-bold hover:bg-purple-50" onClick={() => setExpandedDraftMks(prev => ({ ...prev, [mkId]: !prev[mkId] }))}>
+                                    <td className="p-3" colSpan="3"><div className="flex items-center gap-2"><Icon>{expandedDraftMks[mkId] ? 'expand_less' : 'expand_more'}</Icon><div><div className="text-[#9f149f]">{mk?.kode || 'MK'}</div><div>{mk?.nama || 'Mata kuliah belum tersedia'}</div><span className="inline-block rounded bg-slate-200 px-1 font-extrabold">{mk?.sks} SKS · {details.length} CPMK</span></div></div></td>
+                                    <td className="p-3 text-center text-[10px]">{expandedDraftMks[mkId] ? '' : 'Klik untuk melihat'}</td>
                                   </tr>
-                                )
+                                  {expandedDraftMks[mkId] && details.map(detail => {
+                                    const idx = draftUsulanDetails.indexOf(detail)
+                                    const cpmk = mk?.cpmk.find(c => String(c.id) === String(detail.cpmkId))
+                                    return <tr key={`${mkId}-${detail.cpmkId}`} className="border-b border-slate-100 text-xs font-bold"><td className="p-3 pl-10 text-[#9f149f]">{cpmk?.kode || 'CPMK'}</td><td className="p-3 text-slate-600">{detail.deskripsiRencana}</td><td className="p-3" colSpan="2"><button type="button" onClick={(event) => { event.stopPropagation(); handleRemoveUsulanDetail(idx) }} className="rounded-lg border-2 border-[#191b23] bg-red-100 p-1.5 text-red-600"><Icon className="text-sm">delete</Icon></button></td></tr>
+                                  })}
+                                </Fragment>
                               })}
                             </tbody>
                           </table>
@@ -1226,25 +1210,21 @@ function StudentDashboard({ user, onLogout }) {
                           <th className="p-3">Rencana Tugas / Aktivitas</th>
                         </tr>
                       </thead>
-                      <tbody>
-                         {db.usulan.details.map((detail, idx) => {
-                           const mk = masterMataKuliah.find(m => String(m.id) === String(detail.mkId)) || detail.mataKuliah || detail.mata_kuliah
-                           const cpmk = mk?.cpmk?.find(c => String(c.id) === String(detail.cpmkId)) || detail.cpmk
-                           return (
-                            <tr key={idx} className="border-b border-slate-100 last:border-0 text-xs font-bold">
-                              <td className="p-3">
-                                <div className="text-[#9f149f]">{mk?.kode}</div>
-                                <div>{mk?.nama}</div>
-                                <span className="inline-block bg-slate-200 text-slate-700 font-extrabold px-1 rounded mt-0.5">{mk?.sks} SKS</span>
-                              </td>
-                              <td className="p-3">
-                                <span className="font-extrabold bg-purple-100 text-[#9f149f] px-1.5 py-0.5 rounded">{cpmk?.kode}</span>
-                              </td>
-                              <td className="p-3 font-mono text-gray-500 whitespace-pre-wrap">{detail.deskripsiRencana}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
+                       <tbody>
+                         {[...new Map(db.usulan.details.map(detail => [String(detail.mkId), db.usulan.details.filter(item => String(item.mkId) === String(detail.mkId))])).entries()].map(([mkId, details]) => {
+                           const mk = masterMataKuliah.find(m => String(m.id) === mkId) || details[0]?.mataKuliah || details[0]?.mata_kuliah
+                           return <Fragment key={mkId}>
+                             <tr className="cursor-pointer border-b border-slate-100 bg-slate-50 text-xs font-bold hover:bg-purple-50" onClick={() => setExpandedDraftMks(prev => ({ ...prev, [`active-${mkId}`]: !prev[`active-${mkId}`] }))}>
+                               <td className="p-3" colSpan="2"><div className="flex items-center gap-2"><Icon>{expandedDraftMks[`active-${mkId}`] ? 'expand_less' : 'expand_more'}</Icon><div><div className="text-[#9f149f]">{mk?.kode || 'MK'}</div><div>{mk?.nama || 'Mata kuliah belum tersedia'}</div><span className="inline-block rounded bg-slate-200 px-1 font-extrabold">{mk?.sks} SKS · {details.length} CPMK</span></div></div></td>
+                               <td className="p-3 text-[10px]">{expandedDraftMks[`active-${mkId}`] ? '' : 'Klik untuk melihat'}</td>
+                             </tr>
+                             {expandedDraftMks[`active-${mkId}`] && details.map(detail => {
+                               const cpmk = mk?.cpmk?.find(c => String(c.id) === String(detail.cpmkId)) || detail.cpmk
+                               return <tr key={`${mkId}-${detail.cpmkId}`} className="border-b border-slate-100 text-xs font-bold"><td className="p-3 pl-10 text-[#9f149f]">{cpmk?.kode || 'CPMK'}</td><td className="p-3" colSpan="2"><span className="font-mono text-slate-600">{detail.deskripsiRencana}</span></td></tr>
+                             })}
+                           </Fragment>
+                         })}
+                       </tbody>
                     </table>
                   </div>
                 </div>
@@ -1277,7 +1257,7 @@ function StudentDashboard({ user, onLogout }) {
                        }`}>{getStatusLabel(db.klaim.status)}</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-600 font-semibold leading-relaxed">
-                      {db.klaim.status === 'belum_diajukan' && 'Unggah laporan akhir magang, logbook, dan sertifikat, serta cantumkan bukti pencapaian tugas untuk masing-masing CPMK yang diusulkan.'}
+                       {db.klaim.status === 'belum_diajukan' && 'Unggah laporan akhir magang, logbook, dan sertifikat, lalu uraikan pencapaian tugas untuk masing-masing CPMK yang diusulkan.'}
                       {db.klaim.status === 'menunggu_penilaian_mitra' && 'Sistem telah mengirimkan token penilaian otomatis ke email supervisor industri. Harap menunggu penilaian masuk.'}
                       {db.klaim.status === 'menunggu_review_dpl' && 'Supervisor mitra telah memasukkan penilaian. Sekarang menunggu DPL memberikan penilaian akademis akhir.'}
                       {db.klaim.status === 'disetujui' && 'Selamat! Seluruh penilaian selesai dimasukkan. Silakan ke tab "Hasil Konversi" untuk mengunduh transkrip nilai Anda.'}
@@ -1349,11 +1329,7 @@ function StudentDashboard({ user, onLogout }) {
                                 })}
                                 className="w-full resize-none rounded-xl border-2 border-[#191b23] bg-white p-3 text-xs font-bold outline-none"
                               />
-                              <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-white px-3 py-2 text-[10px] font-black text-slate-500 hover:border-[#9f149f] hover:text-[#9f149f]">
-                                <Icon className="text-base">attach_file</Icon>
-                                {selectedFiles[`cpmk-${idx}`]?.name || 'Lampirkan bukti CPMK'}
-                                <input className="sr-only" type="file" accept=".pdf,.zip,.rar,image/*" onChange={(e) => handleFileSelect(e, `cpmk-${idx}`)} />
-                              </label>
+
                             </div>
                           </div>
                         )

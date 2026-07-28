@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import api, { getApiError } from './lib/api'
 import CursorGrid from './components/CursorGrid'
+import amikomLogo from './assets/amikom-logo.png'
 import RegisterMahasiswa from './RegisterMahasiswa.jsx'
 import StudentDashboard from './components/StudentDashboard.jsx'
 import DashboardDosen from './DashboardDPL.jsx'
@@ -296,11 +297,11 @@ function App() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23] [background-image:radial-gradient(#e1e2ed_1px,transparent_1px)] [background-size:24px_24px]">
-      <header className="fixed left-0 top-4 md:top-8 z-50 flex w-full justify-center px-4">
-        <nav className="flex h-14 items-center gap-2 sm:gap-5 md:gap-8 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-2 sm:px-6 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30">
-          <a href="#beranda" onClick={() => setActiveNav('beranda')} className="group flex items-center gap-1.5 sm:gap-2">
+      <header className="fixed left-0 top-8 z-50 flex w-full justify-center px-4">
+        <nav className="flex h-14 items-center gap-5 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
+          <a href="#beranda" onClick={() => setActiveNav('beranda')} className="group flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#191b23] bg-[#9f149f] text-white transition group-hover:scale-110"><Icon className="text-[14px]">{icons.logo}</Icon></span>
-            <span className="hidden sm:inline text-[11px] font-bold uppercase tracking-[.18em]">Informatics</span>
+            <span className="text-[11px] font-bold uppercase tracking-[.18em]">Informatics</span>
           </a>
           <div className="flex items-center gap-0.5 sm:gap-1">
             <a href="#beranda" onClick={() => setActiveNav('beranda')} className={navLinkClass('beranda')}>Beranda</a>
@@ -451,43 +452,7 @@ function App() {
         </section>
       </main>
 
-      <footer className="border-t-4 border-[#191b23] bg-[#ededf9] px-5 py-12 sm:py-16 md:px-16">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 lg:flex-row">
-          <div className="max-w-md">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#191b23] bg-[#004ac6] text-white"><Icon>school</Icon></span>
-              <span className="text-2xl font-semibold">S1 - Informatics</span>
-            </div>
-            <p className="text-sm sm:text-base leading-relaxed text-[#434655]">Program Studi S1 Informatika Universitas AMIKOM Yogyakarta.</p>
-          </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex flex-col gap-3">
-              <b className="text-xs uppercase tracking-widest">Kontak</b>
-              <a className="text-sm text-[#434655] hover:text-[#004ac6]" href="mailto:informatika@amikom.ac.id">informatika@amikom.ac.id</a>
-              <a className="text-sm text-[#434655] hover:text-[#004ac6]" href="mailto:amikom@amikom.ac.id">amikom@amikom.ac.id</a>
-              <a className="text-sm text-[#434655] hover:text-[#004ac6]" href="mailto:suport@amikom.ac.id">suport@amikom.ac.id</a>
-            </div>
-            <div className="flex flex-col gap-3">
-              <b className="text-xs uppercase tracking-widest">Telepon & Hotline</b>
-              <a className="text-sm text-[#434655] hover:text-[#004ac6]" href="tel:+62274884201">(0274) 884201 - 207</a>
-              <span className="text-sm text-[#434655]">Fax (0274) 884208</span>
-              <a className="text-sm text-[#434655] hover:text-[#004ac6]" href="tel:+628112503444">WA Fasilkom: +62 811-2503-444</a>
-              <a className="text-sm text-[#434655] hover:text-[#004ac6]" href="tel:+6285253444999">WA Pusat: 08525-3444-999</a>
-            </div>
-            <div className="flex flex-col gap-3">
-              <b className="text-xs uppercase tracking-widest">Alamat</b>
-              <span className="text-sm text-[#434655]">Jl. Ring Road Utara,<br />Condong Catur, Sleman,<br />Yogyakarta, 55283</span>
-            </div>
-          </div>
-        </div>
-        <div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-4 border-t-2 border-[#191b23]/20 pt-5 text-xs sm:text-sm text-[#434655] md:flex-row">
-          <span>© 2026 Universitas AMIKOM Yogyakarta. All rights reserved.</span>
-          <div className="flex gap-5">
-            <a href="#daftar">Privacy Policy</a>
-            <a href="#daftar">Terms of Service</a>
-          </div>
-        </div>
-      </footer>
+      <footer className="border-t-4 border-[#191b23] bg-[#ededf9] px-5 py-16 md:px-16"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 md:flex-row"><div className="max-w-md"><div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#191b23] bg-[#004ac6] text-white"><Icon>school</Icon></span><span className="text-2xl font-semibold">S1 - Informatics</span></div><p className="leading-relaxed text-[#434655]">Program Studi S1 Informatika Universitas AMIKOM Yogyakarta.</p></div><div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Kontak</b><a className="text-[#434655] hover:text-[#004ac6]" href="mailto:informatika@amikom.ac.id">informatika@amikom.ac.id</a><a className="text-[#434655] hover:text-[#004ac6]" href="mailto:amikom@amikom.ac.id">amikom@amikom.ac.id</a><a className="text-[#434655] hover:text-[#004ac6]" href="mailto:suport@amikom.ac.id">suport@amikom.ac.id</a></div><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Telepon & Hotline</b><a className="text-[#434655] hover:text-[#004ac6]" href="tel:+62274884201">(0274) 884201 - 207</a><span className="text-[#434655]">Fax (0274) 884208</span><a className="text-[#434655] hover:text-[#004ac6]" href="tel:+628112503444">WA Fasilkom: +62 811-2503-444</a><a className="text-[#434655] hover:text-[#004ac6]" href="tel:+6285253444999">WA Pusat: 08525-3444-999</a></div><div className="flex flex-col gap-3"><b className="text-xs uppercase tracking-widest">Alamat</b><span className="text-[#434655]">Jl. Ring Road Utara,<br />Condong Catur, Sleman,<br />Yogyakarta, 55283</span></div></div></div><div className="mx-auto mt-12 flex max-w-7xl flex-col justify-between gap-4 border-t-2 border-[#191b23]/20 pt-5 text-sm text-[#434655] md:flex-row"><span>© 2026 Universitas AMIKOM Yogyakarta. All rights reserved.</span><div className="flex gap-5"><a href="#daftar">Privacy Policy</a><a href="#daftar">Terms of Service</a></div></div></footer>
     </div>
   )
 }
