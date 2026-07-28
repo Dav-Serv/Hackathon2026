@@ -22,7 +22,7 @@ class MahasiswaDashboardController extends Controller
             ->sortByDesc('created_at')
             ->values();
         $klaims = $user->magangsAsMahasiswa()
-            ->with(['klaimKonversis.details', 'klaimKonversis.nilaiAkhirs.mataKuliah'])
+            ->with(['klaimKonversis.details', 'klaimKonversis.penilaianMitra', 'klaimKonversis.penilaianDpl', 'klaimKonversis.nilaiAkhirs.mataKuliah'])
             ->get()
             ->flatMap->klaimKonversis
             ->sortByDesc('created_at')

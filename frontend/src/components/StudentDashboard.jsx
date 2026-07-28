@@ -20,8 +20,10 @@ function StudentDashboard({ user, onLogout }) {
     const magang = data.magangs?.[0]
     const usulan = data.usulan_konversis?.[0]
     const klaim = data.klaim_konversis?.[0]
-    const mitra = klaim?.penilaian_mitra || klaim?.penilaianMitra
-    const dpl = klaim?.penilaian_dpl || klaim?.penilaianDpl
+    const mitraScores = klaim?.penilaian_mitra || klaim?.penilaianMitra || []
+    const dplScores = klaim?.penilaian_dpl || klaim?.penilaianDpl || []
+    const mitra = Array.isArray(mitraScores) ? (mitraScores.at(-1) || {}) : mitraScores
+    const dpl = Array.isArray(dplScores) ? (dplScores.at(-1) || {}) : dplScores
     const normalizeDetails = (details = []) => details.map((detail) => ({
       ...detail,
       mkId: String(detail.mkId || detail.mata_kuliah_id || detail.mataKuliah?.id || detail.mata_kuliah?.id || ''),
@@ -69,12 +71,14 @@ function StudentDashboard({ user, onLogout }) {
         mitra: {
           ...emptyState.penilaian.mitra,
           ...mitra,
-          nilai: mitra?.nilai ?? null,
+           nilai: mitra?.nilai ?? null,
+           submittedAt: mitra?.submitted_at || mitra?.submittedAt || null,
         },
         dpl: {
           ...emptyState.penilaian.dpl,
           ...dpl,
-          nilaiAkademik: dpl?.nilai_akademik ?? dpl?.nilaiAkademik ?? null,
+           nilaiAkademik: dpl?.nilai_akademik ?? dpl?.nilaiAkademik ?? null,
+           submittedAt: dpl?.submitted_at || dpl?.submittedAt || null,
         },
       },
     }
@@ -1423,7 +1427,7 @@ function StudentDashboard({ user, onLogout }) {
               </div>
 
               {/* Printable KHS Certificate card */}
-              <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 md:p-8 shadow-[8px_8px_0_#191b23] space-y-6 print:border-none print:shadow-none">
+              <div className="print-card rounded-2xl border-[3px] border-[#191b23] bg-white p-6 md:p-8 shadow-[8px_8px_0_#191b23] space-y-6 print:border-none print:shadow-none">
                 
                 <div className="text-center space-y-2 border-b-4 border-[#191b23] pb-5">
                   <div className="text-lg font-bold flex items-center justify-center gap-2">

@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/usulan-konversi', [DplReviewController::class, 'usulanIndex']);
         Route::post('/usulan-konversi/{usulanKonversi}/review', [DplReviewController::class, 'reviewUsulan']);
         Route::get('/klaim-konversi', [DplReviewController::class, 'klaimIndex']);
+        Route::get('/klaim-konversi/{klaimKonversi}/document/{jenis}', [DplReviewController::class, 'document']);
         Route::post('/klaim-konversi/{klaimKonversi}/review', [DplReviewController::class, 'reviewKlaim']);
     });
 

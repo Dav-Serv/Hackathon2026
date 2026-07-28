@@ -61,3 +61,21 @@ body {
   font-family: 'Space Grotesk', sans-serif;
 }
 
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  html, body { width: 210mm; min-height: 297mm; background: white !important; }
+  body { overflow: visible !important; }
+  body * { visibility: hidden; }
+  .print-card, .print-card * { visibility: visible; }
+  .print-card { position: absolute; inset: 0; width: 100%; margin: 0; padding: 0 !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+  .print-card table { width: 100%; table-layout: fixed; font-size: 9px; }
+  .print-card th, .print-card td { padding: 5px !important; word-break: normal; overflow-wrap: anywhere; }
+  .print-card th:nth-child(1), .print-card td:nth-child(1) { width: 11%; }
+  .print-card th:nth-child(2), .print-card td:nth-child(2) { width: 28%; }
+  .print-card th:nth-child(3), .print-card td:nth-child(3) { width: 8%; }
+  .print-card th:nth-child(4), .print-card td:nth-child(4), .print-card th:nth-child(5), .print-card td:nth-child(5), .print-card th:nth-child(6), .print-card td:nth-child(6) { width: 14%; }
+  .print-card th:nth-child(7), .print-card td:nth-child(7) { width: 11%; }
+  .print-card tr { break-inside: avoid; page-break-inside: avoid; }
+  .print-card > * { break-inside: avoid; page-break-inside: avoid; }
+}
+
