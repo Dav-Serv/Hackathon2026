@@ -57,7 +57,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#faf8ff] p-4 font-['Space_Grotesk',sans-serif] text-[#191b23] md:p-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#faf8ff] px-4 py-8 sm:px-6 sm:py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
       <div className="pointer-events-auto absolute inset-0 z-0 opacity-70" aria-hidden="true">
         <CursorGrid
           cellSize={70}
@@ -76,17 +76,17 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
         />
       </div>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
-        <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
-        <Icon className="absolute right-[10%] top-[15%] rotate-12 text-8xl opacity-20">school</Icon>
-        <Icon className="absolute bottom-[20%] left-[5%] -rotate-12 text-7xl opacity-20">auto_stories</Icon>
-        <div className="absolute left-12 top-1/4 flex h-24 w-24 rotate-[-5deg] items-center justify-center border-2 border-[#191b23] bg-[#a862a8] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">OBE READY?</div>
-        <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#f3dff3] p-2 text-center text-xs font-bold opacity-50 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
+        <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20 hidden md:block" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
+        <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25 hidden md:block" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
+        <Icon className="absolute right-[10%] top-[15%] rotate-12 text-8xl opacity-20 hidden md:inline-block">school</Icon>
+        <Icon className="absolute bottom-[20%] left-[5%] -rotate-12 text-7xl opacity-20 hidden md:inline-block">auto_stories</Icon>
+        <div className="absolute left-12 top-1/4 flex h-24 w-24 rotate-[-5deg] items-center justify-center border-2 border-[#191b23] bg-[#a862a8] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23] hidden lg:flex">OBE READY?</div>
+        <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#f3dff3] p-2 text-center text-xs font-bold opacity-50 shadow-[4px_4px_0_#191b23] hidden lg:flex">SYNC IT</div>
       </div>
 
       <div className="relative z-10 w-full max-w-lg">
-        <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] shadow-[8px_8px_0_#191b23]">
-          <div className="flex flex-col gap-6 p-8 pb-0">
+        <div className="overflow-hidden rounded-2xl sm:rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] shadow-[6px_6px_0_#191b23] sm:shadow-[8px_8px_0_#191b23]">
+          <div className="flex flex-col gap-6 p-5 sm:p-8 pb-0">
             <div>
               <button
                 className="inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
@@ -99,24 +99,24 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
             </div>
 
             <div>
-              <h1 className="mb-2 text-4xl font-bold leading-tight md:text-[40px] md:leading-tight">
+              <h1 className="mb-2 text-2xl sm:text-4xl font-bold leading-tight">
                 Registrasi Mahasiswa
               </h1>
-              <p className="text-base leading-[1.6] text-[#434655]">
+              <p className="text-sm sm:text-base leading-[1.6] text-[#434655]">
                 Lengkapi data diri Anda untuk memulai perjalanan akademik di OBE Informatics.
               </p>
             </div>
           </div>
 
-          <div className="p-8 pt-6">
-            <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="p-5 sm:p-8 pt-4 sm:pt-6">
+            <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-1.5">
                 <label className="ml-1 block text-sm font-bold tracking-[0.05em]" htmlFor="nama-lengkap">
                    Nama Lengkap
                 </label>
                 <input
                   required
-                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                   id="nama-lengkap"
                   name="namaLengkap"
                   placeholder="Masukkan nama lengkap Anda"
@@ -124,14 +124,14 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="ml-1 block text-sm font-bold tracking-[0.05em]" htmlFor="nim-nip">
                     NIM/NIP
                   </label>
                   <input
                     required
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                     id="nim-nip"
                     name="nimNip"
                     placeholder="Nomor Induk"
@@ -144,7 +144,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                   </label>
                   <input
                     required
-                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                    className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                     id="nomor-hp"
                     name="nomorHp"
                     placeholder="0812xxxx"
@@ -159,7 +159,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                 </label>
                 <input
                   required
-                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                  className="w-full rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                   id="email"
                   name="email"
                   placeholder="nama@email.com"
@@ -173,7 +173,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                 </label>
                 <textarea
                   required
-                  className="w-full resize-none rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                  className="w-full resize-none rounded-xl border-[3px] border-[#191b23] bg-white px-4 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                   id="alamat"
                   name="alamat"
                   placeholder="Masukkan alamat lengkap"
@@ -181,7 +181,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="ml-1 block text-sm font-bold tracking-[0.05em]" htmlFor="password">
                     Password
@@ -190,7 +190,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                     <input
                       required
                       minLength={6}
-                      className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                      className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                       id="password"
                       name="password"
                       placeholder="••••••••"
@@ -213,7 +213,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                     <input
                       required
                       minLength={6}
-                      className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
+                      className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]"
                       id="konfirmasi-password"
                       name="konfirmasiPassword"
                       placeholder="••••••••"
@@ -238,15 +238,15 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
 
               <button
                 disabled={isLoading}
-                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#861086] hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-85"
+                className="mt-2 w-full rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] py-3 sm:py-4 text-base sm:text-xl font-semibold text-white shadow-[4px_4px_0_#191b23] sm:shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#861086] hover:shadow-[8px_8px_0_#191b23] sm:hover:shadow-[10px_10px_0_#191b23] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-85"
                 type="submit"
               >
                 {isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}
               </button>
             </form>
 
-            <div className="mt-8 pb-2 text-center">
-              <p className="text-base leading-[1.6] text-[#434655]">
+            <div className="mt-6 sm:mt-8 pb-2 text-center">
+              <p className="text-sm sm:text-base leading-[1.6] text-[#434655]">
                 Sudah punya akun?{' '}
                 <button
                   className="font-bold text-[#9f149f] underline decoration-2 underline-offset-4 transition-colors hover:text-[#191b23]"
