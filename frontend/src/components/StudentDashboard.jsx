@@ -117,6 +117,13 @@ function StudentDashboard({ user, onLogout }) {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [tabFromUrl])
+
+  useEffect(() => {
+    if (db.magang.status === 'disetujui' && !db.usulan.id && activeTab === 'status') {
+      changeTab('usulan', true)
+    }
+  }, [db.magang.status, db.usulan.id, activeTab])
+
   const [showNotifications, setShowNotifications] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState({})
   const [avatarFile, setAvatarFile] = useState(null)
