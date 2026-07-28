@@ -203,6 +203,7 @@ function GoogleCallbackPage({ onSuccess }) {
 
 function App() {
   const [selectedStage, setSelectedStage] = useState(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [page, setPage] = useState(() => pageFromPathname(window.location.pathname))
   const [activeNav, setActiveNav] = useState('beranda')
   const [authenticatedUser, setAuthenticatedUser] = useState(null)
@@ -297,19 +298,31 @@ function App() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23] [background-image:radial-gradient(#e1e2ed_1px,transparent_1px)] [background-size:24px_24px]">
-      <header className="fixed left-0 top-8 z-50 flex w-full justify-center px-4">
-        <nav className="flex h-14 items-center gap-5 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
+      <header className="fixed left-0 top-8 z-50 flex w-full flex-col items-center px-4 gap-2">
+        <nav className="flex h-14 items-center gap-4 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
           <a href="#beranda" onClick={() => setActiveNav('beranda')} className="group flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#191b23] bg-[#9f149f] text-white transition group-hover:scale-110"><Icon className="text-[14px]">{icons.logo}</Icon></span>
             <span className="text-[11px] font-bold uppercase tracking-[.18em]">Informatics</span>
           </a>
-          <div className="flex items-center gap-0.5 sm:gap-1">
+          <div className="hidden items-center gap-1 md:flex">
             <a href="#beranda" onClick={() => setActiveNav('beranda')} className={navLinkClass('beranda')}>Beranda</a>
             <a href="#fitur" onClick={() => setActiveNav('fitur')} className={navLinkClass('fitur')}>Fitur</a>
             <a href="#alur" onClick={() => setActiveNav('alur')} className={navLinkClass('alur')}>Alur</a>
           </div>
-          <button type="button" onClick={() => navigatePage('login')} className="rounded-full bg-[#191b23] px-3 py-1.5 sm:px-5 text-[10px] sm:text-xs font-bold text-white transition hover:bg-[#9f149f]">Login</button>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#191b23] bg-white text-[#191b23] md:hidden shadow-[2px_2px_0_#191b23] transition active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+              <Icon className="text-lg">{isMobileMenuOpen ? 'close' : 'menu'}</Icon>
+            </button>
+            <button type="button" onClick={() => navigatePage('login')} className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#9f149f] sm:px-5">Login</button>
+          </div>
         </nav>
+        {isMobileMenuOpen && (
+          <div className="flex w-full max-w-[280px] flex-col gap-1.5 rounded-2xl border-3 border-[#191b23] bg-white p-3 shadow-[6px_6px_0_#191b23] md:hidden">
+            <a href="#beranda" onClick={() => { setActiveNav('beranda'); setIsMobileMenuOpen(false); }} className="rounded-xl px-4 py-2 text-xs font-bold border-2 border-transparent hover:border-[#191b23] hover:bg-[#e7e7f3] transition-all text-center">Beranda</a>
+            <a href="#fitur" onClick={() => { setActiveNav('fitur'); setIsMobileMenuOpen(false); }} className="rounded-xl px-4 py-2 text-xs font-bold border-2 border-transparent hover:border-[#191b23] hover:bg-[#e7e7f3] transition-all text-center">Fitur</a>
+            <a href="#alur" onClick={() => { setActiveNav('alur'); setIsMobileMenuOpen(false); }} className="rounded-xl px-4 py-2 text-xs font-bold border-2 border-transparent hover:border-[#191b23] hover:bg-[#e7e7f3] transition-all text-center">Alur</a>
+          </div>
+        )}
       </header>
 
       <main>
