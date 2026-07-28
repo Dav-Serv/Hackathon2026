@@ -22,6 +22,12 @@ function StudentDashboard({ user, onLogout }) {
     const klaim = data.klaim_konversis?.[0]
     const mitra = klaim?.penilaian_mitra || klaim?.penilaianMitra
     const dpl = klaim?.penilaian_dpl || klaim?.penilaianDpl
+    const normalizeDetails = (details = []) => details.map((detail) => ({
+      ...detail,
+      mkId: String(detail.mkId || detail.mata_kuliah_id || detail.mataKuliah?.id || detail.mata_kuliah?.id || ''),
+      cpmkId: String(detail.cpmkId || detail.cpmk_id || detail.cpmk?.id || ''),
+      deskripsiRencana: detail.deskripsiRencana || detail.deskripsi_aktivitas_rencana || '',
+    }))
 
     return {
       dpls: data.dpls || [],
@@ -42,7 +48,7 @@ function StudentDashboard({ user, onLogout }) {
       usulan: {
         ...emptyState.usulan,
         ...usulan,
-        details: usulan?.details || [],
+        details: normalizeDetails(usulan?.details || []),
         status: usulan?.status || emptyState.usulan.status,
         catatanDpl: usulan?.catatan_dpl || usulan?.catatanDpl || '',
       },
@@ -78,8 +84,15 @@ function StudentDashboard({ user, onLogout }) {
       const { data } = await api.get('/mahasiswa/dashboard')
        const dashboard = normalizeDashboard(data)
        setDb(dashboard)
-       const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
-       setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
+       const masterResponse = await api.get('/mata-kuliah').catch(() => ({ data: [] }))
+       const masterCourses = masterResponse.data?.data || masterResponse.data || []
+       setMasterMataKuliah(masterCourses.map((course) => ({
+         ...course,
+         id: String(course.id),
+         kode: course.kode || course.kode_mk,
+         nama: course.nama || course.nama_mk,
+         cpmk: course.cpmk || course.cpmks || [],
+       })))
        let suratResponse = await api.get('/surat-pengantar')
        let letters = suratResponse.data?.data || suratResponse.data || []
        if (dashboard.magang.id && dashboard.magang.status === 'disetujui' && letters.length === 0) {
@@ -1151,8 +1164,8 @@ function StudentDashboard({ user, onLogout }) {
                                 return (
                                   <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 text-xs font-bold">
                                     <td className="p-3">
-                                      <div className="text-[#9f149f]">{mk?.kode}</div>
-                                      <div>{mk?.nama}</div>
+                                     <div className="text-[#9f149f]">{mk?.kode || mk?.kode_mk || 'MK'}</div>
+                                       <div>{mk?.nama || mk?.nama_mk || 'Mata kuliah belum tersedia'}</div>
                                       <span className="inline-block bg-slate-200 text-slate-700 font-extrabold px-1 rounded mt-0.5">{mk?.sks} SKS</span>
                                     </td>
                                     <td className="p-3">
@@ -1201,10 +1214,10 @@ function StudentDashboard({ user, onLogout }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {db.usulan.details.map((detail, idx) => {
-                          const mk = masterMataKuliah.find(m => m.id === detail.mkId)
-                          const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
-                          return (
+                         {db.usulan.details.map((detail, idx) => {
+                           const mk = masterMataKuliah.find(m => String(m.id) === String(detail.mkId)) || detail.mataKuliah || detail.mata_kuliah
+                           const cpmk = mk?.cpmk?.find(c => String(c.id) === String(detail.cpmkId)) || detail.cpmk
+                           return (
                             <tr key={idx} className="border-b border-slate-100 last:border-0 text-xs font-bold">
                               <td className="p-3">
                                 <div className="text-[#9f149f]">{mk?.kode}</div>
@@ -1297,10 +1310,10 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="h-0.5 bg-slate-100 w-full" />
 
                     <div className="space-y-4">
-                      {db.usulan.details.map((detail, idx) => {
-                        const mk = masterMataKuliah.find(m => m.id === detail.mkId)
-                        const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
-                        return (
+                         {db.usulan.details.map((detail, idx) => {
+                           const mk = masterMataKuliah.find(m => String(m.id) === String(detail.mkId)) || detail.mataKuliah || detail.mata_kuliah
+                           const cpmk = mk?.cpmk?.find(c => String(c.id) === String(detail.cpmkId)) || detail.cpmk
+                           return (
                           <div key={idx} className="rounded-xl border-2 border-[#191b23] bg-slate-50/50 p-4 space-y-3">
                             <div className="flex justify-between items-start gap-2">
                               <div>
