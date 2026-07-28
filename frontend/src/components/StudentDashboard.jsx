@@ -68,6 +68,7 @@ function StudentDashboard({ user, onLogout }) {
   }, [emptyState])
 
   const [masterMataKuliah, setMasterMataKuliah] = useState([])
+  const [suratPengantar, setSuratPengantar] = useState(null)
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true)
@@ -77,7 +78,9 @@ function StudentDashboard({ user, onLogout }) {
       const { data } = await api.get('/mahasiswa/dashboard')
       setDb(normalizeDashboard(data))
       const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
-      setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
+       setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
+       const suratResponse = await api.get('/surat-pengantar')
+       setSuratPengantar((suratResponse.data?.data || suratResponse.data || [])[0] || null)
     } catch (error) {
       setLoadError(getApiError(error))
     } finally {
@@ -985,13 +988,13 @@ function StudentDashboard({ user, onLogout }) {
                     <h2 className="text-md font-black uppercase">Surat Pengantar</h2>
                     <p className="mt-1 text-xs font-semibold text-slate-500">Kelola dan pantau penerbitan surat pengantar magang Anda.</p>
                   </div>
-                  <span className="rounded-full border-2 border-[#191b23] bg-amber-100 px-3 py-1 text-[10px] font-black uppercase">Menunggu penerbitan</span>
+                  <span className="rounded-full border-2 border-[#191b23] bg-amber-100 px-3 py-1 text-[10px] font-black uppercase">{suratPengantar?.status || 'Belum diajukan'}</span>
                 </div>
                 <div className="mt-5 grid gap-4 md:grid-cols-3">
                   {[
                     ['description', 'Proposal tervalidasi', db.magang.status === 'disetujui'],
-                    ['edit_document', 'Surat sedang diproses', db.magang.status === 'disetujui'],
-                    ['download', 'Surat siap diunduh', false],
+                    ['edit_document', 'Surat sedang diproses', ['diproses', 'disetujui'].includes(suratPengantar?.status)],
+                    ['download', 'Surat siap diunduh', suratPengantar?.status === 'disetujui'],
                   ].map(([icon, label, done]) => (
                     <div key={label} className={`rounded-xl border-2 p-4 ${done ? 'border-green-200 bg-green-50' : 'border-slate-200 bg-slate-50'}`}>
                       <Icon className={`text-2xl ${done ? 'text-green-600' : 'text-slate-400'}`}>{done ? 'check_circle' : icon}</Icon>
@@ -1000,11 +1003,9 @@ function StudentDashboard({ user, onLogout }) {
                     </div>
                   ))}
                 </div>
-                <div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 p-5 text-center">
-                  <Icon className="text-4xl text-slate-300">mail_lock</Icon>
-                  <p className="mt-2 text-xs font-black">Surat pengantar belum tersedia</p>
-                  <p className="mt-1 text-[10px] font-semibold text-slate-500">Tombol preview dan unduh akan tersedia setelah surat diterbitkan oleh admin.</p>
-                </div>
+<div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 p-5 text-center">
+                   {suratPengantar?.status === 'disetujui' ? <button type="button" onClick={async () => { try { const { data } = await api.get(`/surat-pengantar/${suratPengantar.id}/download`); window.open(data.url, '_blank') } catch (error) { showToast(getApiError(error), 'error') } }} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-5 py-2 text-xs font-bold text-white">Preview / Unduh Surat</button> : <><Icon className="text-4xl text-slate-300">mail_lock</Icon><p className="mt-2 text-xs font-black">Surat pengantar belum diterbitkan</p><p className="mt-1 text-[10px] font-semibold text-slate-500">Admin akan menerbitkan surat setelah pengajuan disetujui.</p></>}
+                 </div>
               </div>
             </div>
           )}
