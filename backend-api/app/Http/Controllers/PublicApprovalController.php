@@ -34,7 +34,7 @@ class PublicApprovalController extends Controller
         $data = $request->validate(['nilai' => ['required', 'integer', 'between:1,100'], 'komentar' => ['nullable', 'string', 'max:5000'], 'keputusan' => ['nullable', 'in:setuju,revisi,tolak'], 'nilai_akademik' => ['nullable', 'integer', 'between:1,100']]);
         DB::transaction(function () use ($approval, $data, $request, $calculator) {
             $claim = $approval->klaimKonversi()->lockForUpdate()->first();
-            if ($approval->role === 'mitra') {
+            if (($approval->target_role ?: $approval->role) === 'mitra') {
                 $claim->penilaianMitra()->create(['nilai' => $data['nilai'], 'komentar' => $data['komentar'] ?? null, 'submitted_at' => now()]);
                 $claim->update(['status' => 'menunggu_review_dpl']);
             } else {
