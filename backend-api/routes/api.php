@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/supervisor/{supervisor}', [AdminMasterController::class, 'destroySupervisor']);
         Route::apiResource('/mata-kuliah', AdminMataKuliahController::class)->parameters(['mata-kuliah' => 'mataKuliah']);
         Route::scopeBindings()->apiResource('/mata-kuliah/{mataKuliah}/cpmk', AdminCpmkController::class)->parameters(['cpmk' => 'cpmk']);
+        Route::get('/hasil-konversi', [AdminExportController::class, 'hasilKonversiJson']);
         Route::get('/export/hasil-konversi', [AdminExportController::class, 'hasilKonversi']);
     });
 

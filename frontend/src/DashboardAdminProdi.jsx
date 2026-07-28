@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import api, { getApiError } from './lib/api'
+import Loading from './components/Loading'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
@@ -26,21 +27,21 @@ export default function DashboardAdminProdi({ user, onLogout }) {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
-  const [tabData, setTabData] = useState({ courses: [], letters: [], dashboard: null })
+  const [tabData, setTabData] = useState({ courses: [], letters: [], dashboard: null, conversionResults: [] })
   const [tabLoading, setTabLoading] = useState(false)
   const [tabError, setTabError] = useState('')
 
   useEffect(() => {
     let mounted = true
     const loadTab = async () => {
-      if (activeTab === 'pengajuan' || activeTab === 'pengaturan' || activeTab === 'konversi-mk') return
+      if (activeTab === 'pengaturan') return
       setTabLoading(true)
       setTabError('')
       try {
-        const endpoint = activeTab === 'data-master' ? '/admin/mata-kuliah' : activeTab === 'surat' ? '/admin/surat-pengantar' : '/admin/dashboard'
+        const endpoint = activeTab === 'data-master' ? '/admin/mata-kuliah' : activeTab === 'surat' ? '/admin/surat-pengantar' : activeTab === 'konversi-mk' ? '/admin/hasil-konversi' : '/admin/dashboard'
         const { data } = await api.get(endpoint)
         if (!mounted) return
-        setTabData(prev => ({ ...prev, ...(activeTab === 'data-master' ? { courses: data?.data || data || [] } : activeTab === 'surat' ? { letters: data?.data || data || [] } : { dashboard: data?.data || data }) }))
+        setTabData(prev => ({ ...prev, ...(activeTab === 'data-master' ? { courses: data?.data || data || [] } : activeTab === 'surat' ? { letters: data?.data || data || [] } : activeTab === 'konversi-mk' ? { conversionResults: data?.data || [] } : { dashboard: data?.data || data }) }))
       } catch (error) {
         if (mounted) setTabError(getApiError(error))
       } finally {
@@ -93,10 +94,12 @@ export default function DashboardAdminProdi({ user, onLogout }) {
   const toggleTask = () => {}
 
   const [submissions, setSubmissions] = useState([])
+  const [submissionsLoading, setSubmissionsLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedSubmission, setSelectedSubmission] = useState(null)
 
   const loadData = async () => {
+    setSubmissionsLoading(true)
     try {
       const [{ data: dashboard }, { data: magang }] = await Promise.all([api.get('/admin/dashboard'), api.get('/admin/magang')])
       const records = magang?.data || magang || []
@@ -110,7 +113,7 @@ export default function DashboardAdminProdi({ user, onLogout }) {
         avatar: item.mahasiswa?.avatar || '',
       })))
       setTabData(prev => ({ ...prev, dashboard }))
-    } catch (error) { showToast(getApiError(error), 'error') }
+    } catch (error) { showToast(getApiError(error), 'error') } finally { setSubmissionsLoading(false) }
   }
 
   useEffect(() => { loadData() }, [])
@@ -584,7 +587,7 @@ export default function DashboardAdminProdi({ user, onLogout }) {
           {activeTab === 'pengajuan' && (
             <section className="rounded-2xl border-3 border-[#191b23] bg-white shadow-[6px_6px_0_#191b23] overflow-hidden">
 <div className="flex flex-wrap items-center justify-between gap-3 border-b-3 border-[#191b23] p-5"><h2 className="text-xl font-black uppercase tracking-tight">Daftar Pengajuan</h2><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cari mahasiswa, NIM, perusahaan" className="rounded-xl border-2 border-[#191b23] px-3 py-2 text-xs font-bold" /></div>
-               <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-4">Mahasiswa</th><th className="p-4">Perusahaan</th><th className="p-4">DPL</th><th className="p-4 text-center">Status</th><th className="p-4 text-right">Aksi</th></tr></thead><tbody className="divide-y">{submissions.filter(sub => `${sub.nama} ${sub.nim} ${sub.perusahaan}`.toLowerCase().includes(search.toLowerCase())).map(sub => <tr key={sub.id}><td className="p-4"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#191b23] bg-purple-100">{sub.avatar ? <img src={sub.avatar} alt={sub.nama} className="h-full w-full object-cover" /> : <Icon>account_circle</Icon>}</div><div>{sub.nama}<span className="block text-[10px] text-gray-500">NIM: {sub.nim}</span></div></div></td><td className="p-4">{sub.perusahaan}</td><td className="p-4">{sub.dpl}</td><td className="p-4 text-center"><span className="rounded-full border-2 border-green-700 bg-green-100 px-2 py-1 text-[9px] uppercase">{sub.status}</span></td><td className="p-4 text-right"><button onClick={() => setSelectedSubmission(sub)} className="rounded-lg border-2 border-[#191b23] p-2"><Icon className="text-sm">visibility</Icon></button>{sub.status === 'pending' && <div className="mt-2 flex justify-end gap-2"><button onClick={() => handleApprove(sub.id, sub.nama)} className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Setujui</button><button onClick={() => handleReject(sub.id, sub.nama)} className="rounded-lg border-2 border-[#191b23] bg-[#ba1a1a] px-3 py-1 text-white">Revisi</button></div>}</td></tr>)}</tbody></table></div>
+                               {submissionsLoading ? <Loading label="Memuat daftar pengajuan..." /> : <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-4">Mahasiswa</th><th className="p-4">Perusahaan</th><th className="p-4">DPL</th><th className="p-4 text-center">Status</th><th className="p-4 text-right">Aksi</th></tr></thead><tbody className="divide-y">{submissions.filter(sub => `${sub.nama} ${sub.nim} ${sub.perusahaan}`.toLowerCase().includes(search.toLowerCase())).map(sub => <tr key={sub.id}><td className="p-4"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#191b23] bg-purple-100">{sub.avatar ? <img src={sub.avatar} alt={sub.nama} className="h-full w-full object-cover" /> : <Icon>account_circle</Icon>}</div><div>{sub.nama}<span className="block text-[10px] text-gray-500">NIM: {sub.nim}</span></div></div></td><td className="p-4">{sub.perusahaan}</td><td className="p-4">{sub.dpl}</td><td className="p-4 text-center"><span className="rounded-full border-2 border-green-700 bg-green-100 px-2 py-1 text-[9px] uppercase">{sub.status}</span></td><td className="p-4 text-right"><button onClick={() => setSelectedSubmission(sub)} className="rounded-lg border-2 border-[#191b23] p-2"><Icon className="text-sm">visibility</Icon></button>{sub.status === 'pending' && <div className="mt-2 flex justify-end gap-2"><button onClick={() => handleApprove(sub.id, sub.nama)} className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Setujui</button><button onClick={() => handleReject(sub.id, sub.nama)} className="rounded-lg border-2 border-[#191b23] bg-[#ba1a1a] px-3 py-1 text-white">Revisi</button></div>}</td></tr>)}</tbody></table></div>}
             </section>
           )}
 
@@ -595,12 +598,15 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                 {activeTab === 'laporan' && <button onClick={() => exportData('/admin/export/hasil-konversi', 'hasil-konversi.xlsx')} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-4 py-2 text-xs font-bold text-white shadow-[3px_3px_0_#191b23]"><Icon className="mr-1 align-middle text-sm">download</Icon> Ekspor</button>}
                 {activeTab === 'konversi-mk' && <button onClick={() => exportData('/admin/export/hasil-konversi', 'hasil-konversi.xlsx')} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-4 py-2 text-xs font-bold text-white shadow-[3px_3px_0_#191b23]"><Icon className="mr-1 align-middle text-sm">download</Icon> Ekspor Hasil</button>}
               </div>
-              {tabLoading && <p className="text-xs font-bold text-gray-500">Memuat data...</p>}
+
               {tabError && <p className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-xs font-bold text-[#93000a]">{tabError}</p>}
-              {activeTab === 'data-master' && !tabLoading && <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-3">Kode</th><th className="p-3">Mata Kuliah</th><th className="p-3">SKS</th><th className="p-3">Sumber</th></tr></thead><tbody className="divide-y">{tabData.courses.map(course => <tr key={course.id}><td className="p-3 font-mono">{course.kode_mk}</td><td className="p-3">{course.nama_mk}</td><td className="p-3">{course.sks}</td><td className="p-3">{course.sumber || '-'}</td></tr>)}</tbody></table></div>}
-              {activeTab === 'surat' && !tabLoading && <div className="space-y-3">{tabData.letters.map(letter => <div key={letter.id} className="flex flex-wrap items-center justify-between gap-3 border-2 border-[#191b23] p-4 text-xs font-bold"><span>{letter.magang?.mahasiswa?.name || letter.magang?.mahasiswa?.nama || `Surat #${letter.id}`}</span><span className="uppercase">{letter.status}</span>{letter.status !== 'disetujui' && <label className="flex items-center gap-2"><input type="file" accept="application/pdf,.pdf" onChange={event => { const file = event.target.files?.[0]; if (file) issueLetter(letter, file) }} className="max-w-[180px] text-[10px]" /><span className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Pilih PDF & Terbitkan</span></label>}</div>)}</div>}
-              {activeTab === 'laporan' && !tabLoading && <div className="grid gap-4 sm:grid-cols-3">{Object.entries(tabData.dashboard || {}).slice(0, 6).map(([key, value]) => <div key={key} className="border-2 border-[#191b23] p-4"><p className="text-[10px] font-black uppercase">{key.replaceAll('_', ' ')}</p><strong className="text-2xl">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</strong></div>)}</div>}
-              {activeTab === 'konversi-mk' && <p className="text-sm font-bold">Gunakan ekspor hasil konversi untuk melihat pemetaan nilai terbaru.</p>}
+                             {activeTab === 'data-master' && (tabLoading ? <Loading label="Memuat data..." /> : <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-3">Kode</th><th className="p-3">Mata Kuliah</th><th className="p-3">SKS</th><th className="p-3">Sumber</th></tr></thead><tbody className="divide-y">{tabData.courses.map(course => <tr key={course.id}><td className="p-3 font-mono">{course.kode_mk}</td><td className="p-3">{course.nama_mk}</td><td className="p-3">{course.sks}</td><td className="p-3">{course.sumber || '-'}</td></tr>)}</tbody></table></div>)}
+                             {activeTab === 'surat' && (tabLoading ? <Loading label="Memuat surat pengantar..." /> : <div className="space-y-3">{tabData.letters.map(letter => <div key={letter.id} className="flex flex-wrap items-center justify-between gap-3 border-2 border-[#191b23] p-4 text-xs font-bold"><span>{letter.magang?.mahasiswa?.name || letter.magang?.mahasiswa?.nama || `Surat #${letter.id}`}</span><span className="uppercase">{letter.status}</span>{letter.status !== 'disetujui' && <label className="flex items-center gap-2"><input type="file" accept="application/pdf,.pdf" onChange={event => { const file = event.target.files?.[0]; if (file) issueLetter(letter, file) }} className="max-w-[180px] text-[10px]" /><span className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Pilih PDF & Terbitkan</span></label>}</div>)}</div>)}
+               {activeTab === 'laporan' && (tabLoading ? <Loading label="Memuat laporan dashboard..." /> : <div className="grid gap-4 sm:grid-cols-3">{Object.entries(tabData.dashboard || {}).slice(0, 6).map(([key, value]) => <div key={key} className="border-2 border-[#191b23] p-4"><p className="text-[10px] font-black uppercase">{key.replaceAll('_', ' ')}</p><strong className="text-2xl">{typeof value === 'object' ? value?.total ?? value?.disetujui ?? '-' : String(value)}</strong></div>)}</div>)}
+
+                {activeTab === 'konversi-mk' && (tabLoading ? <Loading label="Memuat hasil konversi..." /> : <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-3">NIM</th><th className="p-3">Mahasiswa</th><th className="p-3">Kode MK</th><th className="p-3">Mata Kuliah</th><th className="p-3">SKS</th><th className="p-3">Nilai Mitra</th><th className="p-3">Nilai DPL</th><th className="p-3">Nilai Akhir</th><th className="p-3">Grade</th></tr></thead><tbody className="divide-y">{tabData.conversionResults.map(row => <tr key={`${row.nim}-${row.kode_mk}`}><td className="p-3">{row.nim || '-'}</td><td className="p-3">{row.mahasiswa || '-'}</td><td className="p-3 font-mono">{row.kode_mk || '-'}</td><td className="p-3">{row.mata_kuliah || '-'}</td><td className="p-3">{row.sks || '-'}</td><td className="p-3">{row.nilai_mitra ?? '-'}</td><td className="p-3">{row.nilai_dpl ?? '-'}</td><td className="p-3">{row.nilai_akhir ?? '-'}</td><td className="p-3">{row.nilai_huruf || '-'}</td></tr>)}{tabData.conversionResults.length === 0 && <tr><td colSpan="9" className="p-8 text-center text-gray-400">Belum ada hasil konversi.</td></tr>}</tbody></table></div>)}
+
+
               {activeTab === 'pengaturan' && <div className="grid gap-3 sm:grid-cols-2 text-sm font-bold">{[['Nama', user?.name || user?.nama], ['Email', user?.email], ['NIM/NIP', user?.nim_nip || user?.nim], ['Peran', user?.role]].map(([label, value]) => <div key={label} className="border-2 border-[#191b23] p-4"><span className="block text-[10px] uppercase text-gray-500">{label}</span>{value || '-'}</div>)}</div>}
             </section>
           )}
