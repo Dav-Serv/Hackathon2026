@@ -55,7 +55,14 @@ function StudentDashboard({ user, onLogout }) {
       klaim: {
         ...emptyState.klaim,
         ...klaim,
-        details: klaim?.details || [],
+        logbookFile: klaim?.logbook_file || klaim?.logbookFile || '',
+        laporanFile: klaim?.laporan_file || klaim?.laporanFile || '',
+        sertifikatFile: klaim?.sertifikat_file || klaim?.sertifikatFile || '',
+        details: (klaim?.details || []).map((detail) => ({
+          ...detail,
+          usulanDetailIndex: usulan?.details?.findIndex((item) => String(item.id) === String(detail.usulan_konversi_detail_id)) ?? -1,
+          buktiAktivitasText: detail.bukti_aktivitas_text || detail.buktiAktivitasText || '',
+        })),
         status: klaim?.status || emptyState.klaim.status,
       },
       penilaian: {
@@ -1369,13 +1376,13 @@ function StudentDashboard({ user, onLogout }) {
                     <h2 className="text-md font-bold uppercase tracking-tight">Detail Uraian Klaim CPMK</h2>
                     <div className="space-y-3">
                       {db.klaim.details.map((detail, idx) => {
-                        const usulanDetail = db.usulan.details[detail.usulanDetailIndex]
-                        const mk = masterMataKuliah.find(m => m.id === usulanDetail?.mkId)
-                        const cpmk = mk?.cpmk.find(c => c.id === usulanDetail?.cpmkId)
+                         const usulanDetail = db.usulan.details[detail.usulanDetailIndex] || detail.usulanKonversiDetail || {}
+                         const mk = masterMataKuliah.find(m => String(m.id) === String(usulanDetail?.mkId)) || usulanDetail.mataKuliah || usulanDetail.mata_kuliah || {}
+                         const cpmk = mk?.cpmk?.find(c => String(c.id) === String(usulanDetail?.cpmkId)) || usulanDetail.cpmk || {}
                         return (
                           <div key={idx} className="rounded-xl border-2 border-[#191b23] bg-slate-50 p-4 text-xs font-bold">
-                            <div className="text-[10px] font-black text-gray-400 uppercase">{mk?.kode} - {mk?.nama}</div>
-                            <div className="text-slate-800 font-extrabold mt-0.5">{cpmk?.kode}: {cpmk?.deskripsi}</div>
+                             <div className="text-[10px] font-black text-gray-400 uppercase">{mk?.kode || mk?.kode_mk || '-'} - {mk?.nama || mk?.nama_mk || 'Mata kuliah'}</div>
+                             <div className="text-slate-800 font-extrabold mt-0.5">{cpmk?.kode || cpmk?.kode_cpmk || '-'}: {cpmk?.deskripsi || '-'}</div>
                             <div className="mt-2 border-t border-slate-200 pt-2 font-mono text-[11px] text-slate-600 whitespace-pre-wrap font-medium">
                               <b>Uraian Bukti Mahasiswa:</b> <br />{detail.buktiAktivitasText}
                             </div>
