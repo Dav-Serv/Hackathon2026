@@ -75,6 +75,15 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
           pulseSpeed={600}
         />
       </div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
+        <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
+        <Icon className="absolute right-[10%] top-[15%] rotate-12 text-8xl opacity-20">school</Icon>
+        <Icon className="absolute bottom-[20%] left-[5%] -rotate-12 text-7xl opacity-20">auto_stories</Icon>
+        <div className="absolute left-12 top-1/4 flex h-24 w-24 rotate-[-5deg] items-center justify-center border-2 border-[#191b23] bg-[#a862a8] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">OBE READY?</div>
+        <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#f3dff3] p-2 text-center text-xs font-bold opacity-50 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
+      </div>
+
       <div className="relative z-10 w-full max-w-lg">
         <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] shadow-[8px_8px_0_#191b23]">
           <div className="flex flex-col gap-6 p-8 pb-0">
@@ -103,7 +112,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-1.5">
                 <label className="ml-1 block text-sm font-bold tracking-[0.05em]" htmlFor="nama-lengkap">
-                  Nama Lengkap
+                   Nama Lengkap
                 </label>
                 <input
                   required
@@ -251,9 +260,10 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
           </div>
         </div>
 
-        <footer className="mt-8 text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#737686]">© 2024 OBE GradeSync System</p>
-        </footer>
+        <div className="mt-4 flex justify-between px-4 text-[10px] font-bold uppercase tracking-widest text-[#737686]">
+          <span>[ Status Sistem: Optimal ]</span>
+          <span>v2.4.0_stable</span>
+        </div>
       </div>
     </main>
   )
