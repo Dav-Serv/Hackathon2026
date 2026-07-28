@@ -156,7 +156,7 @@ Sistem dibatasi pada tingkat program studi. Seluruh tugas administrasi, verifika
 - Grafik status proses.
 - Statistik mata kuliah, CPMK, dan nilai.
 - Filter periode, tahun akademik, jenis program, dan status.
-- Rekap hasil serta export jika diizinkan.
+- Rekap hasil serta export data melalui speadsheet
 
 **Backend:**
 

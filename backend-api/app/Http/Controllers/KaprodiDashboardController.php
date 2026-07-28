@@ -25,19 +25,21 @@ class KaprodiDashboardController extends Controller
             ->groupBy('role')
             ->pluck('total', 'role');
 
-        $magangStatus = $this->statusDistribution(Magang::class, [
+        $magangStatus = $this->statusDistribution((clone $magangQuery), [
             'draft',
             'menunggu_verifikasi',
             'disetujui',
             'ditolak',
         ]);
-        $usulanStatus = $this->statusDistribution(UsulanKonversi::class, [
+        $usulanQuery = UsulanKonversi::query()->whereIn('magang_id', $magangIds);
+        $usulanStatus = $this->statusDistribution((clone $usulanQuery), [
             'menunggu_persetujuan_dpl',
             'disetujui',
             'revisi',
             'ditolak',
         ]);
-        $klaimStatus = $this->statusDistribution(KlaimKonversi::class, [
+        $klaimQuery = KlaimKonversi::query()->whereIn('magang_id', $magangIds);
+        $klaimStatus = $this->statusDistribution((clone $klaimQuery), [
             'menunggu_penilaian_mitra',
             'menunggu_review_dpl',
             'revisi',
@@ -45,28 +47,28 @@ class KaprodiDashboardController extends Controller
             'ditolak',
         ]);
 
-        $nilai = NilaiAkhir::query();
+        $nilai = NilaiAkhir::query()->whereHas('klaimKonversi', fn ($query) => $query->whereIn('magang_id', $magangIds));
 
         return response()->json([
             'summary' => [
                 'total_users' => User::count(),
                 'users_by_role' => $roleCounts,
-                'total_magang' => Magang::count(),
+                'total_magang' => (clone $magangQuery)->count(),
                 'total_mitra' => MitraIndustri::count(),
-                'total_usulan_konversi' => UsulanKonversi::count(),
-                'total_klaim_konversi' => KlaimKonversi::count(),
+                'total_usulan_konversi' => (clone $usulanQuery)->count(),
+                'total_klaim_konversi' => (clone $klaimQuery)->count(),
                 'total_nilai_akhir' => (clone $nilai)->count(),
             ],
             'magang' => [
-                'total' => Magang::count(),
+                'total' => (clone $magangQuery)->count(),
                 'status_distribution' => $magangStatus,
             ],
             'usulan_konversi' => [
-                'total' => UsulanKonversi::count(),
+                'total' => (clone $usulanQuery)->count(),
                 'status_distribution' => $usulanStatus,
             ],
             'klaim_konversi' => [
-                'total' => KlaimKonversi::count(),
+                'total' => (clone $klaimQuery)->count(),
                 'status_distribution' => $klaimStatus,
             ],
             'nilai_akhir' => [
@@ -80,22 +82,30 @@ class KaprodiDashboardController extends Controller
                     ->groupBy('nilai_huruf')
                     ->pluck('total', 'nilai_huruf'),
             ],
+            'directory' => [
+                'pengguna' => User::query()->select('id', 'name', 'email', 'role')->orderBy('name')->limit(50)->get(),
+                'magang' => (clone $magangQuery)->with('mahasiswa:id,name,nim_nip')->latest()->limit(50)->get(['id', 'mahasiswa_id', 'nomor_magang', 'jenis_program', 'status']),
+                'mitra' => MitraIndustri::query()->orderBy('nama_perusahaan')->limit(50)->get(['id', 'nama_perusahaan', 'bidang']),
+                'usulan' => (clone $usulanQuery)->with('magang.mahasiswa:id,name,nim_nip')->latest()->limit(50)->get(),
+                'klaim' => (clone $klaimQuery)->with('magang.mahasiswa:id,name,nim_nip')->latest()->limit(50)->get(),
+                'nilai' => (clone $nilai)->with(['klaimKonversi.magang.mahasiswa:id,name,nim_nip', 'mataKuliah:id,kode_mk,nama_mk'])->latest()->limit(50)->get(),
+            ],
             'recent' => [
-                'magang' => Magang::with(['mahasiswa:id,name,nim_nip', 'mitraIndustri:id,nama_perusahaan'])
+                'magang' => (clone $magangQuery)->with(['mahasiswa:id,name,nim_nip', 'mitraIndustri:id,nama_perusahaan'])
                     ->latest()->limit(5)->get(),
-                'usulan_konversi' => UsulanKonversi::with(['magang.mahasiswa:id,name,nim_nip'])
+                'usulan_konversi' => (clone $usulanQuery)->with(['magang.mahasiswa:id,name,nim_nip'])
                     ->latest()->limit(5)->get(),
-                'klaim_konversi' => KlaimKonversi::with(['magang.mahasiswa:id,name,nim_nip'])
+                'klaim_konversi' => (clone $klaimQuery)->with(['magang.mahasiswa:id,name,nim_nip'])
                     ->latest()->limit(5)->get(),
-                'nilai_akhir' => NilaiAkhir::with(['klaimKonversi.magang.mahasiswa:id,name,nim_nip', 'mataKuliah:id,kode_mk,nama_mk'])
+                'nilai_akhir' => (clone $nilai)->with(['klaimKonversi.magang.mahasiswa:id,name,nim_nip', 'mataKuliah:id,kode_mk,nama_mk'])
                     ->latest()->limit(5)->get(),
             ],
         ]);
     }
 
-    private function statusDistribution(string $model, array $statuses): Collection
+    private function statusDistribution($query, array $statuses): Collection
     {
-        $counts = $model::query()
+        $counts = $query
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
