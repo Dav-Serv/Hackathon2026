@@ -253,19 +253,22 @@ function App() {
       .map((id) => document.getElementById(id))
       .filter(Boolean)
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleSection = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+    const updateActiveNav = () => {
+      const marker = window.scrollY + window.innerHeight * 0.35
+      const current = sections
+        .filter((section) => section.offsetTop <= marker)
+        .at(-1)
 
-        if (visibleSection) setActiveNav(visibleSection.target.id)
-      },
-      { threshold: [0.35, 0.5, 0.75], rootMargin: '-80px 0px -25% 0px' },
-    )
+      setActiveNav(current?.id || sections[0]?.id || 'beranda')
+    }
 
-    sections.forEach((section) => observer.observe(section))
-    return () => observer.disconnect()
+    updateActiveNav()
+    window.addEventListener('scroll', updateActiveNav, { passive: true })
+    window.addEventListener('resize', updateActiveNav)
+    return () => {
+      window.removeEventListener('scroll', updateActiveNav)
+      window.removeEventListener('resize', updateActiveNav)
+    }
   }, [page])
 
   if (window.location.pathname === '/auth/callback') {
