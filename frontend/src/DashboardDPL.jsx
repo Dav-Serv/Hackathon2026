@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import api, { getApiError } from './lib/api'
+import Loading from './components/Loading'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
@@ -64,10 +65,13 @@ export default function DashboardDosen({ user, onLogout }) {
             current.claimId = item.id
              const mitraScores = item.penilaian_mitra || item.penilaianMitra || []
              const dplScores = item.penilaian_dpl || item.penilaianDpl || []
-             current.penilaian = {
-               mitra: Array.isArray(mitraScores) ? (mitraScores.at(-1) || {}) : mitraScores,
-               dpl: Array.isArray(dplScores) ? (dplScores.at(-1) || {}) : dplScores,
-             }
+               const mitra = Array.isArray(mitraScores) ? (mitraScores.at(-1) || {}) : mitraScores
+               const dpl = Array.isArray(dplScores) ? (dplScores.at(-1) || {}) : dplScores
+               current.penilaian = {
+                 mitra,
+                 dpl: { ...dpl, nilaiAkademik: dpl.nilaiAkademik ?? dpl.nilai_akademik, submittedAt: dpl.submittedAt ?? dpl.submitted_at },
+               }
+
           }
           records.set(id, current)
         }
@@ -890,8 +894,11 @@ export default function DashboardDosen({ user, onLogout }) {
                           <th className="p-4 font-black uppercase text-center">Tindakan</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y-[2px] divide-[#191b23]/10">
-                        {allStudents.filter(s => s.statusKlaim !== 'belum_diajukan').map(student => (
+                       <tbody className="divide-y-[2px] divide-[#191b23]/10">
+                         {isLoading ? (
+                           <tr><td colSpan="5" className="p-8"><Loading /></td></tr>
+                         ) : allStudents.filter(s => s.statusKlaim !== 'belum_diajukan').map(student => (
+
                           <tr key={student.id} className="hover:bg-purple-50/50 transition-colors">
                             <td className="p-4">
                               <div className="font-black text-slate-800">{student.nama}</div>
@@ -954,10 +961,14 @@ export default function DashboardDosen({ user, onLogout }) {
                         <th className="p-4 font-black uppercase">Tanggal Penilaian</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y-[2px] divide-[#191b23]/10">
-                      {allStudents.filter(s => s.statusKlaim === 'disetujui').map(student => {
+                       <tbody className="divide-y-[2px] divide-[#191b23]/10">
+                         {isLoading ? (
+                           <tr><td colSpan="7" className="p-8"><Loading /></td></tr>
+                         ) : allStudents.filter(s => s.statusKlaim === 'disetujui').map(student => {
+
                         const scoreMitra = student.penilaian?.mitra?.nilai || 0
-                        const scoreDpl = student.penilaian?.dpl?.nilaiAkademik || 0
+                         const scoreDpl = student.penilaian?.dpl?.nilaiAkademik ?? student.penilaian?.dpl?.nilai_akademik ?? 0
+
                         const finalScore = Number((scoreMitra * 0.7 + scoreDpl * 0.3).toFixed(1))
                         const letterGrade = getLetterGrade(finalScore)
 
