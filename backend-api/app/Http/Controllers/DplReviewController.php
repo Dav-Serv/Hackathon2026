@@ -8,6 +8,7 @@ use App\Services\ValueCalculationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class DplReviewController extends Controller
@@ -15,7 +16,7 @@ class DplReviewController extends Controller
     public function usulanIndex(Request $request): JsonResponse
     {
         $usulans = UsulanKonversi::query()
-            ->with(['magang.mahasiswa', 'details.mataKuliah', 'details.cpmk'])
+            ->with(['magang.mahasiswa', 'magang.mitraIndustri', 'magang.supervisorMitra', 'details.mataKuliah', 'details.cpmk'])
             ->whereIn('status', ['menunggu_persetujuan_dpl', 'disetujui', 'revisi', 'ditolak'])
             ->whereHas('magang', fn ($query) => $query->where('dpl_id', $request->user()->id))
             ->latest()
@@ -52,13 +53,23 @@ class DplReviewController extends Controller
     public function klaimIndex(Request $request): JsonResponse
     {
         $klaims = KlaimKonversi::query()
-            ->with(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra'])
+            ->with(['magang.mahasiswa', 'magang.mitraIndustri', 'magang.supervisorMitra', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl'])
             ->where('status', 'menunggu_review_dpl')
             ->whereHas('magang', fn ($query) => $query->where('dpl_id', $request->user()->id))
             ->latest()
             ->paginate($request->integer('per_page', 15));
 
         return response()->json($klaims);
+    }
+
+    public function document(Request $request, KlaimKonversi $klaimKonversi, string $jenis): JsonResponse
+    {
+        abort_unless($klaimKonversi->magang()->where('dpl_id', $request->user()->id)->exists(), 403);
+        abort_unless(in_array($jenis, ['logbook_file', 'laporan_file', 'sertifikat_file'], true), 404);
+        $path = $klaimKonversi->{$jenis};
+        abort_unless($path, 404, 'Dokumen tidak tersedia.');
+
+        return response()->json(['url' => Storage::disk('supabase')->temporaryUrl($path, now()->addMinutes(10))]);
     }
 
     public function reviewKlaim(Request $request, KlaimKonversi $klaimKonversi, ValueCalculationService $calculator): JsonResponse
@@ -82,10 +93,10 @@ class DplReviewController extends Controller
             ]);
             $klaim->update(['status' => ['setuju' => 'disetujui', 'revisi' => 'revisi', 'tolak' => 'ditolak'][$data['keputusan']]]);
 
-            return $klaim->fresh()->load(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl']);
+            return $klaim->fresh()->load(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl', 'penilaianDpl']);
         });
 
         if ($klaimKonversi->status === 'disetujui') $calculator->calculate($klaimKonversi->fresh());
-        return response()->json($klaimKonversi->fresh()->load(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl', 'nilaiAkhirs']));
+        return response()->json($klaimKonversi->fresh()->load(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl', 'penilaianDpl', 'nilaiAkhirs']));
     }
 }

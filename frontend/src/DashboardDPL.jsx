@@ -43,7 +43,7 @@ export default function DashboardDosen({ user, onLogout }) {
           const magang = item.magang || {}
           const mahasiswa = magang.mahasiswa || {}
           const id = mahasiswa.id || magang.id || item.id
-          const current = records.get(id) || { id, nama: mahasiswa.nama || mahasiswa.name || 'Mahasiswa', nim: mahasiswa.nim || mahasiswa.nim_nip || '-', jurusan: mahasiswa.jurusan || mahasiswa.program_studi || '-', perusahaan: magang.mitra?.nama || magang.mitra_industri?.nama_perusahaan || magang.mitra_nama || '-', bidang: magang.mitra?.bidang || magang.mitra_industri?.bidang || magang.mitra_bidang || '-', posisi: magang.posisi || '-', period: magang.periode_mulai && magang.periode_selesai ? `${magang.periode_mulai.substring(0, 7)} s.d ${magang.periode_selesai.substring(0, 7)}` : '-', statusMagang: magang.status || 'disetujui', statusUsulan: 'belum_diajukan', statusKlaim: 'belum_diajukan', usulanDetails: [], penilaian: { mitra: {}, dpl: {} } }
+          const current = records.get(id) || { id, nama: mahasiswa.nama || mahasiswa.name || 'Mahasiswa', nim: mahasiswa.nim || mahasiswa.nim_nip || '-', jurusan: mahasiswa.jurusan || mahasiswa.program_studi || '-', perusahaan: magang.mitra?.nama || magang.mitra_industri?.nama_perusahaan || magang.mitraIndustri?.nama_perusahaan || magang.mitra_nama || '-', bidang: magang.mitra?.bidang || magang.mitra_industri?.bidang || magang.mitra_bidang || '-', posisi: magang.posisi || '-', period: magang.periode_mulai && magang.periode_selesai ? `${magang.periode_mulai.substring(0, 7)} s.d ${magang.periode_selesai.substring(0, 7)}` : '-', statusMagang: magang.status || 'disetujui', statusUsulan: 'belum_diajukan', statusKlaim: 'belum_diajukan', usulanDetails: [], penilaian: { mitra: {}, dpl: {} } }
           if (type === 'usulan') {
             current.statusUsulan = item.status
             current.proposalId = item.id
@@ -62,7 +62,12 @@ export default function DashboardDosen({ user, onLogout }) {
           } else {
             current.statusKlaim = item.status
             current.claimId = item.id
-            current.penilaian = { mitra: item.penilaian_mitra || {}, dpl: item.penilaian_dpl || {} }
+             const mitraScores = item.penilaian_mitra || item.penilaianMitra || []
+             const dplScores = item.penilaian_dpl || item.penilaianDpl || []
+             current.penilaian = {
+               mitra: Array.isArray(mitraScores) ? (mitraScores.at(-1) || {}) : mitraScores,
+               dpl: Array.isArray(dplScores) ? (dplScores.at(-1) || {}) : dplScores,
+             }
           }
           records.set(id, current)
         }
@@ -781,14 +786,13 @@ export default function DashboardDosen({ user, onLogout }) {
                   <div className="grid gap-6 md:grid-cols-2 text-xs bg-slate-50 border-2 border-[#191b23] p-4 rounded-xl">
                     <div className="space-y-3">
                       <h4 className="font-black text-xs uppercase text-[#9f149f] border-b border-purple-200 pb-1">1. Dokumen Bukti Magang</h4>
-                      <div className="flex flex-col gap-2">
-                        <button onClick={() => showToast('Membuka file Logbook...', 'info')} className="inline-flex items-center gap-2 border border-[#191b23] bg-white px-2 py-1.5 rounded font-semibold hover:bg-slate-50 text-left">
-                          <Icon className="text-xs text-purple-600">assignment</Icon> Logbook Harian / Mingguan.pdf
-                        </button>
-                        <button onClick={() => showToast('Membuka file Laporan Akhir...', 'info')} className="inline-flex items-center gap-2 border border-[#191b23] bg-white px-2 py-1.5 rounded font-semibold hover:bg-slate-50 text-left">
-                          <Icon className="text-xs text-red-500">picture_as_pdf</Icon> Laporan Akhir Magang.pdf
-                        </button>
-                      </div>
+                       <div className="flex flex-col gap-2">
+                         {[['logbook_file', 'assignment', 'Logbook'], ['laporan_file', 'picture_as_pdf', 'Laporan Akhir'], ['sertifikat_file', 'workspace_premium', 'Sertifikat']].map(([jenis, icon, label]) => (
+                           <button key={jenis} onClick={async () => { try { const { data } = await api.get(`/dpl/klaim-konversi/${selectedStudent.claimId}/document/${jenis}`); window.open(data.url, '_blank') } catch (error) { showToast(getApiError(error), 'error') } }} className="inline-flex items-center gap-2 border border-[#191b23] bg-white px-2 py-1.5 rounded font-semibold hover:bg-slate-50 text-left">
+                             <Icon className="text-xs text-purple-600">{icon}</Icon> {label}
+                           </button>
+                         ))}
+                       </div>
                     </div>
                     
                     <div className="space-y-3 border-t-2 border-slate-200 pt-3 md:border-t-0 md:border-l-2 md:pl-6 md:pt-0">
@@ -817,9 +821,7 @@ export default function DashboardDosen({ user, onLogout }) {
                           <div key={idx} className="border-2 border-[#191b23] rounded-xl p-4 bg-white shadow-[2px_2px_0_#191b23] text-xs">
                             <div className="flex justify-between border-b border-slate-100 pb-2 mb-2">
                               <span className="font-bold text-slate-800">{mk?.nama} — {cpmk?.kode}</span>
-                              <button onClick={() => showToast('Mengunduh lampiran bukti...', 'success')} className="text-[#9f149f] font-bold hover:underline flex items-center gap-1">
-                                <Icon className="text-sm">download</Icon> Unduh Bukti.zip
-                              </button>
+
                             </div>
                             <div className="space-y-1">
                               <span className="text-[9px] font-black uppercase text-gray-400 block">Klaim Bukti Kinerja Mahasiswa</span>
