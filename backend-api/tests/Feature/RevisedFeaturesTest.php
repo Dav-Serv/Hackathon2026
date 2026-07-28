@@ -52,6 +52,16 @@ class RevisedFeaturesTest extends TestCase
         $this->getJson('/api/approval/'.$expired)->assertStatus(Response::HTTP_GONE);
     }
 
+    public function test_mitra_approval_updates_claim_status(): void
+    {
+        $claim = $this->claim();
+        $token = app(ApprovalTokenService::class)->issue($claim, 'mitra');
+
+        $this->postJson('/api/public/approval/'.$token.'/mitra', ['nilai' => 88, 'komentar' => 'Baik'])->assertOk();
+        $this->assertDatabaseHas('penilaian_mitras', ['klaim_konversi_id' => $claim->id, 'nilai' => 88]);
+        $this->assertDatabaseHas('klaim_konversis', ['id' => $claim->id, 'status' => 'menunggu_review_dpl']);
+    }
+
     public function test_value_calculation_and_result_endpoint(): void
     {
         $claim = $this->claim();

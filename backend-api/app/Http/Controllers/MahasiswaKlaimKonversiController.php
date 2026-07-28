@@ -6,11 +6,12 @@ use App\Models\KlaimKonversi;
 use App\Models\UsulanKonversi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Services\ApprovalTokenService;
 use Illuminate\Support\Facades\DB;
 
 class MahasiswaKlaimKonversiController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, ApprovalTokenService $approvalTokens): JsonResponse
     {
         $data = $request->validate([
             'usulan_konversi_id' => ['required', 'exists:usulan_konversis,id'],
@@ -23,7 +24,12 @@ class MahasiswaKlaimKonversiController extends Controller
             'details.*.bukti_aktivitas_text' => ['required', 'string'],
             'details.*.bukti_file' => ['nullable', 'file', 'max:10240'],
         ]);
-        $usulan = UsulanKonversi::with('magang')->whereKey($data['usulan_konversi_id'])->where('status', 'disetujui')->whereHas('magang', fn ($q) => $q->where('mahasiswa_id', $request->user()->id)->whereDate('periode_selesai', '<=', now()->toDateString()))->firstOrFail();
+        $usulan = UsulanKonversi::with('magang')
+            ->whereKey($data['usulan_konversi_id'])
+            ->where('status', 'disetujui')
+            ->whereHas('magang', fn ($q) => $q->where('mahasiswa_id', $request->user()->id))
+            ->first();
+        abort_if(! $usulan, 422, 'Usulan konversi tidak ditemukan atau belum disetujui DPL.');
         $base = 'klaim/'.$request->user()->id;
         $files = ['logbook_file', 'laporan_file', 'sertifikat_file', 'dokumen_lain_file'];
         foreach ($files as $file) {
@@ -40,7 +46,10 @@ class MahasiswaKlaimKonversiController extends Controller
             return $claim;
         });
 
-        return response()->json($claim->load('details'), 201);
+        $claim->load('details');
+        $approvalTokens->issue($claim, 'mitra');
+
+        return response()->json($claim, 201);
     }
 
     public function update(Request $request, KlaimKonversi $klaimKonversi): JsonResponse
