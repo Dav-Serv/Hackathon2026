@@ -76,11 +76,18 @@ function StudentDashboard({ user, onLogout }) {
 
     try {
       const { data } = await api.get('/mahasiswa/dashboard')
-      setDb(normalizeDashboard(data))
-      const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
+       const dashboard = normalizeDashboard(data)
+       setDb(dashboard)
+       const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
        setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
-       const suratResponse = await api.get('/surat-pengantar')
-       setSuratPengantar((suratResponse.data?.data || suratResponse.data || [])[0] || null)
+       let suratResponse = await api.get('/surat-pengantar')
+       let letters = suratResponse.data?.data || suratResponse.data || []
+       if (dashboard.magang.id && dashboard.magang.status === 'disetujui' && letters.length === 0) {
+         await api.post(`/magang/${dashboard.magang.id}/surat-pengantar`)
+         suratResponse = await api.get('/surat-pengantar')
+         letters = suratResponse.data?.data || suratResponse.data || []
+       }
+       setSuratPengantar(letters[0] || null)
     } catch (error) {
       setLoadError(getApiError(error))
     } finally {

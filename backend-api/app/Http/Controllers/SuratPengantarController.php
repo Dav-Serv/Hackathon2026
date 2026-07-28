@@ -18,19 +18,20 @@ class SuratPengantarController extends Controller
     public function store(Request $request, Magang $magang): JsonResponse
     {
         abort_unless($magang->mahasiswa_id === $request->user()->id, 403);
-        $data = $request->validate(['file' => ['required', 'file', 'mimes:pdf,docx', 'max:10240', 'mimetypes:application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document']]);
-        $surat = SuratPengantar::updateOrCreate(['magang_id' => $magang->id], ['file_path' => $data['file']->store('surat-pengantar/'.$request->user()->id, 'supabase'), 'status' => 'diajukan']);
+        abort_unless($magang->status === 'disetujui', 422, 'Surat pengantar hanya dapat diproses setelah pengajuan magang disetujui admin.');
 
-        return response()->json($surat, 201);
+        $surat = SuratPengantar::firstOrCreate(
+            ['magang_id' => $magang->id],
+            ['status' => 'diajukan']
+        );
+
+        return response()->json($surat->fresh(), $surat->wasRecentlyCreated ? 201 : 200);
     }
 
     public function update(Request $request, SuratPengantar $suratPengantar): JsonResponse
     {
         abort_unless($suratPengantar->magang->mahasiswa_id === $request->user()->id, 403);
-        $data = $request->validate(['status' => ['required', 'in:diproses,disetujui,ditolak'], 'catatan' => ['nullable', 'string', 'max:5000']]);
-        $suratPengantar->update($data);
-
-        return response()->json($suratPengantar->fresh());
+        abort(403, 'Status surat pengantar hanya dapat diubah admin.');
     }
 
     public function download(Request $request, SuratPengantar $suratPengantar): JsonResponse
