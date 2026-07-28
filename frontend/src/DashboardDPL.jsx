@@ -297,10 +297,9 @@ export default function DashboardDosen({ user, onLogout }) {
               </section>
 
               {/* Main Grid Content */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Left Column: Student Review Table */}
-                <section className="lg:col-span-2 flex flex-col gap-6">
-                  <div className="bg-white border-[3px] border-[#191b23] shadow-[6px_6px_0_#191b23] rounded-2xl overflow-hidden">
+                  <div className="lg:col-span-2 bg-white border-[3px] border-[#191b23] shadow-[6px_6px_0_#191b23] rounded-2xl overflow-hidden">
                     <div className="p-4 border-b-3 border-[#191b23] flex justify-between items-center bg-[#ededf9]">
                       <h3 className="font-black text-sm uppercase tracking-wider">Tabel Tinjauan Mahasiswa</h3>
                       <div className="flex gap-2">
@@ -385,8 +384,43 @@ export default function DashboardDosen({ user, onLogout }) {
                     </div>
                   </div>
 
+                  {/* Today's Tasks */}
+                  <section className="bg-white border-[3px] border-[#191b23] p-5 shadow-[6px_6px_0_#191b23] rounded-2xl">
+                    <h3 className="font-black text-sm uppercase mb-4 flex items-center gap-2">
+                      <Icon className="text-green-600">task_alt</Icon>
+                      Tugas Hari Ini
+                    </h3>
+                    <div className="space-y-3">
+                      {counts.pendingProposals > 0 && (
+                        <label className="flex items-start gap-3 p-3 border-2 border-[#191b23] bg-slate-50 hover:bg-purple-50 transition-all cursor-pointer rounded-xl">
+                          <Icon className="text-md text-[#9f149f] mt-0.5">info</Icon>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-black text-slate-800">Review Usulan Konversi</span>
+                            <span className="text-[9px] uppercase font-bold text-gray-500">Batas Waktu: Hari Ini</span>
+                          </div>
+                        </label>
+                      )}
+                      {counts.pendingClaims > 0 && (
+                        <label className="flex items-start gap-3 p-3 border-2 border-[#191b23] bg-slate-50 hover:bg-purple-50 transition-all cursor-pointer rounded-xl">
+                          <Icon className="text-md text-amber-500 mt-0.5">pending_actions</Icon>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-black text-slate-800">Penilaian Laporan Akhir</span>
+                            <span className="text-[9px] uppercase font-bold text-gray-500">Menunggu Penilaian Akademik</span>
+                          </div>
+                        </label>
+                      )}
+                      <label className="flex items-start gap-3 p-3 border-2 border-[#191b23] bg-slate-50 hover:bg-purple-50 transition-all cursor-pointer rounded-xl opacity-60">
+                        <Icon className="text-md text-green-600 mt-0.5">verified</Icon>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-black text-slate-800 line-through">Kumpulkan Rekap Nilai Bulanan</span>
+                          <span className="text-[9px] uppercase font-bold text-gray-500">Selesai</span>
+                        </div>
+                      </label>
+                    </div>
+                  </section>
+
                   {/* Recent Activity Timeline */}
-                  <section className="bg-white border-[3px] border-[#191b23] p-6 shadow-[6px_6px_0_#191b23] rounded-2xl">
+                  <section className="lg:col-span-2 bg-white border-[3px] border-[#191b23] p-6 shadow-[6px_6px_0_#191b23] rounded-2xl">
                     <h3 className="font-black text-sm uppercase mb-6 flex justify-between items-center">
                       <span>Aktivitas Terbaru</span>
                     </h3>
@@ -421,44 +455,6 @@ export default function DashboardDosen({ user, onLogout }) {
                           <p className="text-xs text-[#434655]">Mengirimkan revisi usulan konversi mata kuliah pilihan ke mahasiswa.</p>
                         </div>
                       </div>
-                    </div>
-                  </section>
-                </section>
-
-                {/* Right Column: Tasks & Charts */}
-                <aside className="flex flex-col gap-6">
-                  {/* Today's Tasks */}
-                  <section className="bg-white border-[3px] border-[#191b23] p-5 shadow-[6px_6px_0_#191b23] rounded-2xl">
-                    <h3 className="font-black text-sm uppercase mb-4 flex items-center gap-2">
-                      <Icon className="text-green-600">task_alt</Icon>
-                      Tugas Hari Ini
-                    </h3>
-                    <div className="space-y-3">
-                      {counts.pendingProposals > 0 && (
-                        <label className="flex items-start gap-3 p-3 border-2 border-[#191b23] bg-slate-50 hover:bg-purple-50 transition-all cursor-pointer rounded-xl">
-                          <Icon className="text-md text-[#9f149f] mt-0.5">info</Icon>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-black text-slate-800">Review Usulan Konversi</span>
-                            <span className="text-[9px] uppercase font-bold text-gray-500">Batas Waktu: Hari Ini</span>
-                          </div>
-                        </label>
-                      )}
-                      {counts.pendingClaims > 0 && (
-                        <label className="flex items-start gap-3 p-3 border-2 border-[#191b23] bg-slate-50 hover:bg-purple-50 transition-all cursor-pointer rounded-xl">
-                          <Icon className="text-md text-amber-500 mt-0.5">pending_actions</Icon>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-black text-slate-800">Penilaian Laporan Akhir</span>
-                            <span className="text-[9px] uppercase font-bold text-gray-500">Menunggu Penilaian Akademik</span>
-                          </div>
-                        </label>
-                      )}
-                      <label className="flex items-start gap-3 p-3 border-2 border-[#191b23] bg-slate-50 hover:bg-purple-50 transition-all cursor-pointer rounded-xl opacity-60">
-                        <Icon className="text-md text-green-600 mt-0.5">verified</Icon>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-black text-slate-800 line-through">Kumpulkan Rekap Nilai Bulanan</span>
-                          <span className="text-[9px] uppercase font-bold text-gray-500">Selesai</span>
-                        </div>
-                      </label>
                     </div>
                   </section>
 
@@ -496,7 +492,6 @@ export default function DashboardDosen({ user, onLogout }) {
                       </div>
                     </div>
                   </section>
-                </aside>
               </div>
             </div>
           )}
