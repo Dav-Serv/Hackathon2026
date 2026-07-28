@@ -85,19 +85,25 @@ export default function DashboardDosen({ user, onLogout }) {
 
   useEffect(() => {
     loadData()
+    const refresh = () => { if (document.visibilityState === 'visible') loadData() }
+    document.addEventListener('visibilitychange', refresh)
+    window.addEventListener('focus', refresh)
+    return () => { document.removeEventListener('visibilitychange', refresh); window.removeEventListener('focus', refresh) }
   }, [])
 
   const counts = { pendingProposals: allStudents.filter(s => s.statusUsulan === 'menunggu_persetujuan_dpl').length, pendingClaims: allStudents.filter(s => s.statusKlaim === 'menunggu_review_dpl').length, completed: allStudents.filter(s => s.statusKlaim === 'disetujui').length, totalStudents: allStudents.length }
+  const proposalCounts = { approved: allStudents.filter(s => s.statusUsulan === 'disetujui').length, revision: allStudents.filter(s => s.statusUsulan === 'revisi').length, pending: counts.pendingProposals }
+  const recentActivities = allStudents.filter(student => student.statusUsulan !== 'belum_diajukan' || student.statusKlaim !== 'belum_diajukan').slice(0, 4)
 
   const handleReviewProposal = (studentId, status, catatan) => {
     const student = allStudents.find(item => item.id === studentId)
-    api.post(`/dpl/usulan-konversi/${student.proposalId}/review`, { keputusan: status === 'disetujui' ? 'approve' : status, catatan }).then(() => { setAllStudents(prev => prev.map(item => item.id === studentId ? { ...item, statusUsulan: status } : item)); setSelectedStudent(null); setCatatanDplInput(''); showToast('Usulan berhasil diperbarui!', 'success') }).catch(error => showToast(getApiError(error), 'error'))
+    api.post(`/dpl/usulan-konversi/${student.proposalId}/review`, { keputusan: status === 'disetujui' ? 'approve' : status, catatan }).then(() => { setSelectedStudent(null); setCatatanDplInput(''); loadData(); showToast('Usulan berhasil diperbarui!', 'success') }).catch(error => showToast(getApiError(error), 'error'))
   }
 
   const handleGradeClaim = (studentId, nilai, komentar) => {
     if (nilai === '' || isNaN(nilai) || nilai < 0 || nilai > 100) return showToast('Masukkan nilai akademik yang valid (0 - 100)!', 'error')
     const student = allStudents.find(item => item.id === studentId)
-    api.post(`/dpl/klaim-konversi/${student.claimId}/review`, { keputusan: 'setuju', nilai_akademik: Number(nilai), komentar }).then(() => { setAllStudents(prev => prev.map(item => item.id === studentId ? { ...item, statusKlaim: 'disetujui', penilaian: { ...item.penilaian, dpl: { nilaiAkademik: Number(nilai), komentar, submittedAt: new Date().toISOString() } } } : item)); setSelectedStudent(null); setNilaiAkademikInput(''); setEvaluasiDplInput(''); showToast('Nilai akademik berhasil disubmit!', 'success') }).catch(error => showToast(getApiError(error), 'error'))
+    api.post(`/dpl/klaim-konversi/${student.claimId}/review`, { keputusan: 'setuju', nilai_akademik: Number(nilai), komentar }).then(() => { setSelectedStudent(null); setNilaiAkademikInput(''); setEvaluasiDplInput(''); loadData(); showToast('Nilai akademik berhasil disubmit!', 'success') }).catch(error => showToast(getApiError(error), 'error'))
   }
 
   // Helper to format letter grade
@@ -451,33 +457,11 @@ export default function DashboardDosen({ user, onLogout }) {
                       {/* Timeline Vertical Line */}
                       <div className="absolute left-6 top-2 bottom-2 w-1 bg-[#191b23]" />
                       
-                      {/* Activity 1 */}
-                      <div className="relative flex gap-4 pl-12 items-start">
-                        <div className="absolute left-3 w-7 h-7 rounded-full border-2 border-[#191b23] bg-[#22C55E] flex items-center justify-center text-white z-10">
-                          <Icon className="text-sm font-bold">check_circle</Icon>
-                        </div>
-                        <div className="flex-1 p-4 border-2 border-[#191b23] bg-slate-50 rounded-xl">
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className="text-xs font-black uppercase text-[#191b23]">Proposal Disetujui: Budi Santoso</h4>
-                            <span className="text-[10px] font-bold text-gray-500">10:45 AM</span>
-                          </div>
-                          <p className="text-xs text-[#434655]">Telah memverifikasi proposal dan dokumen konversi di Bank Central Asia.</p>
-                        </div>
-                      </div>
-                      
-                      {/* Activity 2 */}
-                      <div className="relative flex gap-4 pl-12 items-start">
-                        <div className="absolute left-3 w-7 h-7 rounded-full border-2 border-[#191b23] bg-[#ba1a1a] flex items-center justify-center text-white z-10">
-                          <Icon className="text-sm font-bold">error</Icon>
-                        </div>
-                        <div className="flex-1 p-4 border-2 border-[#191b23] bg-slate-50 rounded-xl">
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className="text-xs font-black uppercase text-[#ba1a1a]">Permintaan Revisi: Siti Aminah</h4>
-                            <span className="text-[10px] font-bold text-gray-500">Kemarin, 16:20</span>
-                          </div>
-                          <p className="text-xs text-[#434655]">Mengirimkan revisi usulan konversi mata kuliah pilihan ke mahasiswa.</p>
-                        </div>
-                      </div>
+                      {recentActivities.length ? recentActivities.map(student => {
+                        const status = student.statusKlaim !== 'belum_diajukan' ? student.statusKlaim : student.statusUsulan
+                        const approved = status === 'disetujui'
+                        return <div key={student.id} className="relative flex items-start gap-4 pl-12"><div className={`absolute left-3 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#191b23] text-white z-10 ${approved ? 'bg-[#22C55E]' : 'bg-[#9f149f]'}`}><Icon className="text-sm font-bold">{approved ? 'check_circle' : 'pending'}</Icon></div><div className="flex-1 rounded-xl border-2 border-[#191b23] bg-slate-50 p-4"><h4 className="text-xs font-black uppercase">{student.nama}</h4><p className="mt-1 text-xs text-[#434655]">Status terbaru: {status}</p></div></div>
+                      }) : <p className="pl-12 text-xs font-bold text-slate-400">Belum ada aktivitas terbaru.</p>}
                     </div>
                   </section>
 
@@ -488,12 +472,9 @@ export default function DashboardDosen({ user, onLogout }) {
                       <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
                         {/* Circle Background */}
                         <circle className="text-slate-200" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="12" />
-                        {/* Approved (60%) */}
-                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#22C55E" strokeDasharray="251.2" strokeDashoffset="100.48" strokeWidth="12" strokeLinecap="round" />
-                        {/* Revision (20%) */}
-                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#FACC15" strokeDasharray="251.2" strokeDashoffset="200.96" strokeWidth="12" strokeLinecap="round" />
-                        {/* Pending (20%) */}
-                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#9f149f" strokeDasharray="251.2" strokeDashoffset="226.08" strokeWidth="12" strokeLinecap="round" />
+                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#22C55E" strokeDasharray="251.2" strokeDashoffset={251.2 - (proposalCounts.approved / Math.max(counts.totalStudents, 1)) * 251.2} strokeWidth="12" strokeLinecap="round" />
+                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#FACC15" strokeDasharray="251.2" strokeDashoffset={251.2 - (proposalCounts.revision / Math.max(counts.totalStudents, 1)) * 251.2} strokeWidth="12" strokeLinecap="round" />
+                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#9f149f" strokeDasharray="251.2" strokeDashoffset={251.2 - (proposalCounts.pending / Math.max(counts.totalStudents, 1)) * 251.2} strokeWidth="12" strokeLinecap="round" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className="text-2xl font-black">{counts.totalStudents}</span>
@@ -503,15 +484,15 @@ export default function DashboardDosen({ user, onLogout }) {
                     <div className="mt-4 space-y-2 text-[9px] font-bold uppercase">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-[#22C55E] border border-[#191b23]" />
-                        <span>Selesai / Approved (60%)</span>
+                         <span>Selesai / Approved ({Math.round(proposalCounts.approved / Math.max(counts.totalStudents, 1) * 100)}%)</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-[#FACC15] border border-[#191b23]" />
-                        <span>Perlu Revisi (20%)</span>
+                         <span>Perlu Revisi ({Math.round(proposalCounts.revision / Math.max(counts.totalStudents, 1) * 100)}%)</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-[#9f149f] border border-[#191b23]" />
-                        <span>Menunggu Review (20%)</span>
+                         <span>Menunggu Review ({Math.round(proposalCounts.pending / Math.max(counts.totalStudents, 1) * 100)}%)</span>
                       </div>
                     </div>
                   </section>
