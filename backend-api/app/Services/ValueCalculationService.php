@@ -11,10 +11,16 @@ class ValueCalculationService
     {
         $mitra = (float) $claim->penilaianMitra()->latest()->value('nilai');
         $dpl = (float) $claim->penilaianDpl()->latest()->value('nilai_akademik');
-        abort_if(! $mitra || ! $dpl, 422, 'Nilai mitra dan DPL wajib tersedia.');
+        abort_if($mitra < 1 || $dpl < 1, 422, 'Nilai mitra dan DPL wajib tersedia.');
         $akhir = round($mitra * .7 + $dpl * .3, 2);
-
-        return $claim->nilaiAkhirs()->updateOrCreate(['mata_kuliah_id' => $claim->usulanKonversi->details()->value('mata_kuliah_id')], ['nilai_mitra' => $mitra, 'nilai_dpl' => $dpl, 'nilai_akhir' => $akhir, 'nilai_huruf' => $this->letter($akhir), 'sks' => 0, 'generated_at' => now()]);
+        $details = $claim->load('usulanKonversi.details.mataKuliah')->usulanKonversi->details;
+        abort_if($details->isEmpty(), 422, 'Mapping mata kuliah belum tersedia.');
+        $result = null;
+        foreach ($details->groupBy('mata_kuliah_id') as $mataKuliahId => $mappedDetails) {
+            $sks = (int) ($mappedDetails->first()->mataKuliah?->sks ?? 0);
+            $result = $claim->nilaiAkhirs()->updateOrCreate(['mata_kuliah_id' => $mataKuliahId], ['nilai_mitra' => $mitra, 'nilai_dpl' => $dpl, 'nilai_akhir' => $akhir, 'nilai_huruf' => $this->letter($akhir), 'sks' => $sks, 'generated_at' => now()]);
+        }
+        return $result;
     }
 
     private function letter(float $value): string

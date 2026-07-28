@@ -10,7 +10,11 @@ export default function DashboardDosen({ user, onLogout }) {
   const [isLoading, setIsLoading] = useState(true)
 
   // Active tab inside lecturer dashboard: dashboard | students | internship-proposal | conversion-claim | assessment-history | profile
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const validTabs = ['dashboard', 'students', 'internship-proposal', 'conversion-claim', 'assessment-history', 'profile']
+  const tabFromUrl = () => { const value = new URLSearchParams(window.location.search).get('tab'); return validTabs.includes(value) ? value : 'dashboard' }
+  const [activeTab, setActiveTab] = useState(tabFromUrl)
+  const selectTab = (tab) => { if (!validTabs.includes(tab)) return; setActiveTab(tab); const url = new URL(window.location.href); url.searchParams.set('tab', tab); window.history.pushState({}, '', url) }
+  useEffect(() => { const handlePopState = () => setActiveTab(tabFromUrl()); window.addEventListener('popstate', handlePopState); return () => window.removeEventListener('popstate', handlePopState) }, [])
 
   // Notification helper
   const [toast, setToast] = useState(null)
@@ -136,7 +140,7 @@ export default function DashboardDosen({ user, onLogout }) {
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id)
+                  selectTab(item.id)
                   setSelectedStudent(null)
                   setIsSidebarOpen(false)
                 }}
@@ -205,7 +209,7 @@ export default function DashboardDosen({ user, onLogout }) {
 
           <div className="flex items-center gap-3">
             <div 
-              onClick={() => setActiveTab('profile')}
+              onClick={() => selectTab('profile')}
               className="flex items-center gap-2 cursor-pointer hover:opacity-85"
             >
               <div className="w-8 h-8 rounded-full border border-[#191b23] bg-[#9f149f] flex items-center justify-center text-white text-xs font-black">
@@ -259,7 +263,7 @@ export default function DashboardDosen({ user, onLogout }) {
               {/* Statistics Cards */}
               <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Students */}
-                <div className="bg-[#9f149f] text-white border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => setActiveTab('students')}>
+                <div className="bg-[#9f149f] text-white border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => selectTab('students')}>
                   <div className="flex justify-between items-start mb-2">
                     <Icon className="text-3xl">groups</Icon>
                     <span className="text-[10px] font-black uppercase tracking-wider">TOTAL</span>
@@ -268,7 +272,7 @@ export default function DashboardDosen({ user, onLogout }) {
                   <div className="text-[10px] font-black uppercase">Mahasiswa Bimbingan</div>
                 </div>
                 {/* Pending Proposal */}
-                <div className="bg-[#FACC15] text-[#191b23] border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => setActiveTab('internship-proposal')}>
+                <div className="bg-[#FACC15] text-[#191b23] border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => selectTab('internship-proposal')}>
                   <div className="flex justify-between items-start mb-2">
                     <Icon className="text-3xl">description</Icon>
                     <span className="text-[10px] font-black uppercase tracking-wider">PENDING</span>
@@ -277,7 +281,7 @@ export default function DashboardDosen({ user, onLogout }) {
                   <div className="text-[10px] font-black uppercase">Review Proposal & Usulan</div>
                 </div>
                 {/* Pending Claim */}
-                <div className="bg-[#64a8fe] text-[#191b23] border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => setActiveTab('conversion-claim')}>
+                <div className="bg-[#64a8fe] text-[#191b23] border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => selectTab('conversion-claim')}>
                   <div className="flex justify-between items-start mb-2">
                     <Icon className="text-3xl">swap_horiz</Icon>
                     <span className="text-[10px] font-black uppercase tracking-wider">KLAIM</span>
@@ -286,7 +290,7 @@ export default function DashboardDosen({ user, onLogout }) {
                   <div className="text-[10px] font-black uppercase">Klaim & Penilaian</div>
                 </div>
                 {/* Completed */}
-                <div className="bg-[#22C55E] text-white border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => setActiveTab('assessment-history')}>
+                <div className="bg-[#22C55E] text-white border-[3px] border-[#191b23] p-5 shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 transition-all cursor-pointer" onClick={() => selectTab('assessment-history')}>
                   <div className="flex justify-between items-start mb-2">
                     <Icon className="text-3xl">verified_user</Icon>
                     <span className="text-[10px] font-black uppercase tracking-wider">SELESAI</span>
@@ -368,7 +372,7 @@ export default function DashboardDosen({ user, onLogout }) {
                                 <td className="p-4 text-center">
                                   <button 
                                     onClick={() => {
-                                      setActiveTab(tabTarget)
+                                      selectTab(tabTarget)
                                       setSelectedStudent(student)
                                     }}
                                     className="mx-auto bg-[#9f149f] hover:-translate-y-0.5 active:translate-y-0 text-white border-2 border-[#191b23] px-3 py-1 text-[10px] font-bold uppercase rounded-lg shadow-[2px_2px_0_#191b23] transition-all flex items-center gap-1"
@@ -540,9 +544,9 @@ export default function DashboardDosen({ user, onLogout }) {
                           onClick={() => {
                             setSelectedStudent(student)
                             if (student.statusUsulan === 'menunggu_persetujuan_dpl') {
-                              setActiveTab('internship-proposal')
+                              selectTab('internship-proposal')
                             } else if (student.statusKlaim === 'menunggu_review_dpl') {
-                              setActiveTab('conversion-claim')
+                              selectTab('conversion-claim')
                             } else {
                               // Fallback profile/info modal or view
                               showToast(`Detail Mahasiswa: ${student.nama}`, 'info')

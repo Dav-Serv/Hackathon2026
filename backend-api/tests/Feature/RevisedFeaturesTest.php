@@ -94,7 +94,8 @@ class RevisedFeaturesTest extends TestCase
         $response = $this->actingAs($student)->postJson('/api/magang/'.$claim->magang_id.'/surat-pengantar', ['file' => UploadedFile::fake()->create('surat.pdf', 10, 'application/pdf')]);
         $response->assertCreated()->assertJsonPath('status', 'diajukan');
         $surat = SuratPengantar::first();
-        $this->actingAs($student)->putJson('/api/surat-pengantar/'.$surat->id, ['status' => 'disetujui'])->assertOk();
+        $admin = User::factory()->create(['role' => 'admin_prodi']);
+        $this->actingAs($admin)->post('/api/admin/surat-pengantar/'.$surat->id.'/terbitkan', ['status' => 'disetujui', 'file' => UploadedFile::fake()->create('surat-terbit.pdf', 10, 'application/pdf')])->assertOk();
         $this->actingAs(User::factory()->create(['role' => 'dpl']))->getJson('/api/surat-pengantar')->assertForbidden();
         $this->actingAs($student)->getJson('/api/surat-pengantar/'.$surat->id.'/download')->assertOk()->assertJsonStructure(['url']);
     }

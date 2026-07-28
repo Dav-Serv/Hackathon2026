@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KlaimKonversi;
 use App\Models\UsulanKonversi;
+use App\Services\ValueCalculationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,7 +61,7 @@ class DplReviewController extends Controller
         return response()->json($klaims);
     }
 
-    public function reviewKlaim(Request $request, KlaimKonversi $klaimKonversi): JsonResponse
+    public function reviewKlaim(Request $request, KlaimKonversi $klaimKonversi, ValueCalculationService $calculator): JsonResponse
     {
         abort_unless($klaimKonversi->magang()->where('dpl_id', $request->user()->id)->exists(), 403);
 
@@ -84,6 +85,7 @@ class DplReviewController extends Controller
             return $klaim->fresh()->load(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl']);
         });
 
-        return response()->json($klaimKonversi);
+        if ($klaimKonversi->status === 'disetujui') $calculator->calculate($klaimKonversi->fresh());
+        return response()->json($klaimKonversi->fresh()->load(['magang.mahasiswa', 'usulanKonversi.details.mataKuliah', 'details', 'penilaianMitra', 'penilaianDpl', 'nilaiAkhirs']));
     }
 }

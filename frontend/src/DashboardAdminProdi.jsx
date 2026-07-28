@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import api, { getApiError } from './lib/api'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
@@ -7,7 +8,79 @@ function Icon({ children, className = '' }) {
 export default function DashboardAdminProdi({ user, onLogout }) {
   // Collapsible sidebar state (False = closed/hidden by default)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const validTabs = ['dashboard', 'pengajuan', 'konversi-mk', 'data-master', 'laporan', 'pengaturan', 'surat']
+  const tabFromUrl = () => {
+    const value = new URLSearchParams(window.location.search).get('tab')
+    return validTabs.includes(value) ? value : 'dashboard'
+  }
+  const [activeTab, setActiveTab] = useState(tabFromUrl)
+  const selectTab = (tab) => {
+    if (!validTabs.includes(tab)) return
+    setActiveTab(tab)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', tab)
+    window.history.pushState({}, '', url)
+  }
+  useEffect(() => {
+    const handlePopState = () => setActiveTab(tabFromUrl())
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+  const [tabData, setTabData] = useState({ courses: [], letters: [], dashboard: null })
+  const [tabLoading, setTabLoading] = useState(false)
+  const [tabError, setTabError] = useState('')
+
+  useEffect(() => {
+    let mounted = true
+    const loadTab = async () => {
+      if (activeTab === 'pengajuan' || activeTab === 'pengaturan' || activeTab === 'konversi-mk') return
+      setTabLoading(true)
+      setTabError('')
+      try {
+        const endpoint = activeTab === 'data-master' ? '/admin/mata-kuliah' : activeTab === 'surat' ? '/admin/surat-pengantar' : '/admin/dashboard'
+        const { data } = await api.get(endpoint)
+        if (!mounted) return
+        setTabData(prev => ({ ...prev, ...(activeTab === 'data-master' ? { courses: data?.data || data || [] } : activeTab === 'surat' ? { letters: data?.data || data || [] } : { dashboard: data?.data || data }) }))
+      } catch (error) {
+        if (mounted) setTabError(getApiError(error))
+      } finally {
+        if (mounted) setTabLoading(false)
+      }
+    }
+    loadTab()
+    return () => { mounted = false }
+  }, [activeTab])
+
+  const exportData = async (endpoint, filename) => {
+    try {
+      const { data } = await api.get(endpoint, { responseType: 'blob' })
+      const url = URL.createObjectURL(data)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      showToast(getApiError(error), 'error')
+    }
+  }
+
+  const issueLetter = async (letter, file) => {
+    if (!file) {
+      showToast('Pilih file surat pengantar PDF terlebih dahulu.', 'error')
+      return
+    }
+    try {
+      const payload = new FormData()
+      payload.append('status', 'disetujui')
+      payload.append('file', file)
+      const { data } = await api.post(`/admin/surat-pengantar/${letter.id}/terbitkan`, payload, { headers: { 'Content-Type': 'multipart/form-data' } })
+      setTabData(prev => ({ ...prev, letters: prev.letters.map(item => item.id === letter.id ? data : item) }))
+      showToast('Surat pengantar berhasil diterbitkan.')
+    } catch (error) {
+      showToast(getApiError(error), 'error')
+    }
+  }
 
   // Notification helper
   const [toast, setToast] = useState(null)
@@ -16,62 +89,48 @@ export default function DashboardAdminProdi({ user, onLogout }) {
     setTimeout(() => setToast(null), 3000)
   }
 
-  // Interactive Task List State
-  const [tasks, setTasks] = useState([
-    { id: 1, text: 'Verifikasi 5 berkas Andi Pratama', completed: false },
-    { id: 2, text: 'Upload SK DPL Semester Genap', completed: true },
-    { id: 3, text: 'Cetak laporan bulanan Maret', completed: false },
-  ])
+  const tasks = []
+  const toggleTask = () => {}
 
-  const toggleTask = (id) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
-    showToast('Status tugas diperbarui!')
+  const [submissions, setSubmissions] = useState([])
+  const [search, setSearch] = useState('')
+  const [selectedSubmission, setSelectedSubmission] = useState(null)
+
+  const loadData = async () => {
+    try {
+      const [{ data: dashboard }, { data: magang }] = await Promise.all([api.get('/admin/dashboard'), api.get('/admin/magang')])
+      const records = magang?.data || magang || []
+      setSubmissions(records.map(item => ({
+        id: item.id,
+        nama: item.mahasiswa?.name || item.mahasiswa?.nama || '-',
+        nim: item.mahasiswa?.nim_nip || item.mahasiswa?.nim || '-',
+        perusahaan: item.mitra_industri?.nama_perusahaan || item.mitraIndustri?.nama_perusahaan || '-',
+        dpl: item.dpl?.name || '-',
+        status: item.status === 'menunggu_verifikasi' ? 'pending' : item.status === 'disetujui' ? 'approved' : item.status === 'ditolak' ? 'revisi' : item.status,
+        avatar: item.mahasiswa?.avatar || '',
+      })))
+      setTabData(prev => ({ ...prev, dashboard }))
+    } catch (error) { showToast(getApiError(error), 'error') }
   }
 
-  // Mock data for student submissions
-  const [submissions, setSubmissions] = useState([
-    {
-      id: 'VR-9082',
-      nama: 'Andi Pratama',
-      nim: '220104001',
-      perusahaan: 'PT Teknologi Nusantara',
-      dpl: 'Dr. Sarah Wijaya',
-      status: 'pending',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCb-NLaOs9EmwjAY7nPv91LFFOm66J1cveQVrLcikYQFDEDaFzWqzibu_mOT1DI7HrA5jNeIU3-Kwpsdwvqa9ApM_B37eh7GPkkV-DTsv1Z3BETtNteJo8odItFRFZz2OIdYyMu7uyDTC9Rbe484NvfYNx3aDcEtgdlb_WdX2lh-zf4rOaIYCsaJZn0O3As0XZPfkqPT0CJbC_vnjjExyJcijHCpO-cNuD9m7Me9_wasw7vraz6FmIPqpA2srC8D3NcXkkjc7xF9LvK'
-    },
-    {
-      id: 'VR-9081',
-      nama: 'Bunga Lestari',
-      nim: '220104022',
-      perusahaan: 'Shopee Indonesia',
-      dpl: 'Bambang S.T., M.Kom',
-      status: 'revisi',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBURoEr1gDiLlYf_0JIzysHQuMGlvWg3OykJFAVUnWF2XDyNTwqLwACXbcI8sUKHuD71-JQUFnDL1Yw7f5ZO2GeentIS5FHfT4Vv3HN-E75URWH1Z1yCNgLOd7u_tsNbpgIDbW4zZlV5Wx4jZNDA4qsZ7cTdj-3iKM4Ie2Q43QQtIsm2cMyPudlzX3mjRza-tT12K5XlH7iBoXQooy5evDrvsfj9dvT5PRAFvOTJExnFXekXJF5Fh0hiUTGwGknMxSf8MDRHVyBBl9J'
-    },
-    {
-      id: 'VR-9080',
-      nama: 'Citra Kirana',
-      nim: '220104055',
-      perusahaan: 'Gojek Tech',
-      dpl: 'Indah Sari Ph.D',
-      status: 'approved',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDc0Pg9AoZGJqRbN-mWtjiSj2T1ooshFdb4znRcPv1Nn2XBauzEhInAwVzwtPM8CzXiSLk-PL3bhPv-dRnIIbLQcpE7kpaFObI30uCqTJR1r29-w7fuU7JAKCpPcTgCJv1_ed4Eobq-dSft-h7gcGtkSRWyg8SwntZazLcbrnhUmXORmt3xN-OsQihXN-q_jYqjx69vRNVfNeCtQP6udXOlYElSDmZXhlZ2kxwYK-2LsVOAdli-y16ZBLOE6wqO4bjw52Svjek0qoe8'
-    }
-  ])
+  useEffect(() => { loadData() }, [])
 
-  // Simple action handlers
-  const handleApprove = (id, name) => {
-    setSubmissions(prev => prev.map(sub => sub.id === id ? { ...sub, status: 'approved' } : sub))
-    showToast(`Pengajuan ${name} berhasil disetujui!`)
+  const handleVerify = async (id, name, status) => {
+    try {
+      await api.post(`/admin/magang/${id}/verifikasi`, { status })
+      await loadData()
+      showToast(`Pengajuan ${name} berhasil diproses.`)
+    } catch (error) { showToast(getApiError(error), 'error') }
   }
 
-  const handleReject = (id, name) => {
-    setSubmissions(prev => prev.map(sub => sub.id === id ? { ...sub, status: 'revisi' } : sub))
-    showToast(`Pengajuan ${name} dikembalikan untuk revisi.`, 'error')
-  }
+  const handleApprove = (id, name) => handleVerify(id, name, 'disetujui')
+  const handleReject = (id, name) => handleVerify(id, name, 'ditolak')
+
+
 
   // Count helper
   const pendingCount = submissions.filter(s => s.status === 'pending').length
+  const dashboard = tabData.dashboard || {}
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23]">
@@ -117,15 +176,16 @@ export default function DashboardAdminProdi({ user, onLogout }) {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
               { id: 'pengajuan', label: 'Pengajuan', icon: 'description' },
-              { id: 'konversi-mk', label: 'Konversi MK', icon: 'swap_horiz' },
-              { id: 'data-master', label: 'Data Master', icon: 'database' },
+               { id: 'konversi-mk', label: 'Konversi MK', icon: 'swap_horiz' },
+               { id: 'data-master', label: 'Data Master', icon: 'database' },
+               { id: 'surat', label: 'Surat Pengantar', icon: 'mail' },
               { id: 'laporan', label: 'Laporan', icon: 'assessment' },
               { id: 'pengaturan', label: 'Pengaturan', icon: 'settings' }
             ].map(item => (
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id)
+                  selectTab(item.id)
                   setIsSidebarOpen(false)
                 }}
                 className={`flex items-center gap-3 w-full rounded-2xl border-2 p-3 text-left font-bold transition-all duration-150 ${
@@ -188,7 +248,7 @@ export default function DashboardAdminProdi({ user, onLogout }) {
             </div>
             
             <div 
-              onClick={() => setActiveTab('pengaturan')}
+              onClick={() => selectTab('pengaturan')}
               className="flex items-center gap-2 cursor-pointer hover:opacity-85"
             >
               <div className="w-8 h-8 rounded-full border border-[#191b23] bg-[#9f149f] flex items-center justify-center text-white text-xs font-black">
@@ -229,14 +289,14 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                   
                   <div className="flex flex-wrap gap-3">
                     <button 
-                      onClick={() => setActiveTab('pengajuan')}
+                      onClick={() => selectTab('pengajuan')}
                       className="flex items-center gap-2 rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-5 py-2.5 text-xs font-bold text-white shadow-[3px_3px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                     >
                       <Icon className="text-md">verified_user</Icon>
                       Verifikasi Pengajuan
                     </button>
                     <button 
-                      onClick={() => setActiveTab('laporan')}
+                      onClick={() => selectTab('laporan')}
                       className="flex items-center gap-2 rounded-xl border-2 border-[#191b23] bg-white px-5 py-2.5 text-xs font-bold text-[#191b23] shadow-[3px_3px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                     >
                       <Icon className="text-md">analytics</Icon>
@@ -253,12 +313,13 @@ export default function DashboardAdminProdi({ user, onLogout }) {
 
               {/* KPI Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { title: 'Total Pengajuan', val: 142, icon: 'folder_shared', color: 'bg-white' },
-                  { title: 'Menunggu Verifikasi', val: pendingCount, icon: 'pending_actions', color: 'bg-[#ffdad6] text-[#93000a] border-[#ba1a1a]', isWarning: true },
-                  { title: 'Menunggu Review DPL', val: 28, icon: 'rate_review', color: 'bg-purple-50 text-[#9f149f]' },
-                  { title: 'Konversi Selesai', val: 102, icon: 'task_alt', color: 'bg-[#e8f5e9] text-[#2e7d32]' }
-                ].map((kpi, idx) => (
+                  {[
+                   { title: 'Total Pengajuan', val: dashboard.total_pengajuan ?? submissions.length, icon: 'folder_shared', color: 'bg-white' },
+                   { title: 'Menunggu Verifikasi', val: dashboard.menunggu_verifikasi ?? pendingCount, icon: 'pending_actions', color: 'bg-[#ffdad6] text-[#93000a] border-[#ba1a1a]', isWarning: true },
+                   { title: 'Menunggu Review DPL', val: dashboard.menunggu_review_dpl ?? 0, icon: 'rate_review', color: 'bg-purple-50 text-[#9f149f]' },
+                   { title: 'Konversi Selesai', val: dashboard.konversi_selesai ?? 0, icon: 'task_alt', color: 'bg-[#e8f5e9] text-[#2e7d32]' }
+                 ].map((kpi, idx) => (
+
                   <div key={idx} className={`p-6 rounded-2xl border-3 border-[#191b23] shadow-[4px_4px_0_#191b23] ${kpi.color} flex flex-col gap-2`}>
                     <p className="text-[10px] font-black uppercase tracking-wider opacity-85">{kpi.title}</p>
                     <div className="flex items-end justify-between mt-2">
@@ -277,10 +338,12 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                   <div className="p-5 border-b-3 border-[#191b23] flex flex-wrap justify-between items-center gap-4">
                     <h2 className="text-base font-black uppercase tracking-tight">Daftar Pengajuan Magang Terbaru</h2>
                     <div className="flex gap-2">
-                      <button onClick={() => showToast('Fitur filter akan datang!')} className="p-2 rounded-lg border-2 border-[#191b23] hover:bg-slate-50 transition-colors">
+                       <button onClick={() => selectTab('pengajuan')} className="p-2 rounded-lg border-2 border-[#191b23] hover:bg-slate-50 transition-colors">
+
                         <Icon className="text-md">filter_list</Icon>
                       </button>
-                      <button onClick={() => showToast('Ekspor data berhasil diunduh!')} className="p-2 rounded-lg border-2 border-[#191b23] hover:bg-slate-50 transition-colors">
+                       <button onClick={() => exportData('/admin/export/hasil-konversi', 'hasil-konversi.xlsx')} className="p-2 rounded-lg border-2 border-[#191b23] hover:bg-slate-50 transition-colors">
+
                         <Icon className="text-md">download</Icon>
                       </button>
                     </div>
@@ -331,7 +394,8 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                             <td className="p-4 text-right">
                               <div className="flex justify-end gap-1.5">
                                 <button 
-                                  onClick={() => showToast(`Detail berkas ${sub.nama} terbuka.`)}
+                                   onClick={() => selectTab('pengajuan')}
+
                                   className="p-2 rounded-lg border-2 border-[#191b23] bg-white hover:bg-slate-50 transition-all active:translate-y-0.5"
                                   title="Lihat Berkas"
                                 >
@@ -365,10 +429,11 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                   
                   <div className="p-4 bg-slate-50 text-center border-t-2 border-[#191b23]">
                     <button 
-                      onClick={() => setActiveTab('pengajuan')}
+                      onClick={() => selectTab('pengajuan')}
                       className="text-xs font-black uppercase tracking-wider text-[#9f149f] hover:underline"
                     >
-                      Lihat Semua Pengajuan (45+)
+                       Lihat Semua Pengajuan ({submissions.length})
+
                     </button>
                   </div>
                 </div>
@@ -407,24 +472,13 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                     </div>
                     <div className="flex flex-col gap-4 relative pl-3 text-xs font-bold">
                       <div className="absolute left-1 top-0 bottom-0 w-0.5 bg-white/20" />
-                      
-                      <div className="relative">
-                        <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-[#9f149f] border border-white" />
-                        <p className="text-[10px] text-purple-300">10 Menit Lalu</p>
-                        <p className="mt-0.5">Verifikasi pengajuan <b>Budi Santoso</b> ditolak (Revisi).</p>
-                      </div>
-
-                      <div className="relative">
-                        <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-green-400 border border-white" />
-                        <p className="text-[10px] text-green-300">1 Jam Lalu</p>
-                        <p className="mt-0.5">Anda menyetujui konversi nilai <b>Siska Amalia</b>.</p>
-                      </div>
-
-                      <div className="relative">
-                        <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-yellow-400 border border-white" />
-                        <p className="text-[10px] text-yellow-300">Kemarin</p>
-                        <p className="mt-0.5">Admin Dekanat mengunggah data master mahasiswa baru.</p>
-                      </div>
+                      {(dashboard.activities || []).map((activity, index) => (
+                        <div key={activity.id || index} className="relative">
+                          <div className="absolute -left-[13px] top-1 w-2.5 h-2.5 rounded-full bg-[#9f149f] border border-white" />
+                          <p className="text-[10px] text-purple-300">{activity.time || activity.created_at || '-'}</p>
+                          <p className="mt-0.5">{activity.description || activity.message || '-'}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -437,14 +491,16 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                 <h3 className="text-xs font-black uppercase tracking-widest text-[#434655]">Akses Cepat & Layanan</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
-                    { title: 'Buat Surat Pengantar', icon: 'description', color: 'bg-white hover:bg-purple-50' },
-                    { title: 'Kelola Data Master', icon: 'database', color: 'bg-white hover:bg-yellow-50' },
-                    { title: 'Ekspor Data (Excel)', icon: 'table_view', color: 'bg-white hover:bg-green-50' },
-                    { title: 'Analisis Laporan', icon: 'insights', color: 'bg-white hover:bg-blue-50' }
-                  ].map((act, idx) => (
+                     { title: 'Buat Surat Pengantar', icon: 'description', tab: 'surat', color: 'bg-white hover:bg-purple-50' },
+                     { title: 'Kelola Data Master', icon: 'database', tab: 'data-master', color: 'bg-white hover:bg-yellow-50' },
+                     { title: 'Ekspor Data (Excel)', icon: 'table_view', action: () => exportData('/admin/export/hasil-konversi', 'hasil-konversi.xlsx'), color: 'bg-white hover:bg-green-50' },
+                     { title: 'Analisis Laporan', icon: 'insights', tab: 'laporan', color: 'bg-white hover:bg-blue-50' }
+                   ].map((act, idx) => (
+
                     <button 
                       key={idx}
-                      onClick={() => showToast(`Membuka menu ${act.title}...`)}
+                       onClick={() => act.action ? act.action() : selectTab(act.tab)}
+
                       className={`p-6 rounded-2xl border-3 border-[#191b23] shadow-[4px_4px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all flex flex-col items-center text-center gap-3 ${act.color}`}
                     >
                       <div className="w-12 h-12 rounded-xl border-2 border-[#191b23] bg-purple-50 flex items-center justify-center">
@@ -470,24 +526,21 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                 </div>
 
                 <div className="flex items-end gap-3 md:gap-4 h-64 border-b-3 border-l-3 border-[#191b23] pb-2 pl-3 md:pl-4">
-                  {[
-                    { m: 'Jan', val: '40%', num: 12 },
-                    { m: 'Feb', val: '65%', num: 25 },
-                    { m: 'Mar', val: '90%', num: 48 },
-                    { m: 'Apr', val: '55%', num: 30 },
-                    { m: 'Mei', val: '30%', num: 15 },
-                    { m: 'Jun', val: '45%', num: 20 }
-                  ].map((bar, i) => (
+                  {Array.from({ length: 12 }, (_, index) => { const source = (dashboard.monthly_submissions || dashboard.tren_pengajuan || []).find(item => Number(item.month || item.m) === index + 1); return { month: index + 1, total: Number(source?.total ?? source?.value ?? source?.num ?? 0) } }).map((bar, i, bars) => (
+
                     <div key={i} className="group relative flex-1 flex flex-col justify-end h-full">
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#191b23] text-white px-2 py-1 rounded text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                        {bar.num}
+                         {bar.total}
+
                       </div>
                       <div 
-                        style={{ height: bar.val }}
+                         style={{ height: `${bar.total ? Math.max(4, (bar.total / Math.max(...bars.map(item => item.total), 1)) * 90) : 0}%` }}
+
                         className="bg-purple-100 border-2 border-b-0 border-[#191b23] group-hover:bg-[#9f149f] transition-all"
                       />
                       <p className="mt-3 text-center text-[10px] font-black uppercase tracking-wider text-slate-700">
-                        {bar.m}
+                         {['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'][bar.month - 1]}
+
                       </p>
                     </div>
                   ))}
@@ -503,13 +556,8 @@ export default function DashboardAdminProdi({ user, onLogout }) {
                   </h3>
                 </div>
                 <div className="divide-y-2 divide-[#191b23]/10 font-bold text-xs">
-                  {[
-                    { id: '#VR-9082', task: 'Konversi Nilai: Dian Safitri', date: '24 Mar 2026, 14:20', success: true },
-                    { id: '#VR-9081', task: 'Surat Pengantar: PT Maju Jaya', date: '24 Mar 2026, 11:05', success: true },
-                    { id: '#VR-9080', task: 'Validasi Logbook: Eko Prasetyo', date: '23 Mar 2026, 16:45', success: false },
-                    { id: '#VR-9079', task: 'Pendaftaran Magang: Reza Rahadian', date: '23 Mar 2026, 09:30', success: true },
-                    { id: '#VR-9078', task: 'Konversi Nilai: Siti Aisyah', date: '22 Mar 2026, 15:10', success: true }
-                  ].map((log, idx) => (
+                   {(dashboard.history || dashboard.activities || []).map((log, idx) => (
+
                     <div key={idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
                       <div className="flex items-center gap-4">
                         <span className="font-mono text-[#9f149f]">{log.id}</span>
@@ -533,29 +581,32 @@ export default function DashboardAdminProdi({ user, onLogout }) {
             </div>
           )}
 
-          {/* ============================================================== */}
-          {/* PLACEHOLDER PAGES */}
-          {/* ============================================================== */}
-          {activeTab !== 'dashboard' && (
-            <div className="rounded-2xl border-3 border-[#191b23] bg-white p-8 md:p-12 shadow-[6px_6px_0_#191b23] text-center space-y-4">
-              <div className="w-16 h-16 rounded-full border-3 border-[#191b23] bg-purple-50 text-[#9f149f] flex items-center justify-center mx-auto shadow-[3px_3px_0_#191b23]">
-                <Icon className="text-3xl">build</Icon>
+          {activeTab === 'pengajuan' && (
+            <section className="rounded-2xl border-3 border-[#191b23] bg-white shadow-[6px_6px_0_#191b23] overflow-hidden">
+<div className="flex flex-wrap items-center justify-between gap-3 border-b-3 border-[#191b23] p-5"><h2 className="text-xl font-black uppercase tracking-tight">Daftar Pengajuan</h2><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cari mahasiswa, NIM, perusahaan" className="rounded-xl border-2 border-[#191b23] px-3 py-2 text-xs font-bold" /></div>
+               <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-4">Mahasiswa</th><th className="p-4">Perusahaan</th><th className="p-4">DPL</th><th className="p-4 text-center">Status</th><th className="p-4 text-right">Aksi</th></tr></thead><tbody className="divide-y">{submissions.filter(sub => `${sub.nama} ${sub.nim} ${sub.perusahaan}`.toLowerCase().includes(search.toLowerCase())).map(sub => <tr key={sub.id}><td className="p-4"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#191b23] bg-purple-100">{sub.avatar ? <img src={sub.avatar} alt={sub.nama} className="h-full w-full object-cover" /> : <Icon>account_circle</Icon>}</div><div>{sub.nama}<span className="block text-[10px] text-gray-500">NIM: {sub.nim}</span></div></div></td><td className="p-4">{sub.perusahaan}</td><td className="p-4">{sub.dpl}</td><td className="p-4 text-center"><span className="rounded-full border-2 border-green-700 bg-green-100 px-2 py-1 text-[9px] uppercase">{sub.status}</span></td><td className="p-4 text-right"><button onClick={() => setSelectedSubmission(sub)} className="rounded-lg border-2 border-[#191b23] p-2"><Icon className="text-sm">visibility</Icon></button>{sub.status === 'pending' && <div className="mt-2 flex justify-end gap-2"><button onClick={() => handleApprove(sub.id, sub.nama)} className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Setujui</button><button onClick={() => handleReject(sub.id, sub.nama)} className="rounded-lg border-2 border-[#191b23] bg-[#ba1a1a] px-3 py-1 text-white">Revisi</button></div>}</td></tr>)}</tbody></table></div>
+            </section>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'pengajuan' && (
+            <section className="rounded-2xl border-3 border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23] space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#191b23] pb-4">
+                <h2 className="text-xl font-black uppercase tracking-tight">{activeTab === 'data-master' ? 'Data Master Mata Kuliah' : activeTab === 'surat' ? 'Surat Pengantar' : activeTab === 'laporan' ? 'Laporan Dashboard' : activeTab === 'konversi-mk' ? 'Konversi Mata Kuliah' : 'Pengaturan'}</h2>
+                {activeTab === 'laporan' && <button onClick={() => exportData('/admin/export/hasil-konversi', 'hasil-konversi.xlsx')} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-4 py-2 text-xs font-bold text-white shadow-[3px_3px_0_#191b23]"><Icon className="mr-1 align-middle text-sm">download</Icon> Ekspor</button>}
+                {activeTab === 'konversi-mk' && <button onClick={() => exportData('/admin/export/hasil-konversi', 'hasil-konversi.xlsx')} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-4 py-2 text-xs font-bold text-white shadow-[3px_3px_0_#191b23]"><Icon className="mr-1 align-middle text-sm">download</Icon> Ekspor Hasil</button>}
               </div>
-              <h2 className="text-xl font-black uppercase tracking-tight">Halaman {activeTab} Dalam Pembangunan</h2>
-              <p className="text-xs font-bold text-gray-500 max-w-sm mx-auto">
-                Modul ini sedang disiapkan oleh tim pengembang GradeSync untuk integrasi Siakad akademik.
-              </p>
-              <button 
-                onClick={() => setActiveTab('dashboard')}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl border-2 border-[#191b23] bg-white px-5 py-2 font-bold text-[#191b23] shadow-[2.5px_2.5px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all text-xs"
-              >
-                <Icon className="text-sm">arrow_back</Icon>
-                Kembali ke Dashboard
-              </button>
-            </div>
+              {tabLoading && <p className="text-xs font-bold text-gray-500">Memuat data...</p>}
+              {tabError && <p className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-xs font-bold text-[#93000a]">{tabError}</p>}
+              {activeTab === 'data-master' && !tabLoading && <div className="overflow-x-auto"><table className="w-full text-left text-xs font-bold"><thead className="border-b-2 border-[#191b23] text-[10px] uppercase"><tr><th className="p-3">Kode</th><th className="p-3">Mata Kuliah</th><th className="p-3">SKS</th><th className="p-3">Sumber</th></tr></thead><tbody className="divide-y">{tabData.courses.map(course => <tr key={course.id}><td className="p-3 font-mono">{course.kode_mk}</td><td className="p-3">{course.nama_mk}</td><td className="p-3">{course.sks}</td><td className="p-3">{course.sumber || '-'}</td></tr>)}</tbody></table></div>}
+              {activeTab === 'surat' && !tabLoading && <div className="space-y-3">{tabData.letters.map(letter => <div key={letter.id} className="flex flex-wrap items-center justify-between gap-3 border-2 border-[#191b23] p-4 text-xs font-bold"><span>{letter.magang?.mahasiswa?.name || letter.magang?.mahasiswa?.nama || `Surat #${letter.id}`}</span><span className="uppercase">{letter.status}</span>{letter.status !== 'disetujui' && <label className="flex items-center gap-2"><input type="file" accept="application/pdf,.pdf" onChange={event => { const file = event.target.files?.[0]; if (file) issueLetter(letter, file) }} className="max-w-[180px] text-[10px]" /><span className="rounded-lg border-2 border-[#191b23] bg-[#9f149f] px-3 py-1 text-white">Pilih PDF & Terbitkan</span></label>}</div>)}</div>}
+              {activeTab === 'laporan' && !tabLoading && <div className="grid gap-4 sm:grid-cols-3">{Object.entries(tabData.dashboard || {}).slice(0, 6).map(([key, value]) => <div key={key} className="border-2 border-[#191b23] p-4"><p className="text-[10px] font-black uppercase">{key.replaceAll('_', ' ')}</p><strong className="text-2xl">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</strong></div>)}</div>}
+              {activeTab === 'konversi-mk' && <p className="text-sm font-bold">Gunakan ekspor hasil konversi untuk melihat pemetaan nilai terbaru.</p>}
+              {activeTab === 'pengaturan' && <div className="grid gap-3 sm:grid-cols-2 text-sm font-bold">{[['Nama', user?.name || user?.nama], ['Email', user?.email], ['NIM/NIP', user?.nim_nip || user?.nim], ['Peran', user?.role]].map(([label, value]) => <div key={label} className="border-2 border-[#191b23] p-4"><span className="block text-[10px] uppercase text-gray-500">{label}</span>{value || '-'}</div>)}</div>}
+            </section>
           )}
 
         </main>
+        {selectedSubmission && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-5"><div className="w-full max-w-md rounded-2xl border-3 border-[#191b23] bg-white p-6"><div className="mb-4 flex justify-between"><h2 className="font-black">Detail Berkas</h2><button onClick={() => setSelectedSubmission(null)} className="border-2 border-[#191b23] px-3 py-1 font-bold">Tutup</button></div><p className="mb-4 text-sm font-bold">{selectedSubmission.nama}</p><div className="grid gap-3"><button onClick={async () => { try { const { data } = await api.get(`/admin/magang/${selectedSubmission.id}/dokumen/proposal`); window.open(data.url, '_blank') } catch (e) { showToast(getApiError(e), 'error') } }} className="border-2 border-[#191b23] p-3 text-left font-bold">Buka Proposal</button><button onClick={async () => { try { const { data } = await api.get(`/admin/magang/${selectedSubmission.id}/dokumen/bukti_diterima`); window.open(data.url, '_blank') } catch (e) { showToast(getApiError(e), 'error') } }} className="border-2 border-[#191b23] p-3 text-left font-bold">Buka Bukti Diterima</button></div></div></div>}
       </div>
 
     </div>

@@ -68,6 +68,7 @@ function StudentDashboard({ user, onLogout }) {
   }, [emptyState])
 
   const [masterMataKuliah, setMasterMataKuliah] = useState([])
+  const [suratPengantar, setSuratPengantar] = useState(null)
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true)
@@ -75,9 +76,18 @@ function StudentDashboard({ user, onLogout }) {
 
     try {
       const { data } = await api.get('/mahasiswa/dashboard')
-      setDb(normalizeDashboard(data))
-      const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
-      setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
+       const dashboard = normalizeDashboard(data)
+       setDb(dashboard)
+       const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
+       setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
+       let suratResponse = await api.get('/surat-pengantar')
+       let letters = suratResponse.data?.data || suratResponse.data || []
+       if (dashboard.magang.id && dashboard.magang.status === 'disetujui' && letters.length === 0) {
+         await api.post(`/magang/${dashboard.magang.id}/surat-pengantar`)
+         suratResponse = await api.get('/surat-pengantar')
+         letters = suratResponse.data?.data || suratResponse.data || []
+       }
+       setSuratPengantar(letters[0] || null)
     } catch (error) {
       setLoadError(getApiError(error))
     } finally {
@@ -107,6 +117,13 @@ function StudentDashboard({ user, onLogout }) {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [tabFromUrl])
+
+  useEffect(() => {
+    if (db.magang.status === 'disetujui' && !db.usulan.id && activeTab === 'status') {
+      changeTab('usulan', true)
+    }
+  }, [db.magang.status, db.usulan.id, activeTab])
+
   const [showNotifications, setShowNotifications] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState({})
   const [avatarFile, setAvatarFile] = useState(null)
@@ -451,7 +468,7 @@ function StudentDashboard({ user, onLogout }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23]">
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23]">
       
       {/* Toast Notification Alert */}
       {toast && (
@@ -474,7 +491,7 @@ function StudentDashboard({ user, onLogout }) {
       {/* ============================================================== */}
       {/* COLLAPSIBLE LEFT SIDEBAR (Disappears to the left) */}
       {/* ============================================================== */}
-      <aside className={`w-64 shrink-0 border-r-3 border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-screen fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
+      <aside className={`w-64 shrink-0 border-r-3 border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-dvh fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col flex-1">
@@ -536,7 +553,7 @@ function StudentDashboard({ user, onLogout }) {
       {/* ============================================================== */}
       {/* MAIN VIEWPORT (Occupies 100% width since Sidebar is fixed/floating) */}
       {/* ============================================================== */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto w-full">
+      <div className="min-h-0 flex-1 flex flex-col h-dvh overflow-y-auto overscroll-contain w-full">
         
         {/* Top Bar Header with Toggle Sidebar and controls */}
         <header className="h-16 shrink-0 border-b-3 border-[#191b23] bg-white flex items-center justify-between px-6 sticky top-0 z-20">
@@ -760,27 +777,6 @@ function StudentDashboard({ user, onLogout }) {
                   <div className="border-t-2 border-slate-100 pt-4 space-y-4 text-xs font-bold">
                     <h3 className="font-black text-xs uppercase text-[#9f149f]">A. Rincian Tempat Magang</h3>
 
-                    <div className="space-y-1.5">
-                      <label>Jenis Program</label>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {[
-                          ['magang', 'Magang'],
-                          ['studi_independen', 'Studi Independen'],
-                        ].map(([value, label]) => (
-                          <label key={value} className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-2 ${magangForm.jenisProgram === value ? 'border-[#9f149f] bg-purple-50 text-[#9f149f]' : 'border-[#191b23] bg-white'}`}>
-                            <input
-                              type="radio"
-                              name="jenisProgram"
-                              value={value}
-                              checked={magangForm.jenisProgram === value}
-                              onChange={(e) => setMagangForm({ ...magangForm, jenisProgram: e.target.value })}
-                            />
-                            {label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
                         <label>Nama Perusahaan / Mitra</label>
@@ -985,13 +981,13 @@ function StudentDashboard({ user, onLogout }) {
                     <h2 className="text-md font-black uppercase">Surat Pengantar</h2>
                     <p className="mt-1 text-xs font-semibold text-slate-500">Kelola dan pantau penerbitan surat pengantar magang Anda.</p>
                   </div>
-                  <span className="rounded-full border-2 border-[#191b23] bg-amber-100 px-3 py-1 text-[10px] font-black uppercase">Menunggu penerbitan</span>
+                  <span className="rounded-full border-2 border-[#191b23] bg-amber-100 px-3 py-1 text-[10px] font-black uppercase">{suratPengantar?.status || 'Belum diajukan'}</span>
                 </div>
                 <div className="mt-5 grid gap-4 md:grid-cols-3">
                   {[
                     ['description', 'Proposal tervalidasi', db.magang.status === 'disetujui'],
-                    ['edit_document', 'Surat sedang diproses', db.magang.status === 'disetujui'],
-                    ['download', 'Surat siap diunduh', false],
+                    ['edit_document', 'Surat sedang diproses', ['diproses', 'disetujui'].includes(suratPengantar?.status)],
+                    ['download', 'Surat siap diunduh', suratPengantar?.status === 'disetujui'],
                   ].map(([icon, label, done]) => (
                     <div key={label} className={`rounded-xl border-2 p-4 ${done ? 'border-green-200 bg-green-50' : 'border-slate-200 bg-slate-50'}`}>
                       <Icon className={`text-2xl ${done ? 'text-green-600' : 'text-slate-400'}`}>{done ? 'check_circle' : icon}</Icon>
@@ -1000,11 +996,9 @@ function StudentDashboard({ user, onLogout }) {
                     </div>
                   ))}
                 </div>
-                <div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 p-5 text-center">
-                  <Icon className="text-4xl text-slate-300">mail_lock</Icon>
-                  <p className="mt-2 text-xs font-black">Surat pengantar belum tersedia</p>
-                  <p className="mt-1 text-[10px] font-semibold text-slate-500">Tombol preview dan unduh akan tersedia setelah surat diterbitkan oleh admin.</p>
-                </div>
+<div className="mt-5 rounded-xl border-2 border-dashed border-slate-300 p-5 text-center">
+                   {suratPengantar?.status === 'disetujui' ? <button type="button" onClick={async () => { try { const { data } = await api.get(`/surat-pengantar/${suratPengantar.id}/download`); window.open(data.url, '_blank') } catch (error) { showToast(getApiError(error), 'error') } }} className="rounded-xl border-2 border-[#191b23] bg-[#9f149f] px-5 py-2 text-xs font-bold text-white">Preview / Unduh Surat</button> : <><Icon className="text-4xl text-slate-300">mail_lock</Icon><p className="mt-2 text-xs font-black">Surat pengantar belum diterbitkan</p><p className="mt-1 text-[10px] font-semibold text-slate-500">Admin akan menerbitkan surat setelah pengajuan disetujui.</p></>}
+                 </div>
               </div>
             </div>
           )}
