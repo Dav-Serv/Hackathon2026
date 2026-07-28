@@ -304,7 +304,7 @@ function App() {
       <header className="fixed left-0 top-8 z-50 flex w-full flex-col items-center px-4 gap-2">
         <nav className="flex h-14 items-center gap-4 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
           <a href="#beranda" onClick={() => setActiveNav('beranda')} className="group flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#191b23] bg-[#9f149f] text-white transition group-hover:scale-110"><Icon className="text-[14px]">{icons.logo}</Icon></span>
+            <img src={amikomLogo} alt="Logo Universitas AMIKOM Yogyakarta" className="h-8 w-8 object-contain transition group-hover:scale-110" />
             <span className="text-[11px] font-bold uppercase tracking-[.18em]">Informatics</span>
           </a>
           <div className="hidden items-center gap-1 md:flex">
