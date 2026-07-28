@@ -192,14 +192,6 @@ export default function DashboardDosen({ user, onLogout }) {
           
           <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
             <button 
-              onClick={loadData}
-              className="flex items-center justify-center gap-1.5 w-full rounded-xl border-2 border-[#191b23] bg-yellow-200 py-2 text-xs font-bold shadow-[2.5px_2.5px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
-            >
-              <Icon className="text-base">restart_alt</Icon>
-              <span>Refresh Data</span>
-            </button>
-            
-            <button 
               onClick={onLogout}
               className="flex items-center justify-center gap-1.5 w-full rounded-xl border-2 border-[#191b23] bg-[#191b23] py-2 text-xs font-bold text-white shadow-[2.5px_2.5px_0_#9f149f] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
