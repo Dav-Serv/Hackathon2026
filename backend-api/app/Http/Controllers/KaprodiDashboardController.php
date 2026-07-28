@@ -9,12 +9,17 @@ use App\Models\NilaiAkhir;
 use App\Models\User;
 use App\Models\UsulanKonversi;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class KaprodiDashboardController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $program = $request->string('jenis_program')->toString();
+        $status = $request->string('status')->toString();
+        $magangQuery = Magang::query()->when($program, fn ($q) => $q->where('jenis_program', $program))->when($status, fn ($q) => $q->where('status', $status));
+        $magangIds = (clone $magangQuery)->pluck('id');
         $roleCounts = User::query()
             ->selectRaw('role, COUNT(*) as total')
             ->groupBy('role')

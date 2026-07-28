@@ -6,6 +6,8 @@ import StudentDashboard from './components/StudentDashboard.jsx'
 import DashboardDosen from './DashboardDPL.jsx'
 import DashboardAdminProdi from './DashboardAdminProdi.jsx'
 import DashboardKaprodi from './DashboardKaprodi.jsx'
+import ApprovalPage from './ApprovalPage.jsx'
+import Loading from './components/Loading.jsx'
 
 const icons = {
   logo: 'grading',
@@ -203,6 +205,7 @@ function App() {
   const [page, setPage] = useState(() => pageFromPathname(window.location.pathname))
   const [activeNav, setActiveNav] = useState('beranda')
   const [authenticatedUser, setAuthenticatedUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(window.location.pathname === '/dashboard')
   const navigatePage = useCallback((nextPage, replace = false) => {
     setPage(nextPage)
     const nextPath = pagePaths[nextPage]
@@ -217,18 +220,23 @@ function App() {
   }, [navigatePage])
 
   useEffect(() => {
-    if (window.location.pathname !== '/dashboard' || !localStorage.getItem('auth_token')) return
+    if (window.location.pathname !== '/dashboard' || !localStorage.getItem('auth_token')) {
+      setAuthLoading(false)
+      return
+    }
 
     api.get('/me')
       .then(({ data }) => {
         setAuthenticatedUser(data.user)
         setPage('dashboard')
+        setAuthLoading(false)
       })
       .catch(() => {
+        setAuthLoading(false)
         localStorage.removeItem('auth_token')
         navigatePage('landing', true)
       })
-  }, [navigatePage])
+  }, [navigatePage, page])
 
   useEffect(() => {
     const handlePopState = () => setPage(pageFromPathname(window.location.pathname))
@@ -262,13 +270,18 @@ function App() {
     return <GoogleCallbackPage onSuccess={handleAuthSuccess} />
   }
 
+  if (window.location.pathname.startsWith('/approval/') || window.location.pathname.startsWith('/api/public/approval/')) {
+    return <ApprovalPage />
+  }
+
   if (page === 'login') return <LoginPage onBack={() => navigatePage('landing')} onRegister={() => navigatePage('register')} onLoginSuccess={handleAuthSuccess} />
   if (page === 'register') return <RegisterMahasiswa onBack={() => navigatePage('landing')} onLogin={() => navigatePage('login')} onRegisterSuccess={handleAuthSuccess} />
   if (page === 'dashboard') {
+    if (authLoading) return <main className="flex min-h-screen items-center justify-center bg-[#faf8ff] p-6"><Loading label="Memuat akun dan dashboard..." /></main>
     if (authenticatedUser?.role === 'dpl' || authenticatedUser?.role === 'dosen') {
       return <DashboardDosen user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); navigatePage('login') }} />
     }
-    if (authenticatedUser?.role === 'admin_prodi' || authenticatedUser?.role === 'admin') {
+    if (authenticatedUser?.role === 'admin_prodi') {
       return <DashboardAdminProdi user={authenticatedUser} onLogout={() => { localStorage.removeItem('auth_token'); setAuthenticatedUser(null); navigatePage('login') }} />
     }
     if (authenticatedUser?.role === 'kaprodi') {
