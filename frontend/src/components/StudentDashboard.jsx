@@ -451,7 +451,7 @@ function StudentDashboard({ user, onLogout }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23]">
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23]">
       
       {/* Toast Notification Alert */}
       {toast && (
@@ -474,7 +474,7 @@ function StudentDashboard({ user, onLogout }) {
       {/* ============================================================== */}
       {/* COLLAPSIBLE LEFT SIDEBAR (Disappears to the left) */}
       {/* ============================================================== */}
-      <aside className={`w-64 shrink-0 border-r-3 border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-screen fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
+      <aside className={`w-64 shrink-0 border-r-3 border-[#191b23] bg-[#f8fafc] flex flex-col justify-between h-dvh fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col flex-1">
@@ -536,7 +536,7 @@ function StudentDashboard({ user, onLogout }) {
       {/* ============================================================== */}
       {/* MAIN VIEWPORT (Occupies 100% width since Sidebar is fixed/floating) */}
       {/* ============================================================== */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto w-full">
+      <div className="min-h-0 flex-1 flex flex-col h-dvh overflow-y-auto overscroll-contain w-full">
         
         {/* Top Bar Header with Toggle Sidebar and controls */}
         <header className="h-16 shrink-0 border-b-3 border-[#191b23] bg-white flex items-center justify-between px-6 sticky top-0 z-20">
@@ -760,27 +760,6 @@ function StudentDashboard({ user, onLogout }) {
                   <div className="border-t-2 border-slate-100 pt-4 space-y-4 text-xs font-bold">
                     <h3 className="font-black text-xs uppercase text-[#9f149f]">A. Rincian Tempat Magang</h3>
 
-                    <div className="space-y-1.5">
-                      <label>Jenis Program</label>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {[
-                          ['magang', 'Magang'],
-                          ['studi_independen', 'Studi Independen'],
-                        ].map(([value, label]) => (
-                          <label key={value} className={`flex cursor-pointer items-center gap-2 rounded-xl border-2 px-3 py-2 ${magangForm.jenisProgram === value ? 'border-[#9f149f] bg-purple-50 text-[#9f149f]' : 'border-[#191b23] bg-white'}`}>
-                            <input
-                              type="radio"
-                              name="jenisProgram"
-                              value={value}
-                              checked={magangForm.jenisProgram === value}
-                              onChange={(e) => setMagangForm({ ...magangForm, jenisProgram: e.target.value })}
-                            />
-                            {label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
                         <label>Nama Perusahaan / Mitra</label>
