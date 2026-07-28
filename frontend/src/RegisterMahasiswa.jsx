@@ -103,7 +103,7 @@ function RegisterMahasiswa({ onBack, onLogin, onRegisterSuccess }) {
                 Registrasi Mahasiswa
               </h1>
               <p className="text-base leading-[1.6] text-[#434655]">
-                Lengkapi data diri Anda untuk memulai perjalanan akademik di OBE GradeSync.
+                Lengkapi data diri Anda untuk memulai perjalanan akademik di OBE Informatics.
               </p>
             </div>
           </div>

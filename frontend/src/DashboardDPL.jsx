@@ -161,7 +161,7 @@ export default function DashboardDosen({ user, onLogout }) {
         <div className="p-4 border-t-3 border-[#191b23] bg-purple-50/50 space-y-3">
           <div className="flex items-center gap-2 font-black text-[10px] uppercase tracking-wider text-[#9f149f]">
             <Icon className="text-base">verified_user</Icon>
-            GradeSync DPL Portal
+            Informatics DPL Portal
           </div>
           <div className="text-[9px] text-gray-500 mt-1">NIDN: 0628047901</div>
           

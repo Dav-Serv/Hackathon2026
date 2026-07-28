@@ -510,7 +510,7 @@ function StudentDashboard({ user, onLogout }) {
         <div className="flex flex-col flex-1">
           {/* Header Brand */}
           <div className="bg-[#9f149f] border-b-3 border-[#191b23] h-16 flex items-center px-6 text-white font-bold text-xl justify-between">
-            <span className="tracking-tight uppercase">GradeSync</span>
+            <span className="tracking-tight uppercase">Informatics</span>
             <button className="text-white hover:opacity-80" onClick={() => setIsSidebarOpen(false)}>
               <Icon>close</Icon>
 
