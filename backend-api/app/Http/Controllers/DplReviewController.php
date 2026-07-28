@@ -16,7 +16,7 @@ class DplReviewController extends Controller
     {
         $usulans = UsulanKonversi::query()
             ->with(['magang.mahasiswa', 'details.mataKuliah', 'details.cpmk'])
-            ->where('status', 'menunggu_persetujuan_dpl')
+            ->whereIn('status', ['menunggu_persetujuan_dpl', 'disetujui', 'revisi', 'ditolak'])
             ->whereHas('magang', fn ($query) => $query->where('dpl_id', $request->user()->id))
             ->latest()
             ->paginate($request->integer('per_page', 15));
