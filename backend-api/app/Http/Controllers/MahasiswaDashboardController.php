@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -26,9 +27,15 @@ class MahasiswaDashboardController extends Controller
             ->flatMap->klaimKonversis
             ->sortByDesc('created_at')
             ->values();
+        $dpls = User::query()
+            ->where('role', 'dpl')
+            ->whereRaw('is_active IS TRUE')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
         return response()->json([
             'user' => $user,
+            'dpls' => $dpls,
             'summary' => [
                 'total_magang' => $magangs->count(),
                 'total_usulan_konversi' => $usulans->count(),

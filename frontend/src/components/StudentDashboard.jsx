@@ -1,29 +1,22 @@
-import React, { useState, useEffect } from 'react'
-import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from '../services/mockData'
+import React, { useState, useEffect, useCallback } from 'react'
 import api, { getApiError } from '../lib/api'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
+const VALID_TABS = ['status', 'history', 'surat', 'usulan', 'klaim', 'hasil', 'profile']
+const EMPTY_STATE = { dpls: [], magang: {}, usulan: { details: [], status: 'belum_diajukan' }, klaim: { details: [], status: 'belum_diajukan' }, penilaian: { mitra: {}, dpl: {} } }
+
 function StudentDashboard({ user, onLogout }) {
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
 
   // Keep the local state shape while the API response is normalized into it.
-  const [db, setDb] = useState(() => {
-    const saved = localStorage.getItem('gradeSync_db')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch (e) {
-        console.error('Failed to parse localStorage data, using initial state', e)
-      }
-    }
-    return INITIAL_STATE
-  })
+  const emptyState = EMPTY_STATE
+  const [db, setDb] = useState(emptyState)
 
-  const normalizeDashboard = (data) => {
+  const normalizeDashboard = useCallback((data) => {
     const magang = data.magangs?.[0]
     const usulan = data.usulan_konversis?.[0]
     const klaim = data.klaim_konversis?.[0]
@@ -31,79 +24,94 @@ function StudentDashboard({ user, onLogout }) {
     const dpl = klaim?.penilaian_dpl || klaim?.penilaianDpl
 
     return {
+      dpls: data.dpls || [],
       magang: {
-        ...INITIAL_STATE.magang,
         ...magang,
-        mitraNama: magang?.mitra_industri?.nama || magang?.mitraIndustri?.nama || INITIAL_STATE.magang.mitraNama,
-        supervisorNama: magang?.supervisor_mitra?.nama || magang?.supervisorMitra?.nama || INITIAL_STATE.magang.supervisorNama,
-        supervisorEmail: magang?.supervisor_mitra?.email || magang?.supervisorMitra?.email || INITIAL_STATE.magang.supervisorEmail,
-        dplId: magang?.dpl_id || magang?.dplId || INITIAL_STATE.magang.dplId,
-        periodeMulai: magang?.periode_mulai || magang?.periodeMulai || INITIAL_STATE.magang.periodeMulai,
-        periodeSelesai: magang?.periode_selesai || magang?.periodeSelesai || INITIAL_STATE.magang.periodeSelesai,
-        status: magang?.status || INITIAL_STATE.magang.status,
+        mitraNama: magang?.mitra_industri?.nama || magang?.mitraIndustri?.nama || '',
+        mitraBidang: magang?.mitra_industri?.bidang || magang?.mitraIndustri?.bidang || '',
+        mitraAlamat: magang?.mitra_industri?.alamat || magang?.mitraIndustri?.alamat || '',
+        supervisorNama: magang?.supervisor_mitra?.nama || magang?.supervisorMitra?.nama || '',
+        supervisorEmail: magang?.supervisor_mitra?.email || magang?.supervisorMitra?.email || '',
+        supervisorHp: magang?.supervisor_mitra?.no_hp || magang?.supervisorMitra?.no_hp || '',
+        dplNama: magang?.dpl?.name || '',
+        dplId: magang?.dpl_id || magang?.dplId || '',
+        periodeMulai: magang?.periode_mulai || magang?.periodeMulai || '',
+        periodeSelesai: magang?.periode_selesai || magang?.periodeSelesai || '',
+        status: magang?.status || 'draft',
       },
       usulan: {
-        ...INITIAL_STATE.usulan,
+        ...emptyState.usulan,
         ...usulan,
         details: usulan?.details || [],
-        status: usulan?.status || INITIAL_STATE.usulan.status,
+        status: usulan?.status || emptyState.usulan.status,
         catatanDpl: usulan?.catatan_dpl || usulan?.catatanDpl || '',
       },
       klaim: {
-        ...INITIAL_STATE.klaim,
+        ...emptyState.klaim,
         ...klaim,
         details: klaim?.details || [],
-        status: klaim?.status || INITIAL_STATE.klaim.status,
+        status: klaim?.status || emptyState.klaim.status,
       },
       penilaian: {
         mitra: {
-          ...INITIAL_STATE.penilaian.mitra,
+          ...emptyState.penilaian.mitra,
           ...mitra,
           nilai: mitra?.nilai ?? null,
         },
         dpl: {
-          ...INITIAL_STATE.penilaian.dpl,
+          ...emptyState.penilaian.dpl,
           ...dpl,
           nilaiAkademik: dpl?.nilai_akademik ?? dpl?.nilaiAkademik ?? null,
         },
       },
     }
-  }
+  }, [emptyState])
 
-  const loadDashboard = async () => {
+  const [masterMataKuliah, setMasterMataKuliah] = useState([])
+
+  const loadDashboard = useCallback(async () => {
     setIsLoading(true)
     setLoadError('')
 
     try {
       const { data } = await api.get('/mahasiswa/dashboard')
       setDb(normalizeDashboard(data))
-      localStorage.setItem('gradeSync_db', JSON.stringify(normalizeDashboard(data)))
+      const masterResponse = await api.get('/admin/mata-kuliah').catch(() => ({ data: [] }))
+      setMasterMataKuliah(masterResponse.data?.data || masterResponse.data || [])
     } catch (error) {
       setLoadError(getApiError(error))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [normalizeDashboard])
 
   useEffect(() => {
     loadDashboard()
-  }, [])
+  }, [loadDashboard])
 
-  // Local persistence is only a temporary draft cache; server data remains authoritative.
+  const validTabs = VALID_TABS
+  const tabFromUrl = useCallback(() => {
+    const tab = new URLSearchParams(window.location.search).get('tab')
+    return validTabs.includes(tab) ? tab : 'status'
+  }, [validTabs])
+  const [activeTab, setActiveTab] = useState(tabFromUrl)
+  const changeTab = (tab, replace = false) => {
+    if (!validTabs.includes(tab)) return
+    setActiveTab(tab)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', tab)
+    window.history[replace ? 'replaceState' : 'pushState']({}, '', url)
+  }
   useEffect(() => {
-    if (!isLoading) localStorage.setItem('gradeSync_db', JSON.stringify(db))
-  }, [db, isLoading])
-
-  // Active sub-tab inside student dashboard.
-  const [activeTab, setActiveTab] = useState('status')
+    const handlePopState = () => setActiveTab(tabFromUrl())
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [tabFromUrl])
   const [showNotifications, setShowNotifications] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState({})
+  const [avatarFile, setAvatarFile] = useState(null)
 
-  const notifications = [
-    { id: 1, title: 'Status dashboard diperbarui', text: 'Periksa kembali tahapan proses konversi Anda.', time: 'Baru', unread: true },
-    { id: 2, title: 'Dokumen harus lengkap', text: 'Pastikan proposal dan bukti diterima tersedia sebelum mengajukan.', time: 'Hari ini', unread: false },
-    { id: 3, title: 'Panduan proses tersedia', text: 'Gunakan menu Usulan dan Klaim secara berurutan.', time: 'Kemarin', unread: false },
-  ]
+  const notifications = []
 
   const statusLabels = {
     draft: 'Draft',
@@ -138,15 +146,15 @@ function StudentDashboard({ user, onLogout }) {
 
   // --- Profile State (synced from logged-in user account) ---
   const [profileForm, setProfileForm] = useState({
-    nama: user?.name || user?.nama || 'Arnanda Pratama',
-    nim: user?.nim || '22.11.9876',
-    email: user?.email || 'arnanda.pratama@student.amikom.ac.id',
-    noHp: '081298765432',
-    alamat: 'Sleman, D.I. Yogyakarta',
-    jurusan: 'Informatika',
-    ipk: '3.82',
-    semester: '6',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'
+    nama: user?.name || '',
+    nim: user?.nim_nip || user?.nim || '',
+    email: user?.email || '',
+    noHp: user?.no_hp || '',
+    alamat: user?.alamat || '',
+    jurusan: 'S1 Informatika',
+    ipk: user?.ipk || '',
+    semester: user?.semester || '',
+    avatar: user?.avatar || ''
   })
 
   // Sync profile details when user prop changes
@@ -155,39 +163,81 @@ function StudentDashboard({ user, onLogout }) {
       setProfileForm(prev => ({
         ...prev,
         nama: user.name || user.nama || prev.nama,
-        nim: user.nim || prev.nim,
+        nim: user.nim_nip || user.nim || prev.nim,
         email: user.email || prev.email,
-        jurusan: user.jurusan || prev.jurusan || 'Informatika',
-        semester: user.semester || prev.semester || '6'
+        noHp: user.no_hp ?? prev.noHp,
+        alamat: user.alamat ?? prev.alamat,
+        avatar: user.avatar ?? prev.avatar,
+        ipk: user.ipk ?? prev.ipk,
+        jurusan: 'S1 Informatika',
+        semester: user.semester || prev.semester || ''
       }))
     }
   }, [user])
 
-  const handleProfileSubmit = (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault()
-    setDb(prev => ({
-      ...prev,
-      profile: profileForm
-    }))
-    showToast('Profil Anda berhasil diperbarui!')
+    try {
+      const payload = new FormData()
+      payload.append('_method', 'PUT')
+      payload.append('name', profileForm.nama)
+      payload.append('nim_nip', profileForm.nim)
+      if (profileForm.ipk) payload.append('ipk', profileForm.ipk)
+      if (profileForm.semester) payload.append('semester', profileForm.semester)
+      payload.append('no_hp', profileForm.noHp)
+      payload.append('alamat', profileForm.alamat)
+      if (avatarFile) payload.append('avatar', avatarFile)
+      const { data } = await api.post('/profile', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
+      setDb(prev => ({ ...prev, profile: data.user || profileForm }))
+      if (data.user?.avatar) setProfileForm(prev => ({ ...prev, avatar: data.user.avatar }))
+      setAvatarFile(null)
+      showToast('Profil Anda berhasil diperbarui!')
+    } catch (error) { showToast(getApiError(error), 'error') }
   }
 
   // --- 1. Aksi Magang ---
   const [magangForm, setMagangForm] = useState({
     jenisProgram: db.magang.jenisProgram || 'magang',
-    mitraNama: db.magang.mitraNama || 'PT Solusi Teknologi Nusantara',
-    mitraAlamat: db.magang.mitraAlamat || 'Gedung Digital Creative, Jakarta',
-    mitraBidang: db.magang.mitraBidang || 'Software Development',
-    posisi: db.magang.posisi || 'Fullstack Web Developer',
-    periodeMulai: db.magang.periodeMulai || '2026-02-01',
-    periodeSelesai: db.magang.periodeSelesai || '2026-07-31',
-    dplId: db.magang.dplId || MOCK_DPL_LIST[0].id,
-    supervisorNama: db.magang.supervisorNama || 'Budi Raharjo, S.T.',
-    supervisorEmail: db.magang.supervisorEmail || 'budi.raharjo@solusitech.co.id',
-    supervisorHp: db.magang.supervisorHp || '081234567890',
-    proposalFile: db.magang.proposalFile || 'proposal_magang_12345.pdf',
-    buktiDiterimaFile: db.magang.buktiDiterimaFile || 'bukti_penerimaan_12345.pdf'
+    mitraIndustriId: db.magang.mitra_industri_id || '',
+    mitraNama: db.magang.mitraNama || '',
+    mitraAlamat: db.magang.mitraAlamat || '',
+    mitraBidang: db.magang.mitraBidang || '',
+    posisi: db.magang.posisi || '',
+    periodeMulai: db.magang.periodeMulai || '',
+    periodeSelesai: db.magang.periodeSelesai || '',
+    dplId: db.magang.dplId || '',
+    dplNama: db.magang.dplNama || '',
+    supervisorMitraId: db.magang.supervisor_mitra_id || '',
+    supervisorNama: db.magang.supervisorNama || '',
+    supervisorEmail: db.magang.supervisorEmail || '',
+    supervisorHp: db.magang.supervisorHp || '',
+    proposalFile: db.magang.proposal_file || '',
+    buktiDiterimaFile: db.magang.bukti_diterima_file || ''
   })
+
+  useEffect(() => {
+    const magang = db.magang
+    const hasMagang = Boolean(magang.id)
+    setMagangForm((current) => ({
+      ...current,
+      jenisProgram: hasMagang ? (magang.jenis_program || magang.jenisProgram || 'magang') : 'magang',
+      mitraIndustriId: hasMagang ? magang.mitra_industri_id || '' : '',
+      mitraNama: hasMagang ? magang.mitraNama || '' : '',
+      mitraAlamat: hasMagang ? magang.mitraAlamat || '' : '',
+      mitraBidang: hasMagang ? magang.mitraBidang || '' : '',
+      posisi: hasMagang ? magang.posisi || '' : '',
+      periodeMulai: hasMagang ? magang.periode_mulai || magang.periodeMulai || '' : '',
+      periodeSelesai: hasMagang ? magang.periode_selesai || magang.periodeSelesai || '' : '',
+      dplId: hasMagang ? magang.dpl_id || magang.dplId || '' : '',
+      dplNama: hasMagang ? magang.dpl?.name || magang.dplNama || '' : '',
+      supervisorMitraId: hasMagang ? magang.supervisor_mitra_id || '' : '',
+      supervisorNama: hasMagang ? magang.supervisorNama || '' : '',
+      supervisorEmail: hasMagang ? magang.supervisorEmail || '' : '',
+      supervisorHp: hasMagang ? magang.supervisorHp || '' : '',
+      proposalFile: hasMagang ? magang.proposal_file || '' : '',
+      buktiDiterimaFile: hasMagang ? magang.bukti_diterima_file || '' : '',
+    }))
+  }, [db.magang])
 
   const processHistory = [
     { date: db.magang.updated_at || db.magang.created_at, title: 'Pengajuan magang', status: getStatusLabel(db.magang.status), note: db.magang.catatanAdmin || 'Data pengajuan tersimpan di dashboard.' },
@@ -196,17 +246,44 @@ function StudentDashboard({ user, onLogout }) {
     { date: db.penilaian.dpl.submittedAt, title: 'Penilaian akhir', status: db.klaim.status === 'disetujui' ? 'Selesai' : 'Menunggu', note: db.penilaian.dpl.komentar || 'Menunggu seluruh pihak menyelesaikan penilaian.' },
   ].filter(item => item.date || item.title === 'Pengajuan magang')
 
-  const handleMagangSubmit = (e) => {
+  const handleMagangSubmit = async (e) => {
     e.preventDefault()
-    setDb(prev => ({
-      ...prev,
-      magang: {
-        ...prev.magang,
-        ...magangForm,
-        status: 'menunggu_verifikasi'
-      }
-    }))
-    showToast('Pendaftaran magang berhasil dikirim untuk verifikasi prodi!')
+    const proposal = selectedFiles.proposal
+    const buktiDiterima = selectedFiles.buktiDiterima
+
+    if (!magangForm.dplId) {
+      showToast('Pilih DPL dari data backend.', 'error')
+      return
+    }
+    if (!proposal || !buktiDiterima) {
+      showToast('Proposal dan bukti diterima wajib dipilih.', 'error')
+      return
+    }
+
+    const payload = new FormData()
+    if (magangForm.mitraIndustriId) payload.append('mitra_industri_id', magangForm.mitraIndustriId)
+    payload.append('mitra_nama', magangForm.mitraNama)
+    payload.append('mitra_bidang', magangForm.mitraBidang)
+    payload.append('mitra_alamat', magangForm.mitraAlamat)
+    if (magangForm.supervisorMitraId) payload.append('supervisor_mitra_id', magangForm.supervisorMitraId)
+    payload.append('supervisor_nama', magangForm.supervisorNama)
+    payload.append('supervisor_email', magangForm.supervisorEmail)
+    payload.append('supervisor_hp', magangForm.supervisorHp)
+    payload.append('dpl_id', magangForm.dplId)
+    payload.append('jenis_program', magangForm.jenisProgram)
+    payload.append('posisi', magangForm.posisi)
+    payload.append('periode_mulai', magangForm.periodeMulai)
+    payload.append('periode_selesai', magangForm.periodeSelesai)
+    payload.append('proposal_file', proposal)
+    payload.append('bukti_diterima_file', buktiDiterima)
+
+    try {
+      await api.post('/magang', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
+      await loadDashboard()
+      showToast('Pendaftaran magang berhasil dikirim untuk verifikasi prodi!')
+    } catch (error) {
+      showToast(getApiError(error), 'error')
+    }
   }
 
   // --- 2. Aksi Usulan Konversi ---
@@ -222,7 +299,7 @@ function StudentDashboard({ user, onLogout }) {
 
   const handleAddMkToUsulan = () => {
     if (!selectedMkId) return
-    const mk = MASTER_MATA_KULIAH.find(m => m.id === selectedMkId)
+    const mk = masterMataKuliah.find(m => m.id === selectedMkId)
     if (!mk) return
 
     const alreadyExists = tempSelectedCpmk.some(cpmkId => 
@@ -256,25 +333,26 @@ function StudentDashboard({ user, onLogout }) {
     setDraftUsulanDetails(prev => prev.filter((_, idx) => idx !== indexToRemove))
   }
 
-  const handleSubmitUsulan = () => {
-    if (draftUsulanDetails.length === 0) {
-      showToast('Tambahkan minimal satu mata kuliah & CPMK ke dalam usulan!', 'error')
+  const handleSubmitUsulan = async () => {
+    if (!db.magang.id || draftUsulanDetails.length === 0) {
+      showToast('Magang harus disetujui dan minimal satu CPMK dipilih.', 'error')
       return
     }
-
-    setDb(prev => ({
-      ...prev,
-      usulan: {
-        ...prev.usulan,
-        status: 'menunggu_persetujuan_dpl',
-        details: draftUsulanDetails
-      }
-    }))
-    showToast('Usulan konversi berhasil diajukan ke DPL!')
+    try {
+      const details = draftUsulanDetails.map(detail => ({
+        mata_kuliah_id: detail.mata_kuliah_id || detail.mkId,
+        cpmk_id: detail.cpmk_id || detail.cpmkId,
+        deskripsi_aktivitas_rencana: detail.deskripsi_aktivitas_rencana || detail.deskripsiRencana,
+      }))
+      if (db.usulan.id) await api.put(`/usulan-konversi/${db.usulan.id}`, { details })
+      else await api.post('/usulan-konversi', { magang_id: db.magang.id, details })
+      await loadDashboard()
+      showToast('Usulan konversi berhasil diajukan ke DPL!')
+    } catch (error) { showToast(getApiError(error), 'error') }
   }
 
   // --- 3. Aksi Klaim Konversi ---
-  const [klaimGeneral, setKlaimGeneral] = useState({
+  const [klaimGeneral] = useState({
     logbookFile: 'logbook_magang_final.pdf',
     laporanFile: 'laporan_akhir_magang.pdf',
     sertifikatFile: 'sertifikat_industri.pdf'
@@ -291,26 +369,26 @@ function StudentDashboard({ user, onLogout }) {
     setKlaimDetailsInput(inputs)
   }, [db.usulan.details, db.klaim.details])
 
-  const handleSubmitKlaim = (e) => {
+  const handleSubmitKlaim = async (e) => {
     e.preventDefault()
-    const details = db.usulan.details.map((_, idx) => ({
-      usulanDetailIndex: idx,
-      buktiAktivitasText: klaimDetailsInput[idx] || 'Telah diselesaikan selama periode magang dengan baik.',
-      buktiFile: `bukti_cpmk_${idx + 1}.zip`
-    }))
-
-    setDb(prev => ({
-      ...prev,
-      klaim: {
-        ...prev.klaim,
-        status: 'menunggu_penilaian_mitra',
-        logbookFile: klaimGeneral.logbookFile,
-        laporanFile: klaimGeneral.laporanFile,
-        sertifikatFile: klaimGeneral.sertifikatFile,
-        details: details
-      }
-    }))
-    showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
+    const files = selectedFiles
+    if (!files.logbook || !files.laporan || !files.sertifikat) { showToast('Logbook, laporan, dan sertifikat wajib dipilih.', 'error'); return }
+    try {
+      const payload = new FormData()
+      payload.append('usulan_konversi_id', db.usulan.id)
+      payload.append('logbook_file', files.logbook)
+      payload.append('laporan_file', files.laporan)
+      payload.append('sertifikat_file', files.sertifikat)
+      db.usulan.details.forEach((detail, idx) => {
+        payload.append(`details[${idx}][usulan_konversi_detail_id]`, detail.id)
+        payload.append(`details[${idx}][bukti_aktivitas_text]`, klaimDetailsInput[idx] || '')
+        const evidence = files[`cpmk-${idx}`]
+        if (evidence) payload.append(`details[${idx}][bukti_file]`, evidence)
+      })
+      await api.post('/klaim-konversi', payload, { headers: { 'Content-Type': 'multipart/form-data' } })
+      await loadDashboard()
+      showToast('Klaim konversi berhasil diajukan! Menunggu penilaian mitra.')
+    } catch (error) { showToast(getApiError(error), 'error') }
   }
 
 
@@ -332,7 +410,7 @@ function StudentDashboard({ user, onLogout }) {
 
     const mkMap = {}
     details.forEach(detail => {
-      const mk = MASTER_MATA_KULIAH.find(m => m.id === detail.mkId)
+      const mk = masterMataKuliah.find(m => m.id === detail.mkId)
       if (!mk) return
       if (!mkMap[mk.id]) {
         mkMap[mk.id] = {
@@ -424,7 +502,7 @@ function StudentDashboard({ user, onLogout }) {
                 key={item.id}
                 disabled={item.disabled}
                 onClick={() => {
-                  setActiveTab(item.id)
+                  changeTab(item.id)
                   setIsSidebarOpen(false) // Close sidebar after selecting tab
                 }}
                 className={`flex items-center gap-3 w-full rounded-2xl border-2 p-3 text-left font-bold transition-all duration-150 ${
@@ -485,7 +563,7 @@ function StudentDashboard({ user, onLogout }) {
               className="relative rounded-xl border-2 border-[#191b23] bg-white p-2 shadow-[2px_2px_0_#9f149f] hover:bg-purple-50"
             >
               <Icon className="text-xl text-[#9f149f]">notifications</Icon>
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-[#191b23] bg-red-500 px-1 text-[9px] font-black text-white">1</span>
+              {notifications.length > 0 && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full border border-[#191b23] bg-red-500 px-1 text-[9px] font-black text-white">{notifications.length}</span>}
             </button>
             {showNotifications && (
               <div className="absolute right-14 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-xl border-2 border-[#191b23] bg-white p-3 shadow-[5px_5px_0_#191b23]">
@@ -507,11 +585,11 @@ function StudentDashboard({ user, onLogout }) {
               </div>
             )}
             <div 
-              onClick={() => setActiveTab('profile')}
+              onClick={() => changeTab('profile')}
               className="flex items-center gap-2 cursor-pointer hover:opacity-85"
             >
-              <Icon className="text-2xl text-[#9f149f]">account_circle</Icon>
-              <span className="text-xs font-black hidden sm:inline">{profileForm.nama.split(' ')[0]}</span>
+              {profileForm.avatar ? <img src={profileForm.avatar} alt="Avatar" className="h-8 w-8 rounded-full border-2 border-[#191b23] object-cover" /> : <Icon className="text-2xl text-[#9f149f]">account_circle</Icon>}
+               <span className="text-xs font-black hidden sm:inline">{profileForm.nama.split(' ')[0]}</span>
             </div>
           </div>
         </header>
@@ -619,7 +697,7 @@ function StudentDashboard({ user, onLogout }) {
                 <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23] space-y-6">
                   <div className="mb-4 flex items-center justify-between border-b-2 border-slate-100 pb-3">
                     <h2 className="text-md font-bold uppercase tracking-tight">Rincian Informasi Magang</h2>
-                    <span className="font-mono text-[10px] text-gray-400">ID MAGANG: OBE-M-81729</span>
+                    <span className="font-mono text-[10px] text-gray-400">ID MAGANG: {db.magang.nomor_magang || 'Belum dibuat'}</span>
                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2 text-xs">
@@ -651,7 +729,7 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="space-y-3 border-t-2 border-slate-100 pt-3 md:border-t-0 md:border-l-2 md:pl-6 md:pt-0">
                       <div>
                         <label className="text-[10px] font-black uppercase text-gray-400">Dosen Pembimbing Lapangan (DPL)</label>
-                        <p className="font-bold">{MOCK_DPL_LIST.find(d => d.id === db.magang.dplId)?.nama || 'Belum Ditugaskan'}</p>
+                        <p className="font-bold">{db.magang.dpl?.name || db.magang.dplNama || 'Belum Ditugaskan'}</p>
                       </div>
                       <div>
                         <label className="text-[10px] font-black uppercase text-gray-400">Supervisor Lapangan (Mitra)</label>
@@ -709,7 +787,8 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="text" 
                           required
-                          placeholder="Contoh: PT Solusi Teknologi Nusantara"
+                          readOnly={Boolean(magangForm.mitraIndustriId)}
+                          placeholder="Nama perusahaan mitra"
                           value={magangForm.mitraNama}
                           onChange={(e) => setMagangForm({...magangForm, mitraNama: e.target.value})}
                           className="w-full rounded-xl border-2 border-[#191b23] px-3 py-2 outline-none focus:shadow-[2px_2px_0_#9f149f]"
@@ -720,6 +799,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="text" 
                           required
+                          readOnly={Boolean(magangForm.mitraIndustriId)}
                           placeholder="Contoh: Software House"
                           value={magangForm.mitraBidang}
                           onChange={(e) => setMagangForm({...magangForm, mitraBidang: e.target.value})}
@@ -733,6 +813,7 @@ function StudentDashboard({ user, onLogout }) {
                       <textarea 
                         rows="2" 
                         required
+                        readOnly={Boolean(magangForm.mitraIndustriId)}
                         placeholder="Masukkan alamat lengkap kantor mitra"
                         value={magangForm.mitraAlamat}
                         onChange={(e) => setMagangForm({...magangForm, mitraAlamat: e.target.value})}
@@ -780,21 +861,27 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
                         <label>Dosen Pembimbing (DPL)</label>
-                        <select 
-                          value={magangForm.dplId}
-                          onChange={(e) => setMagangForm({...magangForm, dplId: e.target.value})}
-                          className="w-full rounded-xl border-2 border-[#191b23] bg-white px-3 py-2 outline-none focus:shadow-[2px_2px_0_#9f149f]"
-                        >
-                          {MOCK_DPL_LIST.map(dpl => (
-                            <option key={dpl.id} value={dpl.id}>{dpl.nama}</option>
-                          ))}
-                        </select>
+                         <select
+                           required
+                           value={magangForm.dplId}
+                           onChange={(e) => {
+                             const dpl = db.dpls?.find((item) => String(item.id) === e.target.value)
+                             setMagangForm({ ...magangForm, dplId: e.target.value, dplNama: dpl?.name || '' })
+                           }}
+                           className="w-full rounded-xl border-2 border-[#191b23] bg-white px-3 py-2 outline-none focus:shadow-[2px_2px_0_#9f149f]"
+                         >
+                           <option value="">Pilih DPL</option>
+                           {(db.dpls || []).map((dpl) => (
+                             <option key={dpl.id} value={dpl.id}>{dpl.name} ({dpl.email})</option>
+                           ))}
+                         </select>
                       </div>
                       <div className="space-y-1.5">
                         <label>Nama Supervisor Mitra</label>
                         <input 
                           type="text" 
                           required
+                          readOnly={Boolean(magangForm.supervisorMitraId)}
                           placeholder="Contoh: Budi Santoso"
                           value={magangForm.supervisorNama}
                           onChange={(e) => setMagangForm({...magangForm, supervisorNama: e.target.value})}
@@ -809,6 +896,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="email" 
                           required
+                          readOnly={Boolean(magangForm.supervisorMitraId)}
                           placeholder="Contoh: supervisor@mitra.com"
                           value={magangForm.supervisorEmail}
                           onChange={(e) => setMagangForm({...magangForm, supervisorEmail: e.target.value})}
@@ -820,6 +908,7 @@ function StudentDashboard({ user, onLogout }) {
                         <input 
                           type="tel" 
                           required
+                          readOnly={Boolean(magangForm.supervisorMitraId)}
                           placeholder="Contoh: 0812xxxxxxxx"
                           value={magangForm.supervisorHp}
                           onChange={(e) => setMagangForm({...magangForm, supervisorHp: e.target.value})}
@@ -975,7 +1064,7 @@ function StudentDashboard({ user, onLogout }) {
                           className="w-full rounded-xl border-2 border-[#191b23] bg-white px-3 py-2.5 outline-none"
                         >
                           <option value="">-- Pilih Mata Kuliah --</option>
-                          {MASTER_MATA_KULIAH.map(mk => (
+                          {masterMataKuliah.map(mk => (
                             <option key={mk.id} value={mk.id}>{mk.kode} - {mk.nama} ({mk.sks} SKS)</option>
                           ))}
                         </select>
@@ -985,7 +1074,7 @@ function StudentDashboard({ user, onLogout }) {
                         <div className="space-y-4 rounded-xl border-2 border-[#191b23] bg-slate-50 p-5">
                           <h3 className="text-xs font-black uppercase text-[#9f149f]">Pilih Target CPMK yang Relevan:</h3>
                           <div className="space-y-3">
-                            {MASTER_MATA_KULIAH.find(m => m.id === selectedMkId)?.cpmk.map(cpmk => (
+                            {masterMataKuliah.find(m => m.id === selectedMkId)?.cpmk.map(cpmk => (
                               <div key={cpmk.id} className="space-y-2 border-b border-slate-200 pb-3 last:border-b-0 last:pb-0">
                                 <label className="flex items-start gap-3 cursor-pointer">
                                   <input 
@@ -1063,7 +1152,7 @@ function StudentDashboard({ user, onLogout }) {
                             </thead>
                             <tbody>
                               {draftUsulanDetails.map((detail, idx) => {
-                                const mk = MASTER_MATA_KULIAH.find(m => m.id === detail.mkId)
+                                const mk = masterMataKuliah.find(m => m.id === detail.mkId)
                                 const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
                                 return (
                                   <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 text-xs font-bold">
@@ -1119,7 +1208,7 @@ function StudentDashboard({ user, onLogout }) {
                       </thead>
                       <tbody>
                         {db.usulan.details.map((detail, idx) => {
-                          const mk = MASTER_MATA_KULIAH.find(m => m.id === detail.mkId)
+                          const mk = masterMataKuliah.find(m => m.id === detail.mkId)
                           const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
                           return (
                             <tr key={idx} className="border-b border-slate-100 last:border-0 text-xs font-bold">
@@ -1215,7 +1304,7 @@ function StudentDashboard({ user, onLogout }) {
 
                     <div className="space-y-4">
                       {db.usulan.details.map((detail, idx) => {
-                        const mk = MASTER_MATA_KULIAH.find(m => m.id === detail.mkId)
+                        const mk = masterMataKuliah.find(m => m.id === detail.mkId)
                         const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
                         return (
                           <div key={idx} className="rounded-xl border-2 border-[#191b23] bg-slate-50/50 p-4 space-y-3">
@@ -1285,7 +1374,7 @@ function StudentDashboard({ user, onLogout }) {
                     <div className="space-y-3">
                       {db.klaim.details.map((detail, idx) => {
                         const usulanDetail = db.usulan.details[detail.usulanDetailIndex]
-                        const mk = MASTER_MATA_KULIAH.find(m => m.id === usulanDetail?.mkId)
+                        const mk = masterMataKuliah.find(m => m.id === usulanDetail?.mkId)
                         const cpmk = mk?.cpmk.find(c => c.id === usulanDetail?.cpmkId)
                         return (
                           <div key={idx} className="rounded-xl border-2 border-[#191b23] bg-slate-50 p-4 text-xs font-bold">
@@ -1346,7 +1435,7 @@ function StudentDashboard({ user, onLogout }) {
                   <div className="space-y-1"><span className="text-gray-400">NAMA:</span> {profileForm.nama}</div>
                   <div className="space-y-1"><span className="text-gray-400">NIM:</span> {profileForm.nim}</div>
                   <div className="space-y-1"><span className="text-gray-400">MITRA:</span> {db.magang.mitraNama}</div>
-                  <div className="space-y-1"><span className="text-gray-400">DPL:</span> {MOCK_DPL_LIST.find(d => d.id === db.magang.dplId)?.nama}</div>
+                  <div className="space-y-1"><span className="text-gray-400">DPL:</span> {db.magang.dpl?.name || db.magang.dplNama || 'Belum ditugaskan'}</div>
                   <div className="space-y-1"><span className="text-gray-400">PERIODE:</span> {db.magang.periodeMulai} s.d {db.magang.periodeSelesai}</div>
                 </div>
 
@@ -1411,9 +1500,8 @@ function StudentDashboard({ user, onLogout }) {
                 <div className="w-full md:w-72 shrink-0 space-y-6">
                   <div className="rounded-2xl border-[3px] border-[#191b23] bg-white p-6 shadow-[6px_6px_0_#191b23] text-center space-y-4">
 
-                    <div className="relative mx-auto w-28 h-28 rounded-full border-2 border-[#191b23] bg-purple-100 flex items-center justify-center shadow-[3px_3px_0_#191b23]">
-                      <Icon className="text-5xl text-[#9f149f]">account_circle</Icon>
-
+                    <div className="relative mx-auto flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-2 border-[#191b23] bg-purple-100 shadow-[3px_3px_0_#191b23]">
+                      {profileForm.avatar ? <img src={profileForm.avatar} alt="Avatar profil" className="h-full w-full object-cover" /> : <Icon className="text-5xl text-[#9f149f]">account_circle</Icon>}
                     </div>
                     <div>
                       <h2 className="text-base font-bold">{profileForm.nama}</h2>
@@ -1449,7 +1537,12 @@ function StudentDashboard({ user, onLogout }) {
                   </div>
                   <div className="h-0.5 bg-slate-100 w-full" />
                   
-                  <form onSubmit={handleProfileSubmit} className="space-y-4 text-xs font-bold">
+                  <div className="mb-4 flex items-center gap-4">
+                     {(avatarFile || profileForm.avatar) && <img src={avatarFile ? URL.createObjectURL(avatarFile) : profileForm.avatar} alt="Avatar profil" className="h-16 w-16 rounded-full border-2 border-[#191b23] object-cover" />}
+                     <label className="cursor-pointer rounded-xl border-2 border-[#191b23] bg-white px-4 py-2 text-xs font-bold hover:bg-[#f3dff3]">Pilih Avatar<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} /></label>
+                     {avatarFile && <span className="text-xs text-gray-500">{avatarFile.name}</span>}
+                   </div>
+                   <form onSubmit={handleProfileSubmit} className="space-y-4 text-xs font-bold">
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-1.5">
                         <label>Nama Lengkap</label>
@@ -1465,9 +1558,9 @@ function StudentDashboard({ user, onLogout }) {
                         <label>NIM (Nomor Induk Mahasiswa)</label>
                         <input 
                           type="text" 
-                          disabled
-                          value={profileForm.nim}
-                          className="w-full rounded-xl border-2 border-[#191b23]/30 bg-slate-50 px-3 py-2.5 cursor-not-allowed opacity-80"
+                           value={profileForm.nim}
+                           onChange={(e) => setProfileForm({ ...profileForm, nim: e.target.value })}
+                           className="w-full rounded-xl border-2 border-[#191b23] px-3 py-2.5 outline-none focus:shadow-[2px_2px_0_#9f149f]"
                         />
                       </div>
                     </div>
@@ -1476,11 +1569,12 @@ function StudentDashboard({ user, onLogout }) {
                       <div className="space-y-1.5">
                         <label>Email Akademik</label>
                         <input 
-                          type="email" 
-                          required
-                          value={profileForm.email}
+                           type="email" 
+                           required
+                           disabled
+                           value={profileForm.email}
                           onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                          className="w-full rounded-xl border-2 border-[#191b23] px-3 py-2.5 outline-none focus:shadow-[2px_2px_0_#9f149f]"
+                          className="w-full rounded-xl border-2 border-[#191b23]/30 px-3 py-2.5 outline-none cursor-not-allowed"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -1495,9 +1589,9 @@ function StudentDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <div className="space-y-1.5">
-                        <label>Program Studi</label>
+<div className="grid gap-4 md:grid-cols-3">
+                       <div className="space-y-1.5">
+                         <label>Program Studi</label>
                         <input 
                           type="text" 
                           disabled
@@ -1506,12 +1600,15 @@ function StudentDashboard({ user, onLogout }) {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label>IPK Terakhir</label>
-                        <input 
-                          type="text" 
-                          disabled
+                        <label>IPK</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="4"
+                          step="0.01"
                           value={profileForm.ipk}
-                          className="w-full rounded-xl border-2 border-[#191b23]/30 bg-slate-50 px-3 py-2.5 cursor-not-allowed"
+                          onChange={(e) => setProfileForm({ ...profileForm, ipk: e.target.value })}
+                          className="w-full rounded-xl border-2 border-[#191b23] px-3 py-2.5 outline-none focus:shadow-[2px_2px_0_#9f149f]"
                         />
                       </div>
                       <div className="space-y-1.5">

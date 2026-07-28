@@ -17,6 +17,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'nim_nip',
+        'ipk',
+        'semester',
         'no_hp',
         'alamat',
         'email',
@@ -25,6 +27,7 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'password',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -38,6 +41,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'ipk' => 'decimal:2',
+            'semester' => 'integer',
+            'is_active' => 'boolean',
         ];
     }
 

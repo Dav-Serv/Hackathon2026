@@ -14,12 +14,23 @@ class PublicApprovalController extends Controller
     {
         $approval = $service->resolve($token);
 
-        return response()->json($approval->klaimKonversi->load(['magang.mahasiswa', 'magang.mitraIndustri']));
+        return response()->json(array_merge($approval->klaimKonversi->load(['magang.mahasiswa', 'magang.mitraIndustri'])->toArray(), ['approval_role' => $approval->target_role, 'expires_at' => $approval->expires_at]));
+    }
+
+    public function submitMitra(Request $request, string $token, ApprovalTokenService $service, ValueCalculationService $calculator): JsonResponse
+    {
+        return $this->submit($request->merge(['role' => 'mitra']), $token, $service, $calculator);
+    }
+
+    public function submitDpl(Request $request, string $token, ApprovalTokenService $service, ValueCalculationService $calculator): JsonResponse
+    {
+        return $this->submit($request->merge(['role' => 'dpl']), $token, $service, $calculator);
     }
 
     public function submit(Request $request, string $token, ApprovalTokenService $service, ValueCalculationService $calculator): JsonResponse
     {
         $approval = $service->resolve($token);
+        if ($request->filled('role')) abort_unless($approval->target_role === $request->string('role')->toString(), 403, 'Token tidak sesuai target approval.');
         $data = $request->validate(['nilai' => ['required', 'integer', 'between:1,100'], 'komentar' => ['nullable', 'string', 'max:5000'], 'keputusan' => ['nullable', 'in:setuju,revisi,tolak'], 'nilai_akademik' => ['nullable', 'integer', 'between:1,100']]);
         DB::transaction(function () use ($approval, $data, $request, $calculator) {
             $claim = $approval->klaimKonversi()->lockForUpdate()->first();
