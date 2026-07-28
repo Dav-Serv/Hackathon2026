@@ -43,12 +43,22 @@ export default function DashboardDosen({ user, onLogout }) {
           const magang = item.magang || {}
           const mahasiswa = magang.mahasiswa || {}
           const id = mahasiswa.id || magang.id || item.id
-          const current = records.get(id) || { id, nama: mahasiswa.nama || mahasiswa.name || 'Mahasiswa', nim: mahasiswa.nim || '-', jurusan: mahasiswa.jurusan || mahasiswa.program_studi || '-', perusahaan: magang.mitra?.nama || magang.mitra_nama || '-', bidang: magang.mitra?.bidang || magang.mitra_bidang || '-', posisi: magang.posisi || '-', period: magang.periode_mulai && magang.periode_selesai ? `${magang.periode_mulai.substring(0, 7)} s.d ${magang.periode_selesai.substring(0, 7)}` : '-', statusMagang: magang.status || 'disetujui', statusUsulan: 'belum_diajukan', statusKlaim: 'belum_diajukan', usulanDetails: [], penilaian: { mitra: {}, dpl: {} } }
+          const current = records.get(id) || { id, nama: mahasiswa.nama || mahasiswa.name || 'Mahasiswa', nim: mahasiswa.nim || mahasiswa.nim_nip || '-', jurusan: mahasiswa.jurusan || mahasiswa.program_studi || '-', perusahaan: magang.mitra?.nama || magang.mitra_industri?.nama_perusahaan || magang.mitra_nama || '-', bidang: magang.mitra?.bidang || magang.mitra_industri?.bidang || magang.mitra_bidang || '-', posisi: magang.posisi || '-', period: magang.periode_mulai && magang.periode_selesai ? `${magang.periode_mulai.substring(0, 7)} s.d ${magang.periode_selesai.substring(0, 7)}` : '-', statusMagang: magang.status || 'disetujui', statusUsulan: 'belum_diajukan', statusKlaim: 'belum_diajukan', usulanDetails: [], penilaian: { mitra: {}, dpl: {} } }
           if (type === 'usulan') {
             current.statusUsulan = item.status
             current.proposalId = item.id
             current.proposalFile = magang.proposal_file || item.file || '-'
-            current.usulanDetails = (item.details || []).map(detail => ({ mkId: detail.mata_kuliah_id || detail.mataKuliah?.id, cpmkId: detail.cpmk_id || detail.cpmk?.id, deskripsiRencana: detail.deskripsi_rencana || detail.deskripsiRencana || '-' }))
+            current.usulanDetails = (item.details || []).map(detail => {
+              const rawMk = detail.mataKuliah || detail.mata_kuliah || {}
+              const rawCpmk = detail.cpmk || {}
+              return {
+                mkId: String(detail.mata_kuliah_id || rawMk.id || ''),
+                cpmkId: String(detail.cpmk_id || rawCpmk.id || ''),
+                mataKuliah: { ...rawMk, kode: rawMk.kode || rawMk.kode_mk, nama: rawMk.nama || rawMk.nama_mk },
+                cpmk: { ...rawCpmk, kode: rawCpmk.kode || rawCpmk.kode_cpmk },
+                deskripsiRencana: detail.deskripsi_aktivitas_rencana || detail.deskripsi_rencana || detail.deskripsiRencana || '-',
+              }
+            })
           } else {
             current.statusKlaim = item.status
             current.claimId = item.id
@@ -620,14 +630,14 @@ export default function DashboardDosen({ user, onLogout }) {
                               <div className="flex justify-between items-start border-b border-[#191b23]/10 pb-2 mb-2">
                                 <div>
                                   <span className="text-[10px] font-black uppercase text-gray-400 block">Mata Kuliah</span>
-                                  <span className="font-black text-xs text-slate-800">{mk?.kode} - {mk?.nama} ({mk?.sks} SKS)</span>
-                                </div>
-                                <span className="text-[10px] font-extrabold uppercase bg-purple-100 text-[#9f149f] px-2 py-0.5 border border-[#191b23] rounded">{cpmk?.kode}</span>
+                                   <span className="font-black text-xs text-slate-800">{mk?.kode || mk?.kode_mk || '-'} - {mk?.nama || mk?.nama_mk || 'Mata kuliah'} ({mk?.sks || 0} SKS)</span>
+                                 </div>
+                                 <span className="text-[10px] font-extrabold uppercase bg-purple-100 text-[#9f149f] px-2 py-0.5 border border-[#191b23] rounded">{cpmk?.kode || cpmk?.kode_cpmk || '-'}</span>
                               </div>
                               <div className="text-xs space-y-2">
                                 <div>
                                   <span className="text-[9px] font-black uppercase text-gray-400 block">Deskripsi Capaian Kompetensi (CPMK)</span>
-                                  <p className="text-gray-600 font-semibold">{cpmk?.deskripsi}</p>
+                                   <p className="text-gray-600 font-semibold">{cpmk?.deskripsi || '-'}</p>
                                 </div>
                                 <div>
                                   <span className="text-[9px] font-black uppercase text-gray-400 block">Rencana Aktivitas Mahasiswa di Industri</span>
