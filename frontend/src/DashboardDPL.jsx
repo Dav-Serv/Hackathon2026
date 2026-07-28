@@ -1,28 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { MASTER_MATA_KULIAH, MOCK_DPL_LIST, INITIAL_STATE } from './services/mockData'
+import api, { getApiError } from './lib/api'
 
 function Icon({ children, className = '' }) {
   return <span className={`material-symbols-outlined ${className}`}>{children}</span>
 }
 
 export default function DashboardDosen({ user, onLogout }) {
-  // Load state from localStorage or initial state
-  const [db, setDb] = useState(() => {
-    const saved = localStorage.getItem('gradeSync_db')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch (e) {
-        console.error('Failed to parse localStorage data, using initial state', e)
-      }
-    }
-    return INITIAL_STATE
-  })
-
-  // Sync db to localStorage
-  useEffect(() => {
-    localStorage.setItem('gradeSync_db', JSON.stringify(db))
-  }, [db])
+  const [allStudents, setAllStudents] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   // Active tab inside lecturer dashboard: dashboard | students | internship-proposal | conversion-claim | assessment-history | profile
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -45,255 +30,51 @@ export default function DashboardDosen({ user, onLogout }) {
   const [nilaiAkademikInput, setNilaiAkademikInput] = useState('')
   const [evaluasiDplInput, setEvaluasiDplInput] = useState('')
 
-  // Static Mock Students List (to populate the table and pages)
-  const [mockStudents, setMockStudents] = useState([
-    {
-      id: 'std-02',
-      nama: 'Aditya Pratama',
-      nim: '2021008401',
-      jurusan: 'Informatika',
-      perusahaan: 'Gojek Tech Lab',
-      bidang: 'Software Development',
-      posisi: 'Backend Engineer',
-      period: 'Aug 23 - Jan 24',
-      statusMagang: 'disetujui',
-      statusUsulan: 'menunggu_persetujuan_dpl',
-      statusKlaim: 'belum_diajukan',
-      catatanUsulan: '',
-      proposalFile: 'proposal_aditya_pratama.pdf',
-      buktiDiterimaFile: 'bukti_penerimaan_aditya.pdf',
-      usulanDetails: [
-        { mkId: 'mk-01', cpmkId: 'cpmk-101', deskripsiRencana: 'Membantu optimalisasi database query PostgreSQL untuk modul pembayaran.' },
-        { mkId: 'mk-01', cpmkId: 'cpmk-102', deskripsiRencana: 'Mendeploy RESTful API dengan framework Golang untuk service notifikasi.' }
-      ]
-    },
-    {
-      id: 'std-03',
-      nama: 'Siti Aminah',
-      nim: '2021008455',
-      jurusan: 'Informatika',
-      perusahaan: 'Traveloka HQ',
-      bidang: 'Software Development',
-      posisi: 'Android Developer',
-      period: 'Sep 23 - Feb 24',
-      statusMagang: 'disetujui',
-      statusUsulan: 'revisi',
-      statusKlaim: 'belum_diajukan',
-      catatanUsulan: 'Deskripsi rencana aktivitas pada CPMK-2 Pemrograman Mobile kurang detail.',
-      proposalFile: 'proposal_siti_aminah.pdf',
-      buktiDiterimaFile: 'bukti_penerimaan_siti.pdf',
-      usulanDetails: [
-        { mkId: 'mk-02', cpmkId: 'cpmk-201', deskripsiRencana: 'Mengembangkan layout Android untuk halaman checkout dengan Flutter.' }
-      ]
-    },
-    {
-      id: 'std-04',
-      nama: 'Budi Santoso',
-      nim: '2021008912',
-      jurusan: 'Informatika',
-      perusahaan: 'Bank Central Asia',
-      bidang: 'Financial Technology',
-      posisi: 'UI/UX Designer',
-      period: 'Jul 23 - Dec 23',
-      statusMagang: 'disetujui',
-      statusUsulan: 'disetujui',
-      statusKlaim: 'disetujui',
-      catatanUsulan: '',
-      proposalFile: 'proposal_budi_santoso.pdf',
-      buktiDiterimaFile: 'bukti_penerimaan_budi.pdf',
-      usulanDetails: [
-        { mkId: 'mk-03', cpmkId: 'cpmk-301', deskripsiRencana: 'Membuat high-fidelity mockup dan user flow aplikasi BCA mobile.' },
-        { mkId: 'mk-03', cpmkId: 'cpmk-302', deskripsiRencana: 'Melakukan usability testing prototipe UI baru dengan 10 user.' }
-      ],
-      penilaian: {
-        mitra: { nilai: 95, komentar: 'Sangat mandiri, hasil mockup sangat rapi dan fungsional.' },
-        dpl: { nilaiAkademik: 90, komentar: 'Laporan analisis usability testing terstruktur dan komprehensif.' }
-      }
-    }
-  ])
-
-  // Get active review counts
-  const getCounts = () => {
-    let pendingProposals = mockStudents.filter(s => s.statusUsulan === 'menunggu_persetujuan_dpl').length
-    let pendingClaims = mockStudents.filter(s => s.statusKlaim === 'menunggu_review_dpl').length
-    let completed = mockStudents.filter(s => s.statusKlaim === 'disetujui').length
-
-    if (db.usulan.status === 'menunggu_persetujuan_dpl') {
-      pendingProposals++
-    }
-    if (db.klaim.status === 'menunggu_review_dpl') {
-      pendingClaims++
-    }
-    if (db.klaim.status === 'disetujui') {
-      completed++
-    }
-
-    return {
-      pendingProposals,
-      pendingClaims,
-      completed,
-      totalStudents: 4 + 41 // 4 mock + 41 static background
-    }
-  }
-
-  const counts = getCounts()
-
-  // Reset Demo helper
-  const resetAllDemo = () => {
-    localStorage.removeItem('gradeSync_db')
-    setDb(INITIAL_STATE)
-    // Reset mock students
-    setMockStudents([
-      {
-        id: 'std-02',
-        nama: 'Aditya Pratama',
-        nim: '2021008401',
-        jurusan: 'Informatika',
-        perusahaan: 'Gojek Tech Lab',
-        bidang: 'Software Development',
-        posisi: 'Backend Engineer',
-        period: 'Aug 23 - Jan 24',
-        statusMagang: 'disetujui',
-        statusUsulan: 'menunggu_persetujuan_dpl',
-        statusKlaim: 'belum_diajukan',
-        catatanUsulan: '',
-        proposalFile: 'proposal_aditya_pratama.pdf',
-        buktiDiterimaFile: 'bukti_penerimaan_aditya.pdf',
-        usulanDetails: [
-          { mkId: 'mk-01', cpmkId: 'cpmk-101', deskripsiRencana: 'Membantu optimalisasi database query PostgreSQL untuk modul pembayaran.' },
-          { mkId: 'mk-01', cpmkId: 'cpmk-102', deskripsiRencana: 'Mendeploy RESTful API dengan framework Golang untuk service notifikasi.' }
-        ]
-      },
-      {
-        id: 'std-03',
-        nama: 'Siti Aminah',
-        nim: '2021008455',
-        jurusan: 'Informatika',
-        perusahaan: 'Traveloka HQ',
-        bidang: 'Software Development',
-        posisi: 'Android Developer',
-        period: 'Sep 23 - Feb 24',
-        statusMagang: 'disetujui',
-        statusUsulan: 'revisi',
-        statusKlaim: 'belum_diajukan',
-        catatanUsulan: 'Deskripsi rencana aktivitas pada CPMK-2 Pemrograman Mobile kurang detail.',
-        proposalFile: 'proposal_siti_aminah.pdf',
-        buktiDiterimaFile: 'bukti_penerimaan_siti.pdf',
-        usulanDetails: [
-          { mkId: 'mk-02', cpmkId: 'cpmk-201', deskripsiRencana: 'Mengembangkan layout Android untuk halaman checkout dengan Flutter.' }
-        ]
-      },
-      {
-        id: 'std-04',
-        nama: 'Budi Santoso',
-        nim: '2021008912',
-        jurusan: 'Informatika',
-        perusahaan: 'Bank Central Asia',
-        bidang: 'Financial Technology',
-        posisi: 'UI/UX Designer',
-        period: 'Jul 23 - Dec 23',
-        statusMagang: 'disetujui',
-        statusUsulan: 'disetujui',
-        statusKlaim: 'disetujui',
-        catatanUsulan: '',
-        proposalFile: 'proposal_budi_santoso.pdf',
-        buktiDiterimaFile: 'bukti_penerimaan_budi.pdf',
-        usulanDetails: [
-          { mkId: 'mk-03', cpmkId: 'cpmk-301', deskripsiRencana: 'Membuat high-fidelity mockup dan user flow aplikasi BCA mobile.' },
-          { mkId: 'mk-03', cpmkId: 'cpmk-302', deskripsiRencana: 'Melakukan usability testing prototipe UI baru dengan 10 user.' }
-        ],
-        penilaian: {
-          mitra: { nilai: 95, komentar: 'Sangat mandiri, hasil mockup sangat rapi dan fungsional.' },
-          dpl: { nilaiAkademik: 90, komentar: 'Laporan analisis usability testing terstruktur dan komprehensif.' }
+  const loadData = () => {
+    setIsLoading(true)
+    Promise.all([api.get('/dpl/usulan-konversi?per_page=100'), api.get('/dpl/klaim-konversi?per_page=100')])
+      .then(([usulanResponse, klaimResponse]) => {
+        const records = new Map()
+        const add = (item, type) => {
+          const magang = item.magang || {}
+          const mahasiswa = magang.mahasiswa || {}
+          const id = mahasiswa.id || magang.id || item.id
+          const current = records.get(id) || { id, nama: mahasiswa.nama || mahasiswa.name || 'Mahasiswa', nim: mahasiswa.nim || '-', jurusan: mahasiswa.jurusan || mahasiswa.program_studi || '-', perusahaan: magang.mitra?.nama || magang.mitra_nama || '-', bidang: magang.mitra?.bidang || magang.mitra_bidang || '-', posisi: magang.posisi || '-', period: magang.periode_mulai && magang.periode_selesai ? `${magang.periode_mulai.substring(0, 7)} s.d ${magang.periode_selesai.substring(0, 7)}` : '-', statusMagang: magang.status || 'disetujui', statusUsulan: 'belum_diajukan', statusKlaim: 'belum_diajukan', usulanDetails: [], penilaian: { mitra: {}, dpl: {} } }
+          if (type === 'usulan') {
+            current.statusUsulan = item.status
+            current.proposalId = item.id
+            current.proposalFile = magang.proposal_file || item.file || '-'
+            current.usulanDetails = (item.details || []).map(detail => ({ mkId: detail.mata_kuliah_id || detail.mataKuliah?.id, cpmkId: detail.cpmk_id || detail.cpmk?.id, deskripsiRencana: detail.deskripsi_rencana || detail.deskripsiRencana || '-' }))
+          } else {
+            current.statusKlaim = item.status
+            current.claimId = item.id
+            current.penilaian = { mitra: item.penilaian_mitra || {}, dpl: item.penilaian_dpl || {} }
+          }
+          records.set(id, current)
         }
-      }
-    ])
-    setSelectedStudent(null)
-    setActiveTab('dashboard')
-    showToast('Database Demo berhasil direset!', 'info')
+        ;(usulanResponse.data.data || usulanResponse.data || []).forEach(item => add(item, 'usulan'))
+        ;(klaimResponse.data.data || klaimResponse.data || []).forEach(item => add(item, 'klaim'))
+        setAllStudents([...records.values()])
+      })
+      .catch(error => showToast(getApiError(error), 'error'))
+      .finally(() => setIsLoading(false))
   }
 
-  // Approve / Revise Proposal logic
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const counts = { pendingProposals: allStudents.filter(s => s.statusUsulan === 'menunggu_persetujuan_dpl').length, pendingClaims: allStudents.filter(s => s.statusKlaim === 'menunggu_review_dpl').length, completed: allStudents.filter(s => s.statusKlaim === 'disetujui').length, totalStudents: allStudents.length }
+
   const handleReviewProposal = (studentId, status, catatan) => {
-    if (studentId === 'std-01') {
-      // Dynamic Student (Arnanda Pratama)
-      setDb(prev => ({
-        ...prev,
-        usulan: {
-          ...prev.usulan,
-          status: status,
-          catatanDpl: catatan
-        }
-      }))
-      showToast(status === 'disetujui' ? 'Usulan mahasiswa disetujui!' : 'Catatan revisi usulan berhasil dikirim.', status === 'disetujui' ? 'success' : 'info')
-    } else {
-      // Mock Students
-      setMockStudents(prev => prev.map(s => {
-        if (s.id === studentId) {
-          return {
-            ...s,
-            statusUsulan: status,
-            catatanUsulan: catatan
-          }
-        }
-        return s
-      }))
-      showToast(status === 'disetujui' ? 'Usulan mahasiswa disetujui!' : 'Catatan revisi usulan berhasil dikirim.', status === 'disetujui' ? 'success' : 'info')
-    }
-    setCatatanDplInput('')
-    setSelectedStudent(null)
+    const student = allStudents.find(item => item.id === studentId)
+    api.post(`/dpl/usulan-konversi/${student.proposalId}/review`, { keputusan: status === 'disetujui' ? 'approve' : status, catatan }).then(() => { setAllStudents(prev => prev.map(item => item.id === studentId ? { ...item, statusUsulan: status } : item)); setSelectedStudent(null); setCatatanDplInput(''); showToast('Usulan berhasil diperbarui!', 'success') }).catch(error => showToast(getApiError(error), 'error'))
   }
 
-  // Grade Claim logic
   const handleGradeClaim = (studentId, nilai, komentar) => {
-    if (nilai === '' || isNaN(nilai) || nilai < 0 || nilai > 100) {
-      showToast('Masukkan nilai akademik yang valid (0 - 100)!', 'error')
-      return
-    }
-
-    if (studentId === 'std-01') {
-      // Dynamic Student (Arnanda Pratama)
-      setDb(prev => ({
-        ...prev,
-        klaim: {
-          ...prev.klaim,
-          status: 'disetujui'
-        },
-        penilaian: {
-          ...prev.penilaian,
-          dpl: {
-            nilaiAkademik: Number(nilai),
-            keputusan: 'setuju',
-            komentar: komentar,
-            submittedAt: new Date().toLocaleString()
-          }
-        }
-      }))
-      showToast('Nilai akademik berhasil disubmit dan klaim disetujui!', 'success')
-    } else {
-      // Mock Students
-      setMockStudents(prev => prev.map(s => {
-        if (s.id === studentId) {
-          return {
-            ...s,
-            statusKlaim: 'disetujui',
-            penilaian: {
-              mitra: s.penilaian?.mitra || { nilai: 85, komentar: 'Bekerja dengan baik.' },
-              dpl: {
-                nilaiAkademik: Number(nilai),
-                komentar: komentar,
-                submittedAt: new Date().toLocaleString()
-              }
-            }
-          }
-        }
-        return s
-      }))
-      showToast('Nilai akademik berhasil disubmit!', 'success')
-    }
-    setNilaiAkademikInput('')
-    setEvaluasiDplInput('')
-    setSelectedStudent(null)
+    if (nilai === '' || isNaN(nilai) || nilai < 0 || nilai > 100) return showToast('Masukkan nilai akademik yang valid (0 - 100)!', 'error')
+    const student = allStudents.find(item => item.id === studentId)
+    api.post(`/dpl/klaim-konversi/${student.claimId}/review`, { keputusan: 'setuju', nilai_akademik: Number(nilai), komentar }).then(() => { setAllStudents(prev => prev.map(item => item.id === studentId ? { ...item, statusKlaim: 'disetujui', penilaian: { ...item.penilaian, dpl: { nilaiAkademik: Number(nilai), komentar, submittedAt: new Date().toISOString() } } } : item)); setSelectedStudent(null); setNilaiAkademikInput(''); setEvaluasiDplInput(''); showToast('Nilai akademik berhasil disubmit!', 'success') }).catch(error => showToast(getApiError(error), 'error'))
   }
 
   // Helper to format letter grade
@@ -305,29 +86,6 @@ export default function DashboardDosen({ user, onLogout }) {
     if (score >= 60) return 'C'
     return 'D'
   }
-
-  // Combine dynamic student and mock students for list views
-  const allStudents = [
-    {
-      id: 'std-01',
-      nama: db.profile?.nama || 'Arnanda Pratama',
-      nim: db.profile?.nim || '22.11.9876',
-      jurusan: db.profile?.jurusan || 'Informatika',
-      perusahaan: db.magang.mitraNama || 'PT Solusi Teknologi Nusantara',
-      bidang: db.magang.mitraBidang || 'Software Development',
-      posisi: db.magang.posisi || 'Fullstack Web Developer',
-      period: `${db.magang.periodeMulai ? db.magang.periodeMulai.substring(0,7) : '2026-02'} s.d ${db.magang.periodeSelesai ? db.magang.periodeSelesai.substring(0,7) : '2026-07'}`,
-      statusMagang: db.magang.status,
-      statusUsulan: db.usulan.status,
-      statusKlaim: db.klaim.status,
-      proposalFile: db.magang.proposalFile,
-      buktiDiterimaFile: db.magang.buktiDiterimaFile,
-      usulanDetails: db.usulan.details,
-      penilaian: db.penilaian,
-      isDynamic: true
-    },
-    ...mockStudents
-  ]
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23]">
@@ -405,11 +163,11 @@ export default function DashboardDosen({ user, onLogout }) {
           
           <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
             <button 
-              onClick={resetAllDemo}
+              onClick={loadData}
               className="flex items-center justify-center gap-1.5 w-full rounded-xl border-2 border-[#191b23] bg-yellow-200 py-2 text-xs font-bold shadow-[2.5px_2.5px_0_#191b23] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
               <Icon className="text-base">restart_alt</Icon>
-              <span>Reset Demo</span>
+              <span>Refresh Data</span>
             </button>
             
             <button 
@@ -602,7 +360,7 @@ export default function DashboardDosen({ user, onLogout }) {
                                   <div className="font-bold">{student.perusahaan}</div>
                                   <div className="text-[10px] text-gray-500">{student.posisi}</div>
                                 </td>
-                                <td className="p-4 text-gray-600 font-semibold">{student.period || '2026-02 s.d 2026-07'}</td>
+                                <td className="p-4 text-gray-600 font-semibold">{student.period || '-'}</td>
                                 <td className="p-4">
                                   <span className={`px-2 py-0.5 border border-[#191b23] text-[9px] font-extrabold uppercase rounded ${colorClass}`}>
                                     {label}
@@ -856,8 +614,8 @@ export default function DashboardDosen({ user, onLogout }) {
                     {selectedStudent.usulanDetails && selectedStudent.usulanDetails.length > 0 ? (
                       <div className="space-y-4">
                         {selectedStudent.usulanDetails.map((detail, idx) => {
-                          const mk = MASTER_MATA_KULIAH.find(m => m.id === detail.mkId)
-                          const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
+                          const mk = detail.mataKuliah || {}
+                          const cpmk = detail.cpmk || {}
                           return (
                             <div key={idx} className="border-2 border-[#191b23] rounded-xl p-4 bg-slate-50 shadow-[2px_2px_0_#191b23]">
                               <div className="flex justify-between items-start border-b border-[#191b23]/10 pb-2 mb-2">
@@ -942,8 +700,8 @@ export default function DashboardDosen({ user, onLogout }) {
                           // Calculate SKS
                           const uniqueMks = [...new Set(student.usulanDetails?.map(d => d.mkId))]
                           const totalSks = uniqueMks.reduce((acc, mkId) => {
-                            const mk = MASTER_MATA_KULIAH.find(m => m.id === mkId)
-                            return acc + (mk?.sks || 0)
+                            const detail = student.usulanDetails.find(item => item.mkId === mkId)
+                             return acc + (detail?.mataKuliah?.sks || 0)
                           }, 0)
 
                           return (
@@ -1028,13 +786,13 @@ export default function DashboardDosen({ user, onLogout }) {
                       <h4 className="font-black text-xs uppercase text-[#9f149f] border-b border-purple-200 pb-1">2. Nilai Supervisor Mitra (Industri)</h4>
                       <div>
                         <div className="flex items-center gap-3">
-                          <span className="text-4xl font-black text-green-600">{selectedStudent.penilaian?.mitra?.nilai || '90'}</span>
+                          <span className="text-4xl font-black text-green-600">{selectedStudent.penilaian?.mitra?.nilai ?? '-'}</span>
                           <div>
                             <p className="font-bold">Nilai Rata-rata Industri</p>
                             <p className="text-[10px] text-gray-400">Bobot Penilaian: 70%</p>
                           </div>
                         </div>
-                        <p className="mt-2 text-gray-500 italic">" {selectedStudent.penilaian?.mitra?.komentar || 'Mahasiswa menunjukkan adaptabilitas tinggi dan penguasaan materi yang baik.'} "</p>
+                        <p className="mt-2 text-gray-500 italic">" {selectedStudent.penilaian?.mitra?.komentar || '-'} "</p>
                       </div>
                     </div>
                   </div>
@@ -1044,8 +802,8 @@ export default function DashboardDosen({ user, onLogout }) {
                     <h3 className="font-black text-xs uppercase text-[#9f149f] mb-4">Keselarasan CPMK & Bukti Aktivitas</h3>
                     <div className="space-y-4">
                       {selectedStudent.usulanDetails?.map((detail, idx) => {
-                        const mk = MASTER_MATA_KULIAH.find(m => m.id === detail.mkId)
-                        const cpmk = mk?.cpmk.find(c => c.id === detail.cpmkId)
+                        const mk = detail.mataKuliah || {}
+                        const cpmk = detail.cpmk || {}
                         return (
                           <div key={idx} className="border-2 border-[#191b23] rounded-xl p-4 bg-white shadow-[2px_2px_0_#191b23] text-xs">
                             <div className="flex justify-between border-b border-slate-100 pb-2 mb-2">
@@ -1132,7 +890,7 @@ export default function DashboardDosen({ user, onLogout }) {
                               <div className="font-bold">{student.perusahaan}</div>
                             </td>
                             <td className="p-4 font-black text-green-600 text-sm">
-                              {student.penilaian?.mitra?.nilai || '85'}
+                              {student.penilaian?.mitra?.nilai ?? '-'}
                             </td>
                             <td className="p-4">
                               <span className={`px-2 py-0.5 border border-[#191b23] text-[9px] font-extrabold uppercase rounded ${
@@ -1207,7 +965,7 @@ export default function DashboardDosen({ user, onLogout }) {
                                 {letterGrade}
                               </span>
                             </td>
-                            <td className="p-4 text-gray-500 font-semibold">{student.penilaian?.dpl?.submittedAt?.substring(0,10) || '2026-07-27'}</td>
+                            <td className="p-4 text-gray-500 font-semibold">{student.penilaian?.dpl?.submittedAt?.substring(0,10) || '-'}</td>
                           </tr>
                         )
                       })}

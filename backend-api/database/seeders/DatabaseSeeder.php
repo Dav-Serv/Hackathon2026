@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Universitas AMIKOM Yogyakarta',
                     'password' => Hash::make(env('SEEDER_DEFAULT_PASSWORD', 'Password123!')),
                     'email_verified_at' => now(),
-                    ...($account['role'] === 'dpl' && Schema::hasColumn('users', 'is_active') ? ['is_active' => true] : []),
+
                 ],
             );
         }

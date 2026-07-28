@@ -35,6 +35,11 @@ class Magang extends Model
         return $this->belongsTo(SupervisorMitra::class);
     }
 
+    public function dokumens(): HasMany
+    {
+        return $this->hasMany(Dokumen::class, 'referensi_id')->where('referensi_tabel', 'magangs');
+    }
+
     public function usulanKonversis(): HasMany
     {
         return $this->hasMany(UsulanKonversi::class);

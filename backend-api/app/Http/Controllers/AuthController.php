@@ -109,7 +109,17 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => $request->user()]);
+        $user = $request->user();
+        $user->avatar = $this->avatarUrl($user->avatar);
+        return response()->json(['user' => $user]);
+    }
+
+    private function avatarUrl(?string $avatar): ?string
+    {
+        if (! $avatar) return null;
+        $prefix = rtrim(config('filesystems.disks.supabase.url'), '/').'/';
+        $path = str_starts_with($avatar, $prefix) ? substr($avatar, strlen($prefix)) : $avatar;
+        return Storage::disk('supabase')->temporaryUrl($path, now()->addMinutes(30));
     }
 
     public function updateProfile(Request $request): JsonResponse
@@ -117,6 +127,9 @@ class AuthController extends Controller
         $user = $request->user();
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'nim_nip' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'ipk' => ['sometimes', 'nullable', 'numeric', 'between:0,4'],
+            'semester' => ['sometimes', 'nullable', 'integer', 'between:1,14'],
             'no_hp' => ['sometimes', 'required', 'string', 'max:255'],
             'alamat' => ['sometimes', 'required', 'string'],
             'avatar' => ['sometimes', 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -148,7 +161,9 @@ class AuthController extends Controller
 
         $user->update($data);
 
-        return response()->json(['message' => 'Profil berhasil diperbarui.', 'user' => $user->fresh()]);
+        $freshUser = $user->fresh();
+        $freshUser->avatar = $this->avatarUrl($freshUser->avatar);
+        return response()->json(['message' => 'Profil berhasil diperbarui.', 'user' => $freshUser]);
     }
 
     public function logout(Request $request): JsonResponse

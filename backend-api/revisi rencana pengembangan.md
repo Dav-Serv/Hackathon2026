@@ -142,30 +142,9 @@ Mahasiswa ajukan magang
 
 **Batas akses:** tidak mengubah nilai akademik secara langsung tanpa proses koreksi resmi.
 
-### 2.5 Admin Fakultas
+### 2.5 Kaprodi
 
-**Tujuan:** memeriksa administrasi dan surat pengantar tingkat fakultas.
-
-**Frontend:**
-
-- Daftar dokumen yang perlu diverifikasi.
-- Preview proposal dan surat.
-- Aksi setuju, revisi, atau tolak.
-- Catatan administratif.
-- Filter prodi, periode, mahasiswa, dan status.
-- Histori versi dokumen.
-
-**Backend:**
-
-- Endpoint verifikasi dokumen fakultas.
-- Endpoint generate/upload surat pengantar.
-- Endpoint histori dan temporary download dokumen.
-- Statistik fakultas.
-- Policy akses lintas prodi dalam fakultas.
-
-**Batas akses:** tidak mengubah nilai mitra, nilai DPL, CPMK, atau hasil akademik.
-
-### 2.6 Kaprodi
+Sistem dibatasi pada tingkat program studi. Seluruh tugas administrasi, verifikasi dokumen, surat pengantar, monitoring, master data, approval token, dan export dikerjakan oleh Admin Prodi.
 
 **Tujuan:** memantau statistik dan hasil konversi.
 
