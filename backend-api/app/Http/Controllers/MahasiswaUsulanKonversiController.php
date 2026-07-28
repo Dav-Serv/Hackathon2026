@@ -7,6 +7,7 @@ use App\Models\UsulanKonversi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class MahasiswaUsulanKonversiController extends Controller
 {
@@ -19,6 +20,7 @@ class MahasiswaUsulanKonversiController extends Controller
             'details.*.cpmk_id' => ['required', 'exists:cpmks,id'],
             'details.*.deskripsi_aktivitas_rencana' => ['required', 'string'],
         ]);
+        foreach ($data['details'] as $detail) abort_unless(DB::table('cpmks')->where('id', $detail['cpmk_id'])->where('mata_kuliah_id', $detail['mata_kuliah_id'])->exists(), 422, 'CPMK tidak berasal dari mata kuliah yang dipilih.');
         $magang = Magang::whereKey($data['magang_id'])->where('mahasiswa_id', $request->user()->id)->where('status', 'disetujui')->firstOrFail();
         $usulan = DB::transaction(function () use ($data, $magang) {
             $usulan = $magang->usulanKonversis()->create();
@@ -47,6 +49,7 @@ class MahasiswaUsulanKonversiController extends Controller
             'details.*.cpmk_id' => ['required', 'exists:cpmks,id'],
             'details.*.deskripsi_aktivitas_rencana' => ['required', 'string'],
         ]);
+        foreach ($data['details'] as $detail) abort_unless(DB::table('cpmks')->where('id', $detail['cpmk_id'])->where('mata_kuliah_id', $detail['mata_kuliah_id'])->exists(), 422, 'CPMK tidak berasal dari mata kuliah yang dipilih.');
         DB::transaction(function () use ($data, $usulanKonversi) {
             $usulanKonversi->details()->delete();
             $usulanKonversi->details()->createMany($data['details']);
