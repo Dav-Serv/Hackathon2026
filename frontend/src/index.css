@@ -4,6 +4,14 @@
 
 html { scroll-behavior: smooth; }
 body { margin: 0; overscroll-behavior: none; }
+
+/* Keep the institutional logo visible in the footer after branding updates. */
+footer > div > div:first-child > div:first-child > span:first-child {
+  background: url('./assets/amikom-logo.png') center / contain no-repeat !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: transparent !important;
+}
 ::-webkit-scrollbar { display: none; }
 
 @keyframes float {
