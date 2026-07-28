@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminMataKuliahController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DplReviewController;
 use App\Http\Controllers\KaprodiDashboardController;
+use App\Http\Controllers\KaprodiExportController;
 use App\Http\Controllers\MahasiswaDashboardController;
 use App\Http\Controllers\MahasiswaKlaimKonversiController;
 use App\Http\Controllers\MahasiswaMagangController;
@@ -50,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:kaprodi')->group(function () {
         Route::get('/kaprodi/dashboard', [KaprodiDashboardController::class, 'index']);
+        Route::get('/kaprodi/export/hasil-konversi', [KaprodiExportController::class, 'hasilKonversi']);
     });
 
     Route::middleware('role:admin_prodi')->prefix('admin')->group(function () {
