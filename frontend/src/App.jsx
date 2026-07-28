@@ -76,7 +76,7 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
   }
 
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-5 py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#faf8ff] px-4 py-8 sm:px-6 sm:py-16 font-['Space_Grotesk',sans-serif] text-[#191b23]">
       <div className="pointer-events-auto absolute inset-0 z-0 opacity-70" aria-hidden="true">
         <CursorGrid
           cellSize={70}
@@ -95,37 +95,37 @@ function LoginPage({ onBack, onRegister, onLoginSuccess }) {
         />
       </div>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
-        <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
-        <Icon className="absolute right-[10%] top-[15%] rotate-12 text-8xl opacity-20">school</Icon>
-        <Icon className="absolute bottom-[20%] left-[5%] -rotate-12 text-7xl opacity-20">auto_stories</Icon>
-        <div className="absolute left-12 top-1/4 flex h-24 w-24 rotate-[-5deg] items-center justify-center border-2 border-[#191b23] bg-[#a862a8] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23]">OBE READY?</div>
-        <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#f3dff3] p-2 text-center text-xs font-bold opacity-50 shadow-[4px_4px_0_#191b23]">SYNC IT</div>
+        <svg className="absolute left-10 top-10 h-32 w-32 text-[#9f149f] opacity-20 hidden md:block" viewBox="0 0 100 100"><path d="M0 50 Q25 0 50 50 T100 50" fill="none" stroke="currentColor" strokeDasharray="8 4" strokeWidth="4" /></svg>
+        <svg className="absolute bottom-20 right-10 h-24 w-48 text-[#a862a8] opacity-25 hidden md:block" viewBox="0 0 200 100"><path d="M10 90 L50 10 L90 90 L130 10 L170 90" fill="none" stroke="currentColor" strokeDasharray="12 6" strokeWidth="6" /></svg>
+        <Icon className="absolute right-[10%] top-[15%] rotate-12 text-8xl opacity-20 hidden md:inline-block">school</Icon>
+        <Icon className="absolute bottom-[20%] left-[5%] -rotate-12 text-7xl opacity-20 hidden md:inline-block">auto_stories</Icon>
+        <div className="absolute left-12 top-1/4 flex h-24 w-24 rotate-[-5deg] items-center justify-center border-2 border-[#191b23] bg-[#a862a8] p-2 text-center text-xs font-bold opacity-40 shadow-[4px_4px_0_#191b23] hidden lg:flex">OBE READY?</div>
+        <div className="absolute bottom-1/3 right-16 flex h-20 w-20 rotate-[8deg] items-center justify-center border-2 border-[#191b23] bg-[#f3dff3] p-2 text-center text-xs font-bold opacity-50 shadow-[4px_4px_0_#191b23] hidden lg:flex">SYNC IT</div>
       </div>
 
       <div className="relative z-10 w-full max-w-lg">
-        <div className="overflow-hidden rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] p-8 shadow-[8px_8px_0_#191b23]">
+        <div className="overflow-hidden rounded-2xl sm:rounded-[32px] border-[4px] border-[#191b23] bg-[#faf8ff] p-5 sm:p-8 shadow-[6px_6px_0_#191b23] sm:shadow-[8px_8px_0_#191b23]">
           <button type="button" onClick={onBack} className="mb-6 inline-flex items-center gap-2 rounded-lg border-[2px] border-[#191b23] bg-[#faf8ff] px-3 py-1.5 text-xs font-bold tracking-[0.05em] shadow-[3px_3px_0_#191b23] transition-all hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0_#191b23] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"><Icon className="text-base">arrow_back</Icon> Kembali ke Beranda</button>
-          <div className="mb-8"><h1 className="mb-2 text-[32px] font-bold leading-tight md:text-[40px] md:leading-tight">OBE Informatics</h1><p className="text-base leading-[1.6] text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
-          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+          <div className="mb-8"><h1 className="mb-2 text-[28px] sm:text-[32px] font-bold leading-tight md:text-[40px] md:leading-tight">OBE Informatics</h1><p className="text-sm sm:text-base leading-[1.6] text-[#434655]">Tingkatkan perjalanan akademik Anda dengan sinkronisasi presisi.</p></div>
+          <form className="flex flex-col gap-5 sm:gap-6" onSubmit={handleSubmit}>
             <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Email atau NIM
-              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
+              <div className="relative"><input required value={identifier} onChange={(event) => setIdentifier(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="mhs.12345@univ.ac.id" type="text" /><Icon className="absolute right-4 top-1/2 -translate-y-1/2 text-[#737686]">alternate_email</Icon></div>
             </label>
             <label className="flex flex-col gap-2 text-sm font-bold tracking-[0.05em]">Kata Sandi
-              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-3 text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#737686] hover:text-[#9f149f] transition-colors"><Icon className="text-xl">{showPassword ? 'visibility_off' : 'visibility'}</Icon></button></div>
+              <div className="relative"><input required minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-xl border-[3px] border-[#191b23] bg-white pl-4 pr-12 py-2.5 sm:py-3 text-sm sm:text-base leading-[1.6] outline-none transition-all placeholder:text-[#737686]/50 focus:shadow-[4px_4px_0_#a862a8]" placeholder="••••••••" type={showPassword ? 'text' : 'password'} /><button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#737686] hover:text-[#9f149f] transition-colors"><Icon className="text-xl">{showPassword ? 'visibility_off' : 'visibility'}</Icon></button></div>
             </label>
             <div className="flex justify-end"><button type="button" className="text-xs font-bold uppercase text-[#9f149f] hover:underline">Lupa?</button></div>
 
-            <button disabled={isLoading} className="group flex items-center justify-center gap-2 rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] px-8 py-4 text-xl font-semibold text-white shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[10px_10px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
+            <button disabled={isLoading} className="group flex items-center justify-center gap-2 rounded-2xl border-[3px] border-[#191b23] bg-[#9f149f] px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-xl font-semibold text-white shadow-[4px_4px_0_#191b23] sm:shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#191b23] sm:hover:shadow-[10px_10px_0_#191b23] disabled:cursor-wait disabled:opacity-80" type="submit">{isLoading ? <><span className="h-6 w-6 animate-spin rounded-full border-4 border-white/30 border-t-white" /> MEMPROSES...</> : <>MASUK <Icon className="transition-transform group-hover:translate-x-1">arrow_forward</Icon></>}</button>
             {errorMessage && <p role="alert" className="border-2 border-[#ba1a1a] bg-[#ffdad6] p-3 text-sm font-semibold text-[#93000a]">{errorMessage}</p>}
 
           </form>
-          <div className="mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6">
-            <p className="text-[#434655]">
+          <div className="mt-6 sm:mt-10 flex flex-col items-center gap-4 border-t-[3px] border-[#191b23] pt-6">
+            <p className="text-sm sm:text-base text-[#434655]">
               Belum punya akun? <button type="button" onClick={onRegister} className="ml-1 font-bold text-[#9f149f] hover:underline">DAFTAR</button>
             </p>
             <div className="w-full">
-              <button type="button" aria-label="Login dengan Google" onClick={() => { window.location.href = `${import.meta.env.VITE_API_URL}/auth/google/redirect` }} className="flex w-full items-center justify-center gap-3 rounded-2xl border-[3px] border-[#191b23] bg-white py-4 text-lg font-semibold shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#f3dff3] hover:shadow-[10px_10px_0_#191b23] active:translate-x-0 active:translate-y-0 active:shadow-none">
+              <button type="button" aria-label="Login dengan Google" onClick={() => { window.location.href = `${import.meta.env.VITE_API_URL}/auth/google/redirect` }} className="flex w-full items-center justify-center gap-3 rounded-2xl border-[3px] border-[#191b23] bg-white py-3 sm:py-4 text-sm sm:text-lg font-semibold shadow-[4px_4px_0_#191b23] sm:shadow-[6px_6px_0_#191b23] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-[#f3dff3] hover:shadow-[8px_8px_0_#191b23] sm:hover:shadow-[10px_10px_0_#191b23] active:translate-x-0 active:translate-y-0 active:shadow-none">
                 <svg className="h-6 w-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -203,6 +203,7 @@ function GoogleCallbackPage({ onSuccess }) {
 
 function App() {
   const [selectedStage, setSelectedStage] = useState(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [page, setPage] = useState(() => pageFromPathname(window.location.pathname))
   const [activeNav, setActiveNav] = useState('beranda')
   const [authenticatedUser, setAuthenticatedUser] = useState(null)
@@ -300,19 +301,31 @@ function App() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#faf8ff] font-['Space_Grotesk',sans-serif] text-[#191b23] [background-image:radial-gradient(#e1e2ed_1px,transparent_1px)] [background-size:24px_24px]">
-      <header className="fixed left-0 top-8 z-50 flex w-full justify-center px-4">
-        <nav className="flex h-14 items-center gap-5 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
+      <header className="fixed left-0 top-8 z-50 flex w-full flex-col items-center px-4 gap-2">
+        <nav className="flex h-14 items-center gap-4 rounded-full border-2 border-[#191b23]/10 bg-white/80 px-4 shadow-xl backdrop-blur-md transition hover:border-[#191b23]/30 sm:gap-8 sm:px-6">
           <a href="#beranda" onClick={() => setActiveNav('beranda')} className="group flex items-center gap-2">
             <img src={amikomLogo} alt="Logo Universitas AMIKOM Yogyakarta" className="h-8 w-8 object-contain transition group-hover:scale-110" />
             <span className="text-[11px] font-bold uppercase tracking-[.18em]">Informatics</span>
           </a>
-          <div className="flex items-center gap-0.5 sm:gap-1">
+          <div className="hidden items-center gap-1 md:flex">
             <a href="#beranda" onClick={() => setActiveNav('beranda')} className={navLinkClass('beranda')}>Beranda</a>
             <a href="#fitur" onClick={() => setActiveNav('fitur')} className={navLinkClass('fitur')}>Fitur</a>
             <a href="#alur" onClick={() => setActiveNav('alur')} className={navLinkClass('alur')}>Alur</a>
           </div>
-          <button type="button" onClick={() => navigatePage('login')} className="rounded-full bg-[#191b23] px-3 py-1.5 sm:px-5 text-[10px] sm:text-xs font-bold text-white transition hover:bg-[#9f149f]">Login</button>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#191b23] bg-white text-[#191b23] md:hidden shadow-[2px_2px_0_#191b23] transition active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+              <Icon className="text-lg">{isMobileMenuOpen ? 'close' : 'menu'}</Icon>
+            </button>
+            <button type="button" onClick={() => navigatePage('login')} className="rounded-full bg-[#191b23] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#9f149f] sm:px-5">Login</button>
+          </div>
         </nav>
+        {isMobileMenuOpen && (
+          <div className="flex w-full max-w-[280px] flex-col gap-1.5 rounded-2xl border-3 border-[#191b23] bg-white p-3 shadow-[6px_6px_0_#191b23] md:hidden">
+            <a href="#beranda" onClick={() => { setActiveNav('beranda'); setIsMobileMenuOpen(false); }} className="rounded-xl px-4 py-2 text-xs font-bold border-2 border-transparent hover:border-[#191b23] hover:bg-[#e7e7f3] transition-all text-center">Beranda</a>
+            <a href="#fitur" onClick={() => { setActiveNav('fitur'); setIsMobileMenuOpen(false); }} className="rounded-xl px-4 py-2 text-xs font-bold border-2 border-transparent hover:border-[#191b23] hover:bg-[#e7e7f3] transition-all text-center">Fitur</a>
+            <a href="#alur" onClick={() => { setActiveNav('alur'); setIsMobileMenuOpen(false); }} className="rounded-xl px-4 py-2 text-xs font-bold border-2 border-transparent hover:border-[#191b23] hover:bg-[#e7e7f3] transition-all text-center">Alur</a>
+          </div>
+        )}
       </header>
 
       <main>
